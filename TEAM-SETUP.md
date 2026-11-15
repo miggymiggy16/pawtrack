@@ -105,8 +105,18 @@ dark values instead of hard-coding white/black.
 
 ### 3.1 File storage (default, recommended for UI work)
 `.env` with `DB_NAME` empty. The app reads/writes `data/*.json` and seeds
-10 sample animals, vaccinations, inventory and default accounts
-(Admin / Admin_01, Cashier, Staff). Your changes never touch the live database.
+sample inventory, vaccinations and default accounts. Your changes never
+touch the live database.
+
+> **Why your clone has no pictures or animals from the live clinic:**
+> by design, the repository contains **no** runtime data — no uploaded
+> photos (`static/uploads/`), no `data/*.json`, no `certs/`, no `.env`.
+> On your machine the app seeds its own sample data (inventory items have
+> no photos and show the "no picture" box). That is intentional: live
+> clinic media belongs on the production PC only. If you specifically need
+> the same demo images as the production PC, ask the project owner for a
+> private ZIP of `static\uploads\inventory\` — do **not** commit photos
+> to the repo.
 
 ### 3.2 MySQL/MariaDB (same as production)
 Run MariaDB (XAMPP), then in `.env`: `DB_NAME=pawtrack`

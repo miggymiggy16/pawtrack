@@ -7,10 +7,11 @@ data/*.json
 data/*.corrupt-*
 static/qr/*.png
 .vscode/
-static/uploads/inventory/*
-!static/uploads/inventory/.gitkeep
-static/uploads/animals/*
-!static/uploads/animals/.gitkeep
+# NOTE: static/uploads/ is intentionally tracked so teammates get the same
+# pictures after a clone. If this gets too noisy later, re-add:
+#   static/uploads/inventory/*
+#   static/uploads/animals/*
+# and keep only the .gitkeep files.
 certs/
 *.key
 *.pem
