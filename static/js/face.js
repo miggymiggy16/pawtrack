@@ -109,7 +109,9 @@
       throw new Error("The server returned an unexpected response. Please try again.");
     }
     if (!response.ok || !data.ok) {
-      throw new Error(data.error || "Face recognition failed. Please try again.");
+      var failure = new Error(data.error || "Face recognition failed. Please try again.");
+      failure.status = response.status;
+      throw failure;
     }
     return data;
   }
@@ -126,6 +128,64 @@
     var status = document.getElementById("login-face-status");
     var stream = null;
     var busy = false;
+    var autoTimer = null;
+    var autoFailures = 0;
+    var AUTO_INTERVAL_MS = 1800;
+    var AUTO_FAIL_LIMIT = 12;
+
+    function stopAuto() {
+      if (autoTimer) {
+        clearInterval(autoTimer);
+        autoTimer = null;
+      }
+    }
+
+    function startAuto() {
+      stopAuto();
+      autoFailures = 0;
+      autoTimer = setInterval(scanningTick, AUTO_INTERVAL_MS);
+    }
+
+    async function scanningTick() {
+      if (busy || !stream) return;
+      busy = true;
+      try {
+        var blob = await capture(video);
+        var data = await postFace("/login/face" + window.location.search, [blob]);
+        if (data.redirect) {
+          stopAuto();
+          setStatus(status, "Face recognized. Opening PawTrack...", "ok");
+          window.location.href = data.redirect;
+          return;
+        }
+        autoFailures += 1;
+        if (autoFailures >= AUTO_FAIL_LIMIT) {
+          stopAuto();
+          setStatus(status, "Could not recognize you automatically. Use Scan face or your password.", "error");
+          return;
+        }
+        setStatus(status, "Scanning... keep looking at the camera.", "");
+      } catch (error) {
+        if (error.status === 429) {
+          stopAuto();
+          setStatus(status, error.message, "error");
+          return;
+        }
+        if (error.status === 400 || error.status === 401) {
+          autoFailures += 1;
+          if (autoFailures >= AUTO_FAIL_LIMIT) {
+            stopAuto();
+            setStatus(status, "Could not recognize you automatically. Use Scan face or your password.", "error");
+            return;
+          }
+          setStatus(status, "Scanning... keep looking at the camera.", "");
+          return;
+        }
+        setStatus(status, error.message || "Scanning...", "");
+      } finally {
+        busy = false;
+      }
+    }
 
     async function start() {
       if (stream) return;
@@ -134,13 +194,15 @@
         stream = await startCamera(video, placeholder);
         startButton.textContent = "Stop camera";
         scanButton.disabled = false;
-        setStatus(status, "Camera ready. Look straight at the camera.", "ok");
+        setStatus(status, "Scanning... keep looking at the camera.", "");
+        startAuto();
       } catch (error) {
         setStatus(status, cameraError(error), "error");
       }
     }
 
     function stop() {
+      stopAuto();
       stopCamera(video, stream);
       stream = null;
       startButton.textContent = "Start camera";
@@ -155,24 +217,8 @@
 
     scanButton.addEventListener("click", async function () {
       if (busy || !stream) return;
-      busy = true;
-      scanButton.disabled = true;
       setStatus(status, "Scanning your face...", "");
-      try {
-        var blob = await capture(video);
-        var data = await postFace("/login/face" + window.location.search, [blob]);
-        if (data.redirect) {
-          setStatus(status, "Face recognized. Opening PawTrack...", "ok");
-          window.location.href = data.redirect;
-          return;
-        }
-        setStatus(status, "Face not recognized. Please try again.", "error");
-      } catch (error) {
-        setStatus(status, error.message, "error");
-      } finally {
-        busy = false;
-        if (stream) scanButton.disabled = false;
-      }
+      await scanningTick();
     });
 
     document.querySelectorAll("[data-auth-tab]").forEach(function (tab) {
@@ -275,6 +321,11 @@
       var facePanel = document.getElementById("auth-face");
       if (passwordPanel) passwordPanel.hidden = name !== "password";
       if (facePanel) facePanel.hidden = name !== "face";
+      if (name === "face") {
+        var startBtn = document.getElementById("login-face-start");
+        var faceVideo = document.getElementById("login-face-video");
+        if (startBtn && faceVideo && !faceVideo.classList.contains("live")) startBtn.click();
+      }
     }
 
     tabs.forEach(function (tab) {
