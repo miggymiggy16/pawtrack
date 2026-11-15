@@ -1,0 +1,36 @@
+# =============================================================
+# PawTrack - optional Face ID login (camera) requirements
+# =============================================================
+# Heavy machine-learning packages. Install these ONLY if you want
+# the face-recognition login to work on your machine:
+#
+#     pip install -r requirements-face.txt
+#
+# The app starts and works fully without them - face login will
+# just report "not installed" until you add them.
+# These packages may need extra space (~1-2 GB) and take a while.
+# =============================================================
+-r requirements.txt
+
+# Face detection and recognition (InsightFace, ONNX Runtime, CPU)
+insightface==2.1
+onnx==1.23.2
+onnxruntime==1.32.0
+opencv-python==5.0.0.93
+
+# InsightFace's numerical dependencies
+ml_dtypes==0.6.0
+numpy==2.5.4
+protobuf==7.36.2
+
+# scikit-image / scipy (used by InsightFace internally)
+scikit-image==0.26.0
+scipy==1.18.1
+
+# Small helper dependencies (pinned for a reproducible install)
+flatbuffers==25.12.19
+ImageIO==2.38.1
+lazy-loader==0.6
+networkx==3.7
+tifffile==2026.11.12
+tqdm==4.70.1

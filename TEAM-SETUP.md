@@ -29,12 +29,31 @@ python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
 ```
-This is the biggest step — `requirements.txt` includes `insightface`,
-`opencv` and `onnxruntime`, which are large downloads. First install can take
-several minutes.
 
-If `insightface`/`onnxruntime` fail to install for you, tell the project
-owner — Face ID is optional and the app starts without it.
+This is the main step - it installs the web stack, the PDF exporter and the
+QR generator. It should complete in a few minutes.
+
+**Face ID login (camera) is optional.** The app starts without it - face
+login will simply report "not installed". If you want face recognition on
+your machine, also run:
+
+```powershell
+pip install -r requirements-face.txt
+```
+This downloads large machine-learning packages (`insightface`, `onnxruntime`,
+`opencv-python`, around 1-2 GB of model data on first use). If it fails,
+no problem - everything else works without it.
+
+**Check your environment before starting** (this is the most common setup
+mistake):
+
+```powershell
+.\venv\Scripts\python.exe -c "import flask; print('flask ok:', flask.__version__)"
+```
+If that prints `flask ok: 3.1.3`, you are good. If you see
+`ModuleNotFoundError`, either you never created the venv, or you are running
+the system `python` instead of the venv one. Use `.\venv\Scripts\python.exe`
+explicitly, and verify with the command above.
 
 ### 1.4 Create your `.env`
 ```powershell
@@ -143,9 +162,9 @@ production host handles all of that. Your side of the work is done at the merge.
 
 | Problem | Fix |
 |---|---|
-| `ModuleNotFoundError: numpy` | You used the system `python` — always run `.\venv\Scripts\python.exe` with the venv activated |
+| `ModuleNotFoundError: flask` / `No module named flask` | You used the system `python`, or the install never ran. Activate the venv (`.\venv\Scripts\activate`) or call `.\venv\Scripts\python.exe app.py`. Check with: `.\venv\Scripts\python.exe -c "import flask; print(flask.__version__)"` |
 | Camera blocked | You're on `http://<LAN-IP>` — camera needs HTTPS; use `http://127.0.0.1:5000` locally |
 | Login page loops | Delete older cookies for 127.0.0.1, or use incognito |
 | Templates unchanged | Ctrl+F5 to bypass browser cache |
-| `insightface` won't install | Tell the project owner; the app runs fine without it |
+| `insightface` won't install | That's fine - skip it. The app runs without it; only face login is unavailable. Run `pip install -r requirements-face.txt` only if you want face features. |
 | Port 5000 in use | Another app is on it; stop it or set `PAWTRACK_PORT=5050` in `.env` |
