@@ -9,9 +9,9 @@ from datetime import date, datetime, timedelta
 
 from werkzeug.security import generate_password_hash
 
-from ..config import (CASHIER_PASSWORD, CASHIER_USERNAME, SAMPLE_PRICES,
-                      SAMPLE_SERVICES, SEED_DIR, STAFF_PASSWORD,
-                      STAFF_USERNAME)
+from ..config import (ANIMAL_PHOTO_DIR, CASHIER_PASSWORD, CASHIER_USERNAME,
+                      SAMPLE_PRICES, SAMPLE_SERVICES, SEED_DIR, STAFF_PASSWORD,
+                      STAFF_USERNAME, UPLOAD_DIR)
 from ..helpers import (animal_photo_safe, item_image_url_safe, now_str,
                        process_image_bytes, store_animal_photo,
                        store_product_image)
@@ -166,6 +166,45 @@ def seed_images():
     if changed:
         with edit("settings") as st:
             st["seed_images"] = done
+
+
+def seed_sample_photos():
+    """Attach the committed demo pictures to records that have none (once).
+
+    The pictures in static/uploads/inventory and static/uploads/animals are
+    committed with the project (they ARE the demo pictures). On a fresh install
+    the seeded records carry no photos, so the boxes look empty. This one-time
+    pass links each seeded record to the photo whose name starts with its ID
+    (``INV-0001-*`` -> item INV-0001, ``PT-0001-*`` -> animal PT-0001).
+    Records that already have a photo are never touched.
+    """
+    done = dict(load("settings").get("seed_images", {}))
+    if done.get("sample_photos"):
+        return
+
+    attached = 0
+    with edit("inventory") as items:
+        for item in items:
+            if item.get("image"):
+                continue
+            iid = str(item.get("item_id") or "").strip().upper()
+            matches = sorted(UPLOAD_DIR.glob(f"{iid}-*.*")) if iid else []
+            if matches:
+                item["image"] = matches[0].name
+                attached += 1
+    with edit("animals") as animals:
+        for a in animals:
+            if a.get("photo"):
+                continue
+            aid = str(a.get("animal_id") or "").strip().upper()
+            matches = sorted(ANIMAL_PHOTO_DIR.glob(f"{aid}-*.*")) if aid else []
+            if matches:
+                a["photo"] = matches[0].name
+                attached += 1
+    if attached:
+        print(f"[PawTrack] Attached {attached} sample picture(s) to the seeded records.")
+    with edit("settings") as st:
+        st["seed_images"] = {**done, "sample_photos": True}
 
 
 def seed_cashier():

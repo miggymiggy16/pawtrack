@@ -166,7 +166,7 @@ def issue_animal_id():
 # ---------------------------------------------------------------------------
 def init_storage():
     """Create folders, first-run accounts and sample data (once)."""
-    from .services.seed import load_sample_data, seed_cashier, seed_images, seed_pos, seed_staff
+    from .services.seed import load_sample_data, seed_cashier, seed_images, seed_pos, seed_sample_photos, seed_staff
 
     DATA_DIR.mkdir(exist_ok=True)
     QR_DIR.mkdir(parents=True, exist_ok=True)
@@ -194,4 +194,5 @@ def init_storage():
         with edit("settings") as s:
             s["sample_loaded"] = True
     seed_images()
+    seed_sample_photos()
     seed_pos()
