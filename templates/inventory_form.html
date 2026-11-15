@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} inventory item{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Edit item' if editing else 'Add inventory item' }}</h1>{% if editing %}<p>To change the quantity use Stock In, Stock Out or Adjustment so the history stays accurate.</p>{% endif %}</div></div>
+<form class="card" method="post" enctype="multipart/form-data" novalidate>{{ csrf() }}
+  <div class="form-grid">
+    <div class="field"><label for="item_name">Item name <span class="req">*</span></label><input id="item_name" name="item_name" value="{{ form.item_name }}" required></div>
+    <div class="field"><label for="category">Category <span class="req">*</span></label><select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
+    <div class="field full"><label for="description">Description</label><textarea id="description" name="description" style="min-height:80px">{{ form.description }}</textarea></div>
+    <div class="field"><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
+    <div class="field"><label for="unit">Unit <span class="req">*</span></label><input id="unit" name="unit" value="{{ form.unit }}" placeholder="pcs, vials, boxes..." required></div>
+    <div class="field"><label for="min_stock">Minimum stock level</label><input id="min_stock" name="min_stock" type="number" min="0" step="1" value="{{ form.min_stock }}"></div>
+    <div class="field"><label for="unit_cost">Unit cost (&#8369;)</label><input id="unit_cost" name="unit_cost" type="number" inputmode="decimal" min="0" step="0.01" data-money value="{{ form.unit_cost if form.unit_cost is string else '%.2f'|format(form.unit_cost|float) }}"><small>Price of one unit in pesos, e.g. 150.00 (not cents).</small></div>
+    <div class="field"><label for="selling_price">Selling price (&#8369;)</label><input id="selling_price" name="selling_price" type="number" inputmode="decimal" min="0" step="0.01" value="{{ form.selling_price if form.selling_price is string else '%.2f'|format((form.selling_price or 0)|float) }}"><small>What the customer pays at the POS. Leave at 0.00 to keep this item off the cashier screen.</small></div>
+    <div class="field" data-vaccine-only><label for="vaccine_type">Vaccine type</label><input id="vaccine_type" name="vaccine_type" list="vtypes" value="{{ form.vaccine_type }}" placeholder="e.g. Rabies"><datalist id="vtypes">{% for v in vaccine_types %}<option value="{{ v }}">{% endfor %}</datalist><small>For vaccines only.</small></div>
+    <div class="field" data-vaccine-only><label for="manufacturer">Manufacturer / brand</label><input id="manufacturer" name="manufacturer" value="{{ form.manufacturer }}"></div>
+    <div class="field" data-vaccine-only><label for="batch_number">Batch / lot number</label><input id="batch_number" name="batch_number" value="{{ form.batch_number }}"><small>Printed on the vial or box.</small></div>
+    <div class="field"><label for="supplier">Supplier</label><input id="supplier" name="supplier" value="{{ form.supplier }}"></div>
+    <div class="field"><label for="expiration_date">Expiration date</label><input id="expiration_date" name="expiration_date" type="date" value="{{ form.expiration_date }}"><small>Leave empty for items that do not expire.</small></div>
+    <div class="field full"><label for="image">Product picture</label>
+      <div class="pic-field"><div class="pic-box" id="imagePreview">{% if form.image_url %}<img src="{{ form.image_url }}" alt="Current picture">{% else %}<span class="ph">{{ icon('box') }}No picture</span>{% endif %}</div>
+        <div><input id="image" name="image" type="file" accept="image/png,image/jpeg,image/gif,image/webp"><small>PNG, JPG, GIF or WEBP, up to 4 MB. Optional.{% if editing and form.image_url %} Choosing a new file replaces the current picture.{% endif %}</small>
+          <div class="small imgnote" id="imageNote" role="alert"></div>
+          {% if editing and form.image_url %}<div class="check"><input type="checkbox" id="remove_image" name="remove_image" value="1"><label for="remove_image">Remove the current picture</label></div>{% endif %}</div></div></div>
+  </div>
+  <div class="actions"><button class="btn" type="submit">{{ 'Save changes' if editing else 'Add item' }}</button><a class="btn ghost" href="{{ url_for('inventory') }}">Cancel</a></div>
+</form>
+{% endblock %}

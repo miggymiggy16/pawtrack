@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge %}
+{% block title %}Inventory transactions{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Inventory transaction history</h1><p>Audit trail of every stock change.</p></div><a class="btn ghost" href="{{ url_for('inventory') }}">Back to inventory</a></div>
+<form class="card filters" method="get">
+  <div class="field"><label for="item">Item</label><input id="item" name="item" value="{{ args.item }}" placeholder="Name or ID"></div>
+  <div class="field"><label for="type">Type</label><select id="type" name="type"><option value="">All</option>{% for t in ['Stock In','Stock Out','Adjustment'] %}<option {{ 'selected' if args.type==t }}>{{ t }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+  <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+  <div class="actions"><button class="btn" type="submit">Filter</button><a class="btn ghost" href="{{ url_for('inventory_transactions') }}">Clear</a></div></form>
+<div class="card">{% if rows %}<div class="table-wrap"><table><thead><tr><th>ID</th><th>Date</th><th>Item</th><th>Type</th><th>Quantity</th><th>Before &rarr; After</th><th>Reason</th><th>User</th></tr></thead><tbody>
+{% for t in rows %}<tr><td>{{ t.transaction_id }}</td><td class="nowrap">{{ t.datetime|fmt_dt }}</td><td><a href="{{ url_for('inventory_view', item_id=t.item_id) }}">{{ t.item_name }}</a></td><td>{{ badge(t.transaction_type) }}</td>
+<td>{% if t.transaction_type == 'Adjustment' %}{{ '%+d'|format(t.quantity) }}{% else %}{{ t.quantity }}{% endif %}</td><td>{{ t.quantity_before }} &rarr; {{ t.quantity_after }}</td><td>{{ t.reason }}</td><td>{{ t.user }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}<p class="empty">No transactions match.</p>{% endif %}</div>
+{% endblock %}

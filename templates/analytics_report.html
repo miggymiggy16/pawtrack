@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ r.title }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ r.title }}</h1><p>Detailed report &middot; calculated live from your PawTrack records &middot; {{ clinic.name }}</p></div>
+  <div class="actions"><a class="btn ghost" href="{{ url_for('analytics') }}">Back to Analytics</a><a class="btn ghost" href="{{ url_for('reports', type=reports_kind) }}">Open in Reports (filters &amp; export)</a></div></div>
+
+<div class="summary-row" aria-label="Report summary">{% for s in r.summary %}<div class="stat {{ s.tone }}"><div class="n">{{ s.value }}</div><div class="l">{{ s.label }}</div></div>{% endfor %}</div>
+
+{% if r.chart %}<section class="card"><h3>{{ r.title }}</h3><div class="chart-box tall"><canvas id="reportChart"></canvas></div>{% if r.note %}<p class="muted small" style="margin:10px 0 0">{{ r.note }}</p>{% endif %}</section>
+{% elif r.note %}<p class="muted small">{{ r.note }}</p>{% endif %}
+
+{% for t in r.tables %}<section class="card rpt-section"><h3>{{ t.title }}<span class="count">{{ t.rows|length }} row{{ '' if t.rows|length == 1 else 's' }}</span></h3>
+  {% if t.rows %}<div class="table-wrap"><table><thead><tr>{% for h in t.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead><tbody>
+  {% for row in t.rows %}<tr>{% for c in row %}<td>{% if c is mapping %}<a href="{{ c.href }}">{{ c.text }}</a>{% else %}{{ c }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="empty">Nothing to show here yet.</p>{% endif %}</section>{% endfor %}
+
+<div class="actions"><a class="btn ghost" href="{{ url_for('analytics') }}">Back to Analytics</a></div>
+{% endblock %}
+{% block scripts %}
+{% if r.chart %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const C = {{ r.chart|tojson }};
+if (pawCharts()) pawChart('reportChart', C.type, C.labels, C.values, C.opts);
+</script>{% endif %}
+{% endblock %}

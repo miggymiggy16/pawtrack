@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, csrf %}
+{% block title %}QR - {{ a.animal_name }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h1>QR code for {{ a.animal_name }}</h1><p>{{ a.animal_id }} &middot; {{ a.species }}</p></div>
+  <a class="btn ghost" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">Back to animal profile</a></div>
+{% if local_only %}<div class="notice warn no-print"><b>Phones cannot scan this yet.</b> You opened PawTrack with <code>127.0.0.1</code>/<code>localhost</code>, which only works on this computer. The QR currently points to <code>{{ url }}</code>.
+  For phones on the same Wi-Fi, open PawTrack at <b>{{ lan_url }}</b> (this computer's local address), or set the "QR base URL" in <a href="{{ url_for('settings') }}">Settings</a>, then press "Regenerate QR".</div>{% endif %}
+<div class="grid g2">
+  <div class="print-area"><div class="qr-card">
+    {% if has_qr %}<img src="{{ url_for('static', filename='qr/' ~ a.animal_id ~ '.png') }}?v={{ range(1,999999)|random }}" alt="QR code for {{ a.animal_name }}">{% else %}<p>QR image is missing.</p>{% endif %}
+    <h3>{{ a.animal_name }}</h3><div>{{ a.animal_id }} &middot; {{ a.species }}{% if a.breed %} &middot; {{ a.breed }}{% endif %}</div><div class="small">PawTrack &middot; {{ clinic.name }}</div></div></div>
+  <section class="card no-print"><h2>Actions</h2>
+    <p class="small muted">Encoded address:<br><code style="word-break:break-all">{{ url }}</code></p>
+    <div class="actions">
+      {% if has_qr %}<a class="btn" href="{{ url_for('qr_download', animal_id=a.animal_id) }}">Download QR image</a><button class="btn ghost" type="button" data-print>Print QR</button>{% endif %}
+      <form method="post" class="inline" action="{{ url_for('qr_regenerate', animal_id=a.animal_id) }}">{{ csrf() }}<button class="btn ghost" type="submit">Regenerate QR</button></form>
+    </div>
+    <h2 style="margin-top:22px">Animal</h2><dl class="kv"><dt>Vaccination</dt><dd>{{ badge(info.status) }}</dd><dt>Next due</dt><dd>{{ info.next_due|fmt_date if info.next_due else '-' }}</dd></dl>
+  </section>
+</div>
+{% endblock %}

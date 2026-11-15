@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}Send email{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Send email notification</h1><p>For {{ a.animal_name }} ({{ a.animal_id }})</p></div><a class="btn ghost" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">Back to profile</a></div>
+{% if not mail_ok %}<div class="notice warn">Email is not configured yet. You can prepare a message, but sending will fail until MAIL_* values are set in <code>.env</code>. The attempt will be saved as Failed in the history.</div>{% endif %}
+<form class="card" method="post">{{ csrf() }}
+  <div class="form-grid">
+    <div class="field full"><label>Recipient</label>
+      <div class="check"><input type="radio" id="r1" name="recipient" value="owner" {{ 'checked' if form.recipient=='owner' }}><label for="r1">Owner: {{ a.owner_name or 'none' }} ({{ a.owner_email or 'no email on file' }})</label></div>
+      <div class="check"><input type="radio" id="r2" name="recipient" value="custom" {{ 'checked' if form.recipient=='custom' }}><label for="r2">Another address</label></div>
+      <input type="email" name="custom_email" value="{{ form.custom_email }}" placeholder="name@example.com" aria-label="Other email address"></div>
+    <div class="field"><label for="type">Purpose</label><select id="type" name="type">{% for t in types %}<option {{ 'selected' if form.type==t }}>{{ t }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="vaccination_id">Vaccination record</label><select id="vaccination_id" name="vaccination_id"><option value="">None</option>
+      {% for r in info.records %}<option value="{{ r.vaccination_id }}" {{ 'selected' if form.vaccination_id==r.vaccination_id }}>{{ r.vaccine_name }} - given {{ r.date_administered }}</option>{% endfor %}</select></div>
+    <div class="field full"><label for="subject">Subject</label><input id="subject" name="subject" value="{{ form.subject }}"></div>
+    <div class="field full"><label for="message">Message (you can edit it)</label><textarea id="message" name="message" style="min-height:240px">{{ form.message }}</textarea></div>
+  </div>
+  <div class="actions"><button class="btn ghost" name="action" value="preview" type="submit">Load / refresh message template</button>
+    <button class="btn" name="action" value="send" type="submit">Send email</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+{% set back = request.full_path.rstrip('?') %}
+<div class="page-head nt-head">
+  <div><h1>Notifications{% if counts.unread %} <span class="nt-count" aria-label="{{ counts.unread }} unread">{{ counts.unread }}</span>{% endif %}</h1>
+    <p>Important vaccination, inventory and email updates.</p></div>
+  <div class="nt-head-actions">
+    {% if user.role == 'admin' %}<form method="post" action="{{ url_for('notification_check') }}">{{ csrf() }}<input type="hidden" name="back" value="{{ back }}"><button class="btn ghost" type="submit" title="Email owners whose reminders are due (each reminder is sent only once)">Run reminder check</button></form>{% endif %}
+    <form method="post" action="{{ url_for('notification_read_all') }}">{{ csrf() }}<input type="hidden" name="back" value="{{ back }}"><button class="btn nt-readall" type="submit" aria-label="Mark all as read" title="Mark all as read" {{ 'disabled' if not counts.unread }}>{{ icon('checks') }}<span>Mark all as read</span></button></form>
+  </div>
+</div>
+
+{% if cat in ('all', 'email') %}
+{% if not mail.configured %}<div class="notice warn">Email is <b>not configured</b>. Add MAIL_* values to your <code>.env</code> file (see README) and restart PawTrack.</div>{% endif %}
+{% if not enabled %}<div class="notice warn">Email reminders are currently turned off in Settings.</div>{% endif %}
+{% endif %}
+
+<nav class="nt-chips" aria-label="Filter notifications">
+  {% for c, label in cats.items() %}
+    {% set n = counts.unread if c == 'unread' else unread.get(c, 0) %}
+    <a class="nt-chip {{ 'active' if cat == c }}" href="{{ url_for('notifications', cat=c) }}" {% if cat == c %}aria-current="page"{% endif %}>{{ label }}{% if n %} <span class="nt-chip-n">&middot; {{ n }}</span>{% endif %}</a>
+  {% endfor %}
+</nav>
+
+{% if cat == 'email' %}
+<details class="nt-emailfilter" {{ 'open' if email_filtered }}><summary>Filter email history</summary>
+  <form class="filters" method="get"><input type="hidden" name="cat" value="email">
+    <div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+    <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+    <div class="field"><label for="type">Type</label><select id="type" name="type"><option value="">All</option>{% for t in types %}<option {{ 'selected' if args.type==t }}>{{ t }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for s in ['Sent','Failed'] %}<option {{ 'selected' if args.status==s }}>{{ s }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="animal">Animal</label><input id="animal" name="animal" value="{{ args.animal }}" placeholder="Name or ID"></div>
+    <div class="actions"><button class="btn" type="submit">Filter</button><a class="btn ghost" href="{{ url_for('notifications', cat='email') }}">Clear</a></div></form>
+</details>
+{% endif %}
+
+{% for grp in groups %}
+<section class="nt-group" aria-labelledby="g-{{ grp.id }}">
+  <h2 id="g-{{ grp.id }}">{{ grp.label }} <span class="nt-group-n">{{ grp['items']|length }}</span></h2>
+  <ul class="nt-list">
+  {% for x in grp['items'] %}
+    <li class="nt-card sev-{{ x.severity }} {{ 'unread' if x.unread else 'read' }}">
+      <span class="nt-ico">{{ icon(x.icon) }}</span>
+      <div class="nt-body">
+        <h3 class="nt-title">{{ x.title }}</h3>
+        <p class="nt-msg">{{ x.message }}</p>
+        <p class="nt-meta">{{ x.meta }}</p>
+        {% if x.body %}<details class="nt-detail"><summary>View message</summary><pre>{{ x.body }}</pre></details>{% endif %}
+        <div class="nt-actions">
+          {% if x.url %}<form method="post" action="{{ url_for('notification_open') }}">{{ csrf() }}<input type="hidden" name="key" value="{{ x.key }}"><button class="nt-link" type="submit">View Record <span aria-hidden="true">&rarr;</span></button></form>{% endif %}
+          {% if x.unread %}<form method="post" action="{{ url_for('notification_read') }}">{{ csrf() }}<input type="hidden" name="key" value="{{ x.key }}"><input type="hidden" name="back" value="{{ back }}"><button class="nt-mark" type="submit">Mark as read</button></form>{% endif %}
+        </div>
+      </div>
+      {% if x.trackable %}<span class="nt-dot" role="img" aria-label="{{ 'Unread' if x.unread else 'Read' }}" title="{{ 'Unread' if x.unread else 'Read' }}"></span>{% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+  {% if grp.id == 'email' and hidden_email %}<p class="nt-more"><a href="{{ url_for('notifications', cat='email') }}">Show {{ hidden_email }} older email entries</a></p>{% endif %}
+</section>
+{% else %}
+<p class="card empty">{% if cat == 'unread' %}You're all caught up. Nothing unread.{% elif email_filtered %}No email history matches these filters.{% else %}No notifications here yet.{% endif %}</p>
+{% endfor %}
+{% endblock %}

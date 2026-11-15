@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}Point of Sale{% endblock %}
+{% block body_class %}pos-page{% endblock %}
+{% block topbar_title %}Point of Sale{% endblock %}
+{% block topbar_after %}
+<button class="po-held" id="heldBtn" type="button" aria-label="Held orders" title="Held orders">{{ icon('pause') }}<span id="heldCount">0</span></button>
+<span class="po-today" title="Your sales today">{{ today_summary.count }} sale{{ '' if today_summary.count == 1 else 's' }} today &middot; {{ today_summary.total|money }}</span>
+{% endblock %}
+{% block topbar_search %}
+<label class="tb-search"><span class="sr">Search items</span>{{ icon('search') }}<input id="posSearch" type="search" placeholder="Search items…  ( / )" autocomplete="off"></label>
+{% endblock %}
+{% block content %}
+<div class="pos2">
+  <section class="po-main" aria-label="Items for sale">
+    <div class="po-cats" id="posCats" role="tablist" aria-label="Categories"></div>
+    <p class="po-showing" id="posShowing"></p>
+    <div class="po-grid" id="posGrid"></div>
+    <p class="empty" id="posNone" hidden>No items match. Prices are set by the administrator (Inventory &gt; Selling price, or POS Services).</p>
+  </section>
+
+  <div class="po-resizer" id="poResizer" role="separator" aria-orientation="vertical" tabindex="0"
+       aria-label="Resize the order panel" aria-valuemin="300" aria-valuemax="720" aria-valuenow="392"
+       title="Drag to the left to make the order panel wider"></div>
+
+  <aside class="po-order" aria-label="Current order">
+    <form id="checkoutForm" method="post" action="{{ url_for('pos_checkout') }}" novalidate>{{ csrf() }}
+      <input type="hidden" name="form_token" value="{{ token }}"><input type="hidden" name="cart" id="cartField">
+      <input type="hidden" name="discount" id="discount" value="0"><input type="hidden" name="discount_reason" id="discount_reason" value="">
+
+      <div class="po-scroll">
+        <div class="po-sec po-lines-sec">
+          <div class="po-order-head">
+            <div><h2 class="po-h">Current Order</h2><span class="po-count" id="orderCount">0 item(s)</span></div>
+            <div class="po-headbtns">
+              <button class="po-ghost sm" id="holdBtn" type="button">{{ icon('pause') }}Hold</button>
+              <button class="po-ghost sm clr" id="clearBtn" type="button">{{ icon('trash') }}Clear</button>
+            </div>
+          </div>
+          <div id="cartEmpty" class="po-empty">{{ icon('cart') }}<b>No items yet</b><span>Tap an item to add it to the order.</span></div>
+          <ul id="cartLines" class="po-lines"></ul>
+        </div>
+      </div>
+
+      <div class="po-foot">
+        <dl class="po-totals">
+          <div><dt>Subtotal</dt><dd id="tSub">&#8369;0.00</dd></div>
+          <div class="disc-row"><dt><button type="button" class="po-disc" id="discBtn" aria-pressed="false" title="Apply or remove a 20% discount">{{ icon('percent') }}<span>Discount</span><small>20%</small></button></dt><dd id="tDisc">&minus;&#8369;0.00</dd></div>
+          <div class="grand"><dt>Total</dt><dd id="tTotal">&#8369;0.00</dd></div>
+          <div class="vat-row"><dt>VAT 12% <small>included</small></dt><dd id="tVat">&#8369;0.00</dd></div>
+        </dl>
+
+        <div class="po-pay">
+          <div class="po-paymethods" id="payChips" role="radiogroup" aria-label="Payment method"></div>
+          <select id="payment_method" name="payment_method" hidden>{% for p in payments %}<option>{{ p }}</option>{% endfor %}</select>
+          <div class="po-cash" id="cashRow">
+            <label for="amount_tendered">Cash received (&#8369;)</label>
+            <input id="amount_tendered" name="amount_tendered" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00">
+            <div class="change" id="changeBox" aria-live="polite"></div>
+          </div>
+          <div class="po-ref" id="refRow" hidden><label for="reference">Reference no. <small>(optional)</small></label><input id="reference" name="reference" maxlength="60" placeholder="e.g. E-Wallet reference number"></div>
+        </div>
+
+        <div id="posError" class="po-msg" role="alert" hidden></div>
+        <button class="po-checkout" id="payBtn" type="submit" disabled>{{ icon('receipt') }}Checkout &ndash; <span id="payAmt">&#8369;0.00</span></button>
+      </div>
+    </form>
+  </aside>
+</div>
+
+<dialog id="heldDialog" class="po-dialog" aria-labelledby="heldTitle">
+  <div class="po-dhead"><h3 id="heldTitle">Held orders</h3><button type="button" class="po-x" id="heldClose" aria-label="Close">{{ icon('x') }}</button></div>
+  <ul class="po-heldlist" id="heldList"></ul>
+  <p class="empty" id="heldNone">No held orders. Use Hold to set an order aside while you serve someone else.</p>
+</dialog>
+<script type="application/json" id="catalogData">{{ catalog|tojson }}</script>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/pos.js') }}"></script>{% endblock %}

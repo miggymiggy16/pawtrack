@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}{{ 'Settings' if user.role == 'admin' else 'My profile' }}{% endblock %}
+{% block content %}
+{% set admin = user.role == 'admin' %}
+<div class="page-head"><div><h1>{{ 'Settings' if admin else 'My profile' }}</h1>{% if not admin %}<p>Your account details and password. Clinic and system settings are managed by administrators.</p>{% endif %}</div></div>
+{% if not admin %}<section class="card" style="max-width:640px"><h2>Account</h2><dl class="kv"><dt>Name</dt><dd>{{ user.full_name or '-' }}</dd><dt>Username</dt><dd>{{ user.username }}</dd><dt>Email</dt><dd>{{ user.email or '-' }}</dd><dt>Role</dt><dd>{{ role_label }}</dd></dl></section>{% endif %}
+{% if admin %}<div class="grid g2">
+<section class="card"><h2>Notification settings</h2>
+  <form method="post" action="{{ url_for('settings_notifications') }}">{{ csrf() }}
+    <div class="field"><label for="reminder_days">Reminder days before due date</label><input id="reminder_days" name="reminder_days" type="number" min="0" max="365" value="{{ s.reminder_days }}" {{ 'disabled' if not admin }}><small>Example: due Dec 20 with 7 days becomes "Upcoming" on Dec 13.</small></div>
+    <div class="field"><label for="expiry_warning_days">Inventory "expiring soon" window (days)</label><input id="expiry_warning_days" name="expiry_warning_days" type="number" min="0" max="365" value="{{ s.expiry_warning_days }}" {{ 'disabled' if not admin }}></div>
+    <div class="check"><input type="checkbox" id="email_enabled" name="email_enabled" value="1" {{ 'checked' if s.email_enabled }} {{ 'disabled' if not admin }}><label for="email_enabled">Email reminders enabled</label></div>
+    {% if admin %}<button class="btn" type="submit">Save notification settings</button>{% endif %}</form>
+  {% if admin %}<hr style="border-color:var(--line);margin:22px 0">
+  <h3>Email configuration</h3>
+  <p class="small">Status: {% if mail.configured %}<b style="color:var(--ok)">credentials found</b> ({{ mail.server }}:{{ mail.port }}, {{ mail.username }}){% else %}<b style="color:var(--warn)">not configured</b> - edit <code>.env</code> and restart{% endif %}.</p>
+  <form method="post" action="{{ url_for('settings_test_email') }}">{{ csrf() }}<div class="field"><label for="to">Send a test email to</label><input id="to" name="to" type="email" required placeholder="you@example.com"></div><button class="btn ghost" type="submit">Send test email</button></form>
+  <form method="post" action="{{ url_for('notification_check') }}" style="margin-top:14px">{{ csrf() }}<input type="hidden" name="back" value="{{ url_for('settings') }}"><button class="btn" type="submit">Run notification check now</button></form>{% endif %}
+</section>
+<section class="card"><h2>Clinic information</h2>
+  <form method="post" action="{{ url_for('settings_clinic') }}">{{ csrf() }}
+    <div class="field"><label for="name">Clinic name</label><input id="name" name="name" value="{{ s.clinic.name }}" {{ 'disabled' if not admin }}></div>
+    <div class="field"><label for="address">Address</label><input id="address" name="address" value="{{ s.clinic.address }}" {{ 'disabled' if not admin }}></div>
+    <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" value="{{ s.clinic.phone }}" {{ 'disabled' if not admin }}></div>
+    <div class="field"><label for="cemail">Email</label><input id="cemail" name="email" type="email" value="{{ s.clinic.email }}" {{ 'disabled' if not admin }}></div>
+    <div class="field"><label for="public_base_url">QR base URL (optional)</label><input id="public_base_url" name="public_base_url" value="{{ s.public_base_url }}" placeholder="http://{{ lan }}:{{ port }}" {{ 'disabled' if not admin }}>
+      <small>The address phones use to open QR pages. <code>127.0.0.1</code> only works on this computer; use this computer's network address (maybe <b>http://{{ lan }}:{{ port }}</b>) or a deployed URL. Press "Regenerate all QR codes" after changing it.</small></div>
+    {% if admin %}<button class="btn" type="submit">Save clinic information</button>{% endif %}</form>
+  {% if admin %}<form method="post" action="{{ url_for('settings_regenerate_qr') }}" style="margin-top:14px">{{ csrf() }}<button class="btn ghost" type="submit">Regenerate all QR codes</button></form>{% endif %}
+</section>
+</div>{% endif %}
+<div class="grid g2">
+<section class="card"><h2>Change my password</h2>
+  <form method="post" action="{{ url_for('settings_password') }}">{{ csrf() }}
+    <div class="field"><label for="current_password">Current password</label><input id="current_password" name="current_password" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label for="new_password">New password</label><input id="new_password" name="new_password" type="password" autocomplete="new-password" required><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>
+    <div class="field"><label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required></div>
+    <button class="btn" type="submit">Change password</button></form></section>
+<section class="card" id="face-card">
+  <h2>Face ID</h2>
+  <p class="muted">Register your face so you can log in by scanning instead of typing your password. Only a mathematical face descriptor is saved, never a photo.</p>
+  <p id="face-status-text" class="small">Status: {% if user.face_descriptors %}<b style="color:var(--ok)">registered</b>{% if user.face_enrolled_at %} on {{ user.face_enrolled_at }}{% endif %}{% else %}<b style="color:var(--warn)">not registered</b>{% endif %}</p>
+  <div class="face-camera">
+    <video id="enroll-face-video" autoplay playsinline muted></video>
+    <div id="enroll-face-placeholder" class="face-placeholder">Camera is off</div>
+  </div>
+  <div class="face-actions">
+    <button type="button" class="btn ghost" id="enroll-face-start">Start camera</button>
+    <button type="button" class="btn" id="enroll-face-capture" disabled>Capture &amp; register</button>
+  </div>
+  <div class="field" style="margin-top:14px"><label for="face_password">Current password (to confirm)</label><input id="face_password" type="password" autocomplete="current-password" placeholder="Enter your password"><small>Needed so someone using an unattended session cannot register their own face.</small></div>
+  <div id="enroll-face-status" class="face-status" role="status" aria-live="polite"></div>
+  {% if user.face_descriptors %}<form method="post" action="{{ url_for('settings_face_remove') }}" style="margin-top:14px" data-confirm="Remove your face ID? You will need to use your password until you register again.">{{ csrf() }}<button class="btn danger" type="submit">Remove my face ID</button></form>{% endif %}
+</section>
+{% if admin %}<section class="card"><h2>Sample data</h2>
+  <p class="muted">PawTrack starts with sample animals, vaccinations and inventory so the dashboard has something to show. They are labelled internally and can be removed in one step. Your own records are never touched.</p>
+  {% if has_sample %}<form method="post" action="{{ url_for('settings_remove_sample') }}" data-confirm="Remove all sample animals, vaccinations, inventory and their history?">{{ csrf() }}<button class="btn danger" type="submit">Remove sample data</button></form>
+  {% else %}<p class="small">There is no sample data left.</p>{% endif %}</section>{% endif %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/face.js') }}"></script>{% endblock %}

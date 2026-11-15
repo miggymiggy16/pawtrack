@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, csrf, icon %}
+{% block title %}{{ i.item_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ i.item_name }}</h1><p>{{ i.item_id }} &middot; {{ i.category }}</p></div>
+  <div class="actions">{% if can('inventory.manage') %}<a class="btn" href="{{ url_for('inventory_edit', item_id=i.item_id) }}">Edit item</a>{% endif %}<a class="btn ghost" href="{{ url_for('inventory') }}">Back to {{ 'inventory' if can('inventory.manage') else 'stock' }}</a></div></div>
+<div class="grid g2">
+  <section class="card"><h2>Details</h2>
+    <div class="item-top"><div class="pic-box">{% if i.image_url %}<img src="{{ i.image_url }}" alt="Picture of {{ i.item_name }}">{% else %}<span class="ph">{{ icon('box') }}No picture added</span>{% endif %}</div>
+    <dl class="kv">
+    <dt>Quantity</dt><dd><b>{{ i.quantity }} {{ i.unit }}</b> {{ badge(i.stock_status) }}</dd><dt>Minimum stock</dt><dd>{{ i.min_stock }}</dd>
+    <dt>Expiration</dt><dd>{{ i.expiration_date|fmt_date if i.expiration_date else 'Does not expire' }} {{ badge(i.expiry_status) }}</dd>
+    {% if i.category == 'Vaccines' %}<dt>Vaccine type</dt><dd>{{ i.vaccine_type or '-' }}</dd><dt>Manufacturer / brand</dt><dd>{{ i.manufacturer or '-' }}</dd><dt>Batch / lot</dt><dd>{{ i.batch_number or '-' }}</dd>{% endif %}
+    <dt>Supplier</dt><dd>{{ i.supplier or '-' }}</dd>{% if can('inventory.manage') %}<dt>Unit cost</dt><dd>{{ i.unit_cost|money }} <span class="small muted">per {{ i.unit }}</span></dd><dt>Selling price (POS)</dt><dd>{% if i.selling_price %}{{ i.selling_price|money }} <span class="small muted">per {{ i.unit }}</span>{% else %}<span class="muted">Not sold at the POS</span>{% endif %}</dd><dt>Stock value</dt><dd>{{ i.value|money }} <span class="small muted">({{ i.quantity }} &times; {{ i.unit_cost|money }})</span></dd>{% endif %}
+    <dt>Description</dt><dd>{{ i.description or '-' }}</dd><dt>Date added</dt><dd>{{ i.date_added|fmt_date }}</dd><dt>Last updated</dt><dd>{{ i.last_updated|fmt_dt }}</dd></dl></div></section>
+  {% if can('inventory.manage') %}<section class="card"><h2>Change stock</h2>
+    <form method="post" action="{{ url_for('inventory_stock', item_id=i.item_id) }}">{{ csrf() }}
+      <div class="field"><label for="transaction_type">Transaction</label><select id="transaction_type" name="transaction_type">
+        <option>Stock In</option><option>Stock Out</option><option>Adjustment</option></select></div>
+      <div class="field"><label for="quantity">Quantity</label><input id="quantity" name="quantity" type="number" min="0" step="1" required><small>For Adjustment, enter the NEW total quantity counted.</small></div>
+      <div class="field"><label for="reason">Reason <span class="req">*</span></label><input id="reason" name="reason" placeholder="e.g. delivery received, used in surgery, recount" required></div>
+      <button class="btn" type="submit">Save stock change</button></form></section>{% else %}<section class="card"><h2>{{ 'Before you vaccinate' if i.category == 'Vaccines' else 'Stock information' }}</h2><p class="muted">This is view-only stock information. {% if i.category == 'Vaccines' %}Recording a vaccination with this vaccine selected deducts the dose automatically; expired or empty stock cannot be used.{% else %}Stock is managed by administrators.{% endif %}</p>{% if i.category == 'Vaccines' %}<a class="btn" href="{{ url_for('vaccination_new') }}">Record vaccination</a>{% endif %}</section>{% endif %}
+</div>
+{% if can('inventory.history') %}<section class="card"><h2>Transaction history</h2>
+  {% if tx %}<div class="table-wrap"><table><thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Change</th><th>Before &rarr; After</th><th>Reason</th><th>User</th></tr></thead><tbody>
+  {% for t in tx %}<tr><td>{{ t.transaction_id }}</td><td class="nowrap">{{ t.datetime|fmt_dt }}</td><td>{{ badge(t.transaction_type) }}</td>
+  <td>{% if t.transaction_type == 'Stock Out' %}-{{ t.quantity }}{% elif t.transaction_type == 'Stock In' %}+{{ t.quantity }}{% else %}{{ '%+d'|format(t.quantity) }}{% endif %}</td>
+  <td>{{ t.quantity_before }} &rarr; {{ t.quantity_after }}</td><td>{{ t.reason }}</td><td>{{ t.user }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="empty">No transactions yet.</p>{% endif %}</section>{% endif %}
+{% endblock %}

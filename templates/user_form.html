@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} user{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Edit user' if editing else 'Add user' }}</h1></div><a class="btn ghost" href="{{ url_for('users') }}">Back to users</a></div>
+<form class="card" method="post" novalidate>{{ csrf() }}
+  <div class="form-grid">
+    <div class="field"><label for="username">Username <span class="req">*</span></label><input id="username" name="username" value="{{ form.username }}" required></div>
+    <div class="field"><label for="full_name">Full name <span class="req">*</span></label><input id="full_name" name="full_name" value="{{ form.full_name }}" required></div>
+    <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="{{ form.email }}"></div>
+    <div class="field"><label for="role">Role</label><select id="role" name="role"><option value="staff" {{ 'selected' if form.role=='staff' }}>Veterinary Staff</option><option value="admin" {{ 'selected' if form.role=='admin' }}>Administrator</option><option value="cashier" {{ 'selected' if form.role=='cashier' }}>Cashier (POS only)</option></select></div>
+    {% if not editing %}<div class="field full"><label for="password">Password <span class="req">*</span></label><div class="pw"><input id="password" name="password" type="password" autocomplete="new-password" required><button type="button" data-toggle-pw="password">Show</button></div><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>{% endif %}
+  </div>
+  <div class="check"><input type="checkbox" id="active" name="active" value="1" {{ 'checked' if form.active }}><label for="active">Account is active (can log in)</label></div>
+  <div class="actions"><button class="btn" type="submit">{{ 'Save changes' if editing else 'Create user' }}</button></div>
+</form>
+{% if editing %}<form class="card" method="post" action="{{ url_for('user_reset_password', user_id=form.user_id) }}" data-confirm="Reset the password for {{ form.username }}?">{{ csrf() }}
+  <h2>Reset password</h2><div class="field"><label for="new_password">New password</label><div class="pw"><input id="new_password" name="new_password" type="password" autocomplete="new-password" required><button type="button" data-toggle-pw="new_password">Show</button></div><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>
+  <button class="btn" type="submit">Reset password</button></form>
+<form class="card" method="post" action="{{ url_for('user_reset_face', user_id=form.user_id) }}" data-confirm="Reset the face ID for {{ form.username }}? They will need to register their face again.">{{ csrf() }}
+  <h2>Face ID</h2>
+  <p class="small">Status: {% if form.face_descriptors %}<b style="color:var(--ok)">registered</b>{% if form.face_enrolled_at %} on {{ form.face_enrolled_at }}{% endif %}{% else %}<b style="color:var(--warn)">not registered</b>{% endif %}</p>
+  {% if form.face_descriptors %}<button class="btn danger" type="submit">Reset face ID</button>{% endif %}
+</form>{% endif %}
+{% endblock %}

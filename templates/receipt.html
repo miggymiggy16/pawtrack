@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}Receipt {{ s.sale_id }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h1>Receipt {{ s.sale_id }}</h1><p class="mono-s">{{ s.datetime|fmt_dt }}</p></div>
+  <div class="actions"><button class="btn" type="button" onclick="window.print()">{{ icon('printer') }}Print receipt</button>
+    {% if can('pos.use') %}<a class="btn{{ '' if is_new else ' ghost' }}" href="{{ url_for('pos_screen') }}">{{ icon('plus') }}New sale</a><a class="btn ghost" href="{{ url_for('pos_my_sales') }}">My sales</a>
+    {% else %}<a class="btn ghost" href="{{ url_for('sales_list') }}">Back to sales</a>{% endif %}</div></div>
+{% if is_new %}<div class="flash success no-print"><span>Sale {{ s.sale_id }} recorded. Give the customer their change: <b>{{ s.change|money }}</b>.</span></div>{% endif %}
+{% if s.status == 'Voided' %}<div class="notice warn no-print" role="alert"><b>VOIDED</b> by {{ s.voided_by }} on {{ s.voided_at|fmt_dt }}. Reason: {{ s.void_reason }}. Products were returned to stock.</div>{% endif %}
+<article class="receipt">
+  {% if s.status == 'Voided' %}<div class="rc-void">VOIDED</div>{% endif %}
+  <header><b>{{ clinic.name }}</b>{% if clinic.address %}<div>{{ clinic.address }}</div>{% endif %}{% if clinic.phone %}<div>{{ clinic.phone }}</div>{% endif %}
+    <div class="rc-title">OFFICIAL SALES RECEIPT</div></header>
+  <dl class="rc-meta"><div><dt>Receipt no.</dt><dd>{{ s.sale_id }}</dd></div><div><dt>Date</dt><dd>{{ s.datetime|fmt_dt }}</dd></div>
+    <div><dt>Cashier</dt><dd>{{ s.cashier_name }}</dd></div>
+    {% if s.customer_name %}<div><dt>Customer</dt><dd>{{ s.customer_name }}</dd></div>{% endif %}
+    {% if s.animal_id %}<div><dt>Pet</dt><dd>{{ s.animal_name }} ({{ s.animal_id }})</dd></div>{% endif %}</dl>
+  <table class="rc-lines"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead><tbody>
+    {% for ln in s['items'] %}<tr><td>{{ ln.name }}</td><td>{{ ln.qty }}</td><td>{{ ln.unit_price|money }}</td><td>{{ ln.line_total|money }}</td></tr>{% endfor %}</tbody></table>
+  <dl class="rc-tot"><div><dt>Subtotal</dt><dd>{{ s.subtotal|money }}</dd></div>
+    {% if s.discount %}<div><dt>Discount{% if s.discount_reason %} ({{ s.discount_reason }}){% endif %}</dt><dd>-{{ s.discount|money }}</dd></div>{% endif %}
+    <div class="g"><dt>TOTAL</dt><dd>{{ s.total|money }}</dd></div>
+    {% if s.vat %}<div><dt>VAT {{ s.vat_rate or 12 }}% <small>(included in TOTAL)</small></dt><dd>{{ s.vat|money }}</dd></div>{% endif %}
+    <div><dt>{{ s.payment_method }}{% if s.reference %} ({{ s.reference }}){% endif %}</dt><dd>{{ s.amount_tendered|money }}</dd></div>
+    {% if s.payment_method == 'Cash' %}<div><dt>Change</dt><dd>{{ s.change|money }}</dd></div>{% endif %}</dl>
+  <footer>Thank you for caring for your pet!</footer>
+</article>
+{% if can('pos.manage') and s.status != 'Voided' %}<form class="card no-print" method="post" action="{{ url_for('sale_void', sale_id=s.sale_id) }}" data-confirm="Void sale {{ s.sale_id }}? Its products go back to stock and it stops counting as revenue." style="max-width:420px">{{ csrf() }}
+  <h2>Void this sale</h2><div class="field"><label for="reason">Reason <span class="req">*</span></label><input id="reason" name="reason" maxlength="100" required placeholder="e.g. wrong item, customer cancelled"></div>
+  <button class="btn danger" type="submit">Void sale</button></form>{% endif %}
+{% endblock %}

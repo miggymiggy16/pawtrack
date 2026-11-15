@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, icon %}
+{% block title %}Sales (POS){% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Sales (POS)</h1><p>Every sale the cashier made. {{ 'Void a sale from its receipt page.' if show_profit else 'View only.' }}</p></div>
+  <div class="actions"><a class="btn ghost" href="{{ url_for('sales_export', **args) }}">Export CSV</a><a class="btn ghost" href="{{ url_for('pos_services') }}">{{ icon('tag') }}Services</a></div></div>
+<form class="card filters" method="get">
+  <div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+  <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+  <div class="field"><label for="cashier">Cashier</label><select id="cashier" name="cashier"><option value="">All</option>{% for c in cashiers %}<option {{ 'selected' if args.cashier==c }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="payment">Payment</label><select id="payment" name="payment"><option value="">All</option>{% for p in payments %}<option {{ 'selected' if args.payment==p }}>{{ p }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for st in ['Completed','Voided'] %}<option {{ 'selected' if args.status==st }}>{{ st }}</option>{% endfor %}</select></div>
+  <div class="field"><label for="q">Search</label><input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer, pet, item"></div>
+  <div class="actions"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('sales_list') }}">Reset</a></div></form>
+<section class="kpis {{ 'k5' if show_profit else 'k4' }}">
+  <div class="kpi ok"><span class="kl">Total sales</span><span class="kpi-n sm">{{ summary.total|money }}</span><span class="kpi-foot">{{ summary.count }} transactions</span></div>
+  <div class="kpi"><span class="kl">Average sale</span><span class="kpi-n sm">{{ summary.average|money }}</span></div>
+  <div class="kpi"><span class="kl">Items sold</span><span class="kpi-n">{{ summary.units }}</span></div>
+  <div class="kpi {{ 'warn' if summary.voided }}"><span class="kl">Discounts / voided</span><span class="kpi-n sm">{{ summary.discount|money }}</span><span class="kpi-foot">{{ summary.voided }} voided</span></div>
+  {% if show_profit %}<div class="kpi info"><span class="kl">Gross profit</span><span class="kpi-n sm">{{ summary.profit|money }}</span><span class="kpi-foot">sales minus item cost</span></div>{% endif %}
+</section>
+<div class="grid g2">
+  <section class="card"><h2>By payment method</h2>{% if summary.by_payment %}<div class="table-wrap"><table style="min-width:0"><tbody>{% for m, v in summary.by_payment %}<tr><td>{{ m }}</td><td class="right">{{ v|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No sales.</p>{% endif %}</section>
+  <section class="card"><h2>Top items</h2>{% if summary.top_items %}<div class="table-wrap"><table style="min-width:0"><thead><tr><th>Item</th><th>Qty</th><th class="right">Revenue</th></tr></thead><tbody>{% for t in summary.top_items %}<tr><td>{{ t.name }}</td><td>{{ t.qty }}</td><td class="right">{{ t.revenue|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No sales.</p>{% endif %}</section>
+</div>
+<div class="card">{% if rows %}<div class="table-wrap"><table><thead><tr><th>Sale no.</th><th>Date and time</th><th>Cashier</th><th>Customer / pet</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody>
+{% for s in rows %}<tr><td class="mono-ref">{{ s.sale_id }}</td><td class="nowrap">{{ s.datetime|fmt_dt }}</td><td>{{ s.cashier }}</td><td>{{ s.customer_name or '-' }}{% if s.animal_id %}<div class="mono-s">{{ s.animal_name }} &middot; {{ s.animal_id }}</div>{% endif %}</td>
+<td>{% for ln in s['items'][:2] %}{{ ln.qty }} &times; {{ ln.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if s['items']|length > 2 %} <span class="muted">+{{ s['items']|length - 2 }} more</span>{% endif %}</td>
+<td class="nowrap">{{ s.total|money }}</td><td>{{ s.payment_method }}</td><td>{{ badge('Voided' if s.status == 'Voided' else 'Completed') }}</td><td><a class="btn sm ghost" href="{{ url_for('sale_receipt', sale_id=s.sale_id) }}">Receipt</a></td></tr>{% endfor %}</tbody></table></div>
+{% if total > rows|length %}<p class="dnote">Showing the latest {{ rows|length }} of {{ total }}. Export CSV contains all {{ total }}.</p>{% endif %}
+{% else %}<p class="empty">No sales match these filters.</p>{% endif %}</div>
+{% endblock %}

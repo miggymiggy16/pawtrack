@@ -1,0 +1,18 @@
+{% from '_macros.html' import badge, logo, theme_toggle %}
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><script>/* theme: apply saved choice before first paint (default = dark, the original PawTrack look) */
+(function(){var t='dark';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ a.animal_name }} | PawTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></head><body>
+{{ theme_toggle(true) }}
+<div class="public">
+  <div class="brand" style="justify-content:center">{{ logo() }}<span><b>PawTrack</b><small>Animal information</small></span></div>
+  <div class="hero"><div class="ring">{{ a.animal_name[0]|upper }}</div><h1 style="margin:0">{{ a.animal_name }}</h1><p class="muted" style="margin:0">{{ a.animal_id }}</p></div>
+  <section class="card"><dl class="kv">
+    <dt>Species</dt><dd>{{ a.species }}</dd><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd><dt>Sex</dt><dd>{{ a.sex }}</dd>
+    <dt>Ownership</dt><dd>{{ badge(a.ownership_status) }}</dd><dt>Vaccination</dt><dd>{{ badge(info.status) }}</dd>
+    <dt>Latest vaccine</dt><dd>{% if info.latest %}{{ info.latest.vaccine_name }} ({{ info.latest.date_administered|fmt_date }}){% else %}None recorded{% endif %}</dd>
+    <dt>Next due date</dt><dd>{{ info.next_due|fmt_date if info.next_due else '-' }}</dd></dl></section>
+  <p class="muted small" style="text-align:center">Found this animal? Please contact {{ clinic.name }}{% if clinic.phone %} at {{ clinic.phone }}{% endif %}.</p>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script></body></html>

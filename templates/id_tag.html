@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon %}
+{% block title %}ID tag - {{ a.animal_name }}{% endblock %}
+{% block content %}
+<div class="page-head no-print"><div><h1>Collar ID &middot; {{ a.animal_name }}</h1><p class="mono-s">{{ a.animal_id }} &middot; 40 &times; 20 mm</p></div>
+  <div class="actions"><a class="btn ghost" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">Back</a><button class="btn" type="button" data-print>{{ icon('file') }}Print ID</button></div></div>
+{% if local_only %}<div class="notice warn no-print">Phones cannot scan this yet: the QR points to <code>{{ url }}</code>. Set the QR base URL in <a href="{{ url_for('settings') }}">Settings</a> first.</div>{% endif %}
+<div class="idtag-stage"><div class="idtag">
+  <img class="idtag-qr" src="{{ qr_src }}" alt="QR code for {{ a.animal_name }}">
+  <div class="idtag-txt"><b class="idtag-name">{{ a.animal_name }}</b><span class="idtag-id">{{ a.animal_id }}</span></div>
+</div></div>
+{% endblock %}

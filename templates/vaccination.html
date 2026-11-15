@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, csrf, icon, initial %}
+{% block title %}Vaccinations{% endblock %}
+{% block content %}
+{# keep the other filters when a status chip is clicked #}
+{% set keep = {} %}{% for k, v in args.items() if v and k != 'status' %}{% set _ = keep.update({k: v}) %}{% endfor %}
+{% set adv = args.vaccine or args.due_from or args.due_to %}
+
+<div class="page-head vm-head">
+  <div><h1>Vaccination Monitoring</h1><p>Monitor vaccination records and schedules.</p></div>
+  <a class="btn" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }}Add vaccination</a>
+</div>
+
+<section class="vm-stats" aria-label="Vaccination summary">
+  <a class="stat vm-stat" href="{{ url_for('vaccinations') }}"><span class="vm-ico">{{ icon('shield') }}</span><span class="vm-stat-body"><span class="l">Total Records</span><span class="n">{{ counts.total }}</span></span></a>
+  <a class="stat vm-stat good" href="{{ url_for('vaccinations', status='Completed') }}"><span class="vm-ico">{{ icon('check') }}</span><span class="vm-stat-body"><span class="l">Completed</span><span class="n">{{ counts['Completed'] }}</span></span></a>
+  <a class="stat vm-stat info" href="{{ url_for('vaccinations', status='Upcoming') }}"><span class="vm-ico">{{ icon('clock') }}</span><span class="vm-stat-body"><span class="l">Upcoming</span><span class="n">{{ counts['Upcoming'] }}</span>{% if counts['Due Today'] %}<span class="sub">+ {{ counts['Due Today'] }} due today</span>{% endif %}</span></a>
+  <a class="stat vm-stat bad" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="vm-ico">{{ icon('alert') }}</span><span class="vm-stat-body"><span class="l">Overdue</span><span class="n">{{ counts['Overdue'] }}</span></span></a>
+</section>
+<p class="muted small vm-note">Reminders become eligible {{ reminder_days }} day(s) before the due date. Only the latest record of each vaccine is monitored; older doses stay in the history as Completed.</p>
+
+<form class="vm-toolbar" method="get" action="{{ url_for('vaccinations') }}" role="search">
+  {% if args.animal_id %}<input type="hidden" name="animal_id" value="{{ args.animal_id }}">{% endif %}
+  {% if args.status %}<input type="hidden" name="status" value="{{ args.status }}">{% endif %}
+  <div class="vm-search-row">
+    <div class="vm-search">{{ icon('search') }}<input type="search" name="q" value="{{ args.q }}" placeholder="Search animal or vaccine..." aria-label="Search by animal ID, animal name or vaccine name" autocomplete="off"></div>
+    <button class="vm-filter-btn" type="button" id="vmFilterBtn" aria-expanded="{{ 'true' if adv else 'false' }}" aria-controls="vmFilters">{{ icon('filter') }}<span>Filters</span></button>
+  </div>
+  <div class="vm-filters {{ 'open' if adv }}" id="vmFilters">
+    <div class="field"><label for="vmv">Vaccine</label><select id="vmv" name="vaccine"><option value="">All vaccines</option>{% for v in vaccine_options %}<option value="{{ v }}" {{ 'selected' if args.vaccine|lower == v|lower }}>{{ v }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="vmf">Due from</label><input type="date" id="vmf" name="due_from" value="{{ args.due_from }}"></div>
+    <div class="field"><label for="vmt">Due to</label><input type="date" id="vmt" name="due_to" value="{{ args.due_to }}"></div>
+    <div class="vm-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('vaccinations') }}">Clear</a></div>
+  </div>
+</form>
+
+<nav class="vm-chips" aria-label="Filter by status">
+  <a class="vm-chip {{ 'active' if not args.status }}" href="{{ url_for('vaccinations', **keep) }}">All Records</a>
+  {% for s in ['Upcoming', 'Due Today', 'Overdue', 'Completed'] %}<a class="vm-chip {{ 'active' if args.status == s }}" href="{{ url_for('vaccinations', status=s, **keep) }}">{{ s }}</a>{% endfor %}
+</nav>
+
+<section class="card vm-list" id="records" aria-label="Vaccination records">
+  <div class="vm-list-head"><h2>{% if animal %}Records for {{ animal.animal_name }}{% else %}Vaccination Records{% endif %}</h2>
+    <span class="vm-count">{{ rows|length }}{% if rows|length != counts.total %} of {{ counts.total }}{% endif %}</span></div>
+
+  {% if rows %}
+  <div class="vm-table table-wrap"><table>
+    <thead><tr><th>Animal</th><th>Vaccine</th><th>Administered</th><th>Next due</th><th>Status</th><th class="right">Actions</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      <tr>
+        <td><div class="vm-animal"><span class="vm-av">{{ initial(r.animal) }}</span><span><a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a><br><span class="small muted">{{ r.animal_id }}</span></span></div></td>
+        <td>{{ r.vaccine_name }}</td>
+        <td class="nowrap">{{ r.date_administered|fmt_date }}</td>
+        <td class="nowrap">{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
+        <td>{{ badge(r.status) }}</td>
+        <td class="right nowrap"><div class="vm-actions">
+          <a class="vm-act" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" title="View profile" aria-label="View {{ r.animal.animal_name }}'s profile">{{ icon('eye') }}</a>
+          <a class="vm-act" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" title="Edit record" aria-label="Edit record {{ r.vaccination_id }}">{{ icon('edit') }}</a>
+          {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button class="vm-act danger" type="submit" title="Delete record" aria-label="Delete record {{ r.vaccination_id }}">{{ icon('trash') }}</button></form>{% endif %}
+        </div></td>
+      </tr>
+    {% endfor %}
+    </tbody></table></div>
+
+  <ul class="vm-cards">
+    {% for r in rows %}
+    <li class="vm-card">
+      <span class="vm-card-ico">{{ icon('paw') }}</span>
+      <div class="vm-card-body">
+        <a class="vm-card-title" href="{{ url_for('animal_view', animal_id=r.animal_id) }}">{{ r.animal.animal_name }} &middot; {{ r.animal_id }}</a>
+        <span class="vm-card-vac">{{ r.vaccine_name }}</span>
+        <span class="vm-card-dates">Given {{ r.date_administered|fmt_date }}{% if r.next_due_date %}<br>Next due: <b>{{ r.next_due_date|fmt_date }}</b>{% endif %}</span>
+        <span>{{ badge(r.status) }}</span>
+      </div>
+      <div class="vm-actions">
+        <a class="vm-act" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" title="View profile" aria-label="View {{ r.animal.animal_name }}'s profile">{{ icon('eye') }}</a>
+        <a class="vm-act" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" title="Edit record" aria-label="Edit record {{ r.vaccination_id }}">{{ icon('edit') }}</a>
+        {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button class="vm-act danger" type="submit" title="Delete record" aria-label="Delete record {{ r.vaccination_id }}">{{ icon('trash') }}</button></form>{% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="empty">No vaccination records match. <a href="{{ url_for('vaccinations') }}">Clear filters</a></p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var btn = document.getElementById('vmFilterBtn'), panel = document.getElementById('vmFilters');
+  if (btn && panel) btn.addEventListener('click', function () {
+    var open = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+})();
+</script>
+{% endblock %}

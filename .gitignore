@@ -1,0 +1,17 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+data/*.json
+data/*.corrupt-*
+static/qr/*.png
+.vscode/
+static/uploads/inventory/*
+!static/uploads/inventory/.gitkeep
+static/uploads/animals/*
+!static/uploads/animals/.gitkeep
+certs/
+*.key
+*.pem
+Thumbs.db

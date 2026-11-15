@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Business analytics</h1><p>All charts are calculated live from your PawTrack records.</p></div></div>
+<div class="grid g4">
+  <div class="stat"><div class="n">{{ d.total }}</div><div class="l">Total animals</div></div>
+  <div class="stat good"><div class="n">{{ d.coverage }}%</div><div class="l">Vaccination coverage ({{ d.stats.vaccinated }} of {{ d.total }})</div></div>
+  <div class="stat"><div class="n">{{ d.inv.value|money }}</div><div class="l">Total inventory value</div></div>
+  <div class="stat bad"><div class="n">{{ d.vax['Overdue'] }}</div><div class="l">Overdue vaccinations</div></div>
+</div>
+<p class="muted small" style="margin:10px 2px 24px">Coverage = vaccinated animals &divide; total animals &times; 100. An animal counts as vaccinated once if its latest records have no overdue due date (Vaccinated, Upcoming or Due Today). Animals with no record, or an overdue record, are unvaccinated.</p>
+
+<h2>Animal population</h2>
+<div class="grid g2">
+  <section class="card"><h3>Animals by species</h3><div class="chart-box"><canvas id="c1"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='species') }}">View Report</a></div></section>
+  <section class="card"><h3>Owned vs. stray</h3><div class="chart-box"><canvas id="c2"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='ownership') }}">View Report</a></div></section>
+  <section class="card"><h3>Animals by sex</h3><div class="chart-box"><canvas id="c3"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='sex') }}">View Report</a></div></section>
+  <section class="card"><h3>Animals by breed (top 10)</h3><div class="chart-box"><canvas id="c4"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='breed') }}">View Report</a></div></section>
+</div>
+<h2>Vaccination</h2>
+<div class="grid g2">
+  <section class="card"><h3>Vaccination status of animals</h3><div class="chart-box"><canvas id="c5"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='status') }}">View Report</a></div></section>
+  <section class="card"><h3>Monitoring: upcoming, due today, overdue</h3><div class="chart-box"><canvas id="c6"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='monitoring') }}">View Report</a></div></section>
+  <section class="card"><h3>Vaccinations administered per month</h3><div class="chart-box"><canvas id="c7"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='trends') }}">View Report</a></div></section>
+  <section class="card"><h3>Most frequently administered vaccines</h3><div class="chart-box"><canvas id="c8"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='vaccines') }}">View Report</a></div></section>
+  <section class="card"><h3>Coverage by species (%)</h3><div class="chart-box"><canvas id="c9"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='coverage-species') }}">View Report</a></div></section>
+  <section class="card"><h3>Coverage by ownership (%)</h3><div class="chart-box"><canvas id="c10"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='coverage-ownership') }}">View Report</a></div></section>
+</div>
+<h2>Inventory</h2>
+<div class="grid g2">
+  <section class="card"><h3>Inventory value by category (&#8369;)</h3><div class="chart-box"><canvas id="c11"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-value') }}">View Report</a></div></section>
+  <section class="card"><h3>Inventory alerts</h3><div class="chart-box"><canvas id="c12"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-alerts') }}">View Report</a><a class="btn sm ghost" href="{{ url_for('analytics_report', key='vaccine-stock') }}">Vaccine stock report</a></div></section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const D = {{ d|tojson }};
+const K = o => Object.keys(o), V = o => Object.values(o);
+if (pawCharts()) {
+  pawChart('c1','doughnut',K(D.species),V(D.species));
+  pawChart('c2','doughnut',K(D.ownership),V(D.ownership));
+  pawChart('c3','pie',K(D.sex),V(D.sex));
+  pawChart('c4','bar',K(D.breeds),V(D.breeds),{label:'Animals',horizontal:true});
+  pawChart('c5','bar',K(D.status_counts),V(D.status_counts),{label:'Animals'});
+  pawChart('c6','bar',['Upcoming','Due Today','Overdue'],[D.vax['Upcoming'],D.vax['Due Today'],D.vax['Overdue']],{label:'Records',colors:['#7FB4F5','#F5A04A','#F26B6B']});
+  pawChart('c7','line',K(D.monthly),V(D.monthly),{label:'Vaccinations'});
+  pawChart('c8','bar',K(D.top_vaccines),V(D.top_vaccines),{label:'Times given',horizontal:true});
+  pawChart('c9','bar',K(D.species_cov),V(D.species_cov),{label:'Coverage %',max:100});
+  pawChart('c10','bar',K(D.ownership_cov),V(D.ownership_cov),{label:'Coverage %',max:100});
+  pawChart('c11','bar',K(D.value_by_cat),V(D.value_by_cat),{label:'Value'});
+  pawChart('c12','bar',['Low stock','Out of stock','Expired','Expiring soon'],[D.inv.low,D.inv.out,D.inv.expired,D.inv.expiring],{label:'Items',colors:['#F5A04A','#F26B6B','#C94444','#FFD2A1']});
+}
+</script>
+{% endblock %}

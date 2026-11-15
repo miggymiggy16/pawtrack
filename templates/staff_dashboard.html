@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+{% macro units(totals) %}{% for u, q in totals.items() %}{{ q }}<small>{{ u }}</small>{% if not loop.last %} {% endif %}{% else %}0{% endfor %}{% endmacro %}
+{% macro task_list(rows, tone) %}<ul class="tasks">{% for r in rows %}<li>
+  <a class="av av-{{ tone }}" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" aria-label="{{ r.animal.animal_name }}">{{ (r.animal.species or '?')[:1]|upper }}</a>
+  <span class="t-main"><a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a><span class="mono-s">{{ r.animal_id }} &middot; {{ r.vaccine_name }}</span></span>
+  <span class="due due-{{ tone }}">{% if r.days < 0 %}{{ -r.days }}d late{% elif r.days == 0 %}Today{% else %}in {{ r.days }}d{% endif %}</span>
+  <a class="btn sm" href="{{ url_for('vaccination_new', animal_id=r.animal_id) }}">Record</a></li>{% endfor %}</ul>{% endmacro %}
+
+<div class="crumb">PawTrack <i>/</i> <b>Overview</b></div>
+<div class="page-head"><div><h1>Overview</h1><p class="mono-s">{{ today|fmt_date }}</p></div>
+  <div class="actions"><a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div></div>
+{% if problems %}<div class="notice warn" role="alert">Some data could not be loaded ({{ problems|join(', ') }}).</div>{% endif %}
+
+<section class="kpis k4" aria-label="Today">
+  <a class="kpi" href="{{ url_for('animals_list') }}"><span class="kico">{{ icon('paw') }}</span><span class="kl">Registered Animals</span><span class="kpi-n">{{ cards.animals }}</span></a>
+  <a class="kpi ok" href="{{ url_for('vaccinations') }}"><span class="kico">{{ icon('checks') }}</span><span class="kl">Recorded Today</span><span class="kpi-n">{{ cards.today }}</span></a>
+  <a class="kpi info" href="{{ url_for('vaccinations', status='Upcoming') }}"><span class="kico">{{ icon('clock') }}</span><span class="kl">Upcoming</span><span class="kpi-n">{{ cards.due - cards.due_today }}</span>{% if cards.due_today %}<span class="kpi-foot sub-warn">+ {{ cards.due_today }} due today</span>{% endif %}</a>
+  <a class="kpi {{ 'bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="kico">{{ icon('bell') }}</span><span class="kl">Overdue</span><span class="kpi-n {{ 'neg' if cards.overdue }}">{{ cards.overdue }}</span></a>
+</section>
+
+<div class="dash-row r11">
+  <section class="card dcard sec bad"><div class="sh"><span class="kico">{{ icon('alert') }}</span><span class="sh-t"><span class="kl">Overdue</span><span class="sh-n neg">{{ cards.overdue }}</span></span></div>
+    {% if overdue %}{{ task_list(overdue, 'bad') }}{% if overdue_more %}<a class="more" href="{{ url_for('vaccinations', status='Overdue') }}">+{{ overdue_more }} more</a>{% endif %}
+    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All clear</span></p>{% endif %}</section>
+  <section class="card dcard sec info"><div class="sh"><span class="kico">{{ icon('clock') }}</span><span class="sh-t"><span class="kl">Upcoming</span><span class="sh-n">{{ cards.due }}</span>{% if cards.due_today %}<span class="sh-sub">+ {{ cards.due_today }} due today</span>{% endif %}</span></div>
+    {% if upcoming %}{{ task_list(upcoming, 'info') }}{% if upcoming_more %}<a class="more" href="{{ url_for('vaccinations', status='Upcoming') }}">+{{ upcoming_more }} more</a>{% endif %}
+    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>Nothing due</span></p>{% endif %}</section>
+</div>
+
+<div class="dash-row r11">
+  <section class="card dcard sec {{ 'warn' if stock_alerts }}"><div class="sh"><span class="kico">{{ icon('box') }}</span><span class="sh-t"><span class="kl">Vaccine Stock</span><span class="sh-n sm">{{ units(cards.stock) }}</span>{% if stock_alerts %}<span class="sh-sub">{{ stock_alerts }} need{{ 's' if stock_alerts == 1 else '' }} attention</span>{% endif %}</span><a class="btn sm ghost sh-act" href="{{ url_for('inventory') }}">Open</a></div>
+    {% if stock_rows %}<div class="hbars cardrows">{% for i in stock_rows[:8] %}
+      {% set bad = i.stock_status == 'Out of Stock' or i.expiry_status == 'Expired' %}{% set warn = i.stock_status == 'Low Stock' or i.expiry_status == 'Expiring Soon' %}
+      {% set pct = [ (i.quantity / (([i.min_stock, 1]|max) * 2) * 100), 100 ]|min %}
+      <div class="hrow mini"><a class="hl" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }}</a><span class="htrack"><i class="f-{{ 'bad' if bad else 'warn' if warn else 'ok' }}" style="width:{{ pct }}%"></i><u style="left:50%"></u></span><b class="hv">{{ i.quantity }}</b></div>{% endfor %}</div>
+    {% else %}<p class="empty">No vaccines yet.</p>{% endif %}</section>
+  <section class="card dcard sec {{ 'warn' if feed }}"><div class="sh"><span class="kico">{{ icon('bell') }}</span><span class="sh-t"><span class="kl">Alerts</span><span class="sh-n">{{ feed|length }}</span></span><a class="btn sm ghost sh-act" href="{{ url_for('notifications') }}">All</a></div>
+    {% if feed %}<ul class="alerts">{% for n in feed %}<li class="al-{{ n.severity }}"><span class="kchip {{ n.severity }}">{{ icon(n.icon) }}</span><span class="al-t"><b>{{ n.title }}</b></span><a class="btn sm ghost" href="{{ n.url }}">Open</a></li>{% endfor %}</ul>
+    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All caught up</span></p>{% endif %}</section>
+</div>
+
+<div class="dash-row r11">
+  <section class="card dcard sec"><div class="sh"><span class="kico">{{ icon('search') }}</span><span class="sh-t"><span class="kl">Find Animal</span></span></div>
+    <form class="quick-search" method="get" action="{{ url_for('animals_list') }}" role="search"><div class="field"><label class="sr" for="qs">Animal ID or name</label><input id="qs" name="q" placeholder="PT-0001 or name" autocomplete="off"></div><button class="btn" type="submit">{{ icon('search') }}Search</button></form>
+    {% if recent_animals %}<div class="mono-s rec-l">Recent</div><div class="pets-row">{% for a in recent_animals %}<a class="pchip" href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><span class="av">{{ (a.species or '?')[:1]|upper }}</span><span><b>{{ a.animal_name }}</b><small class="mono-s">{{ a.animal_id }}</small></span></a>{% endfor %}</div>{% endif %}</section>
+  <section class="card dcard sec"><div class="sh"><span class="kico">{{ icon('file') }}</span><span class="sh-t"><span class="kl">No Record Yet</span><span class="sh-n">{{ no_record_total }}</span></span></div>
+    {% if no_record %}<ul class="tasks">{% for a in no_record %}<li><span class="av av-mute">{{ (a.species or '?')[:1]|upper }}</span><span class="t-main"><a href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><b>{{ a.animal_name }}</b></a><span class="mono-s">{{ a.animal_id }}</span></span><a class="btn sm ghost" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Record</a></li>{% endfor %}</ul>
+    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All recorded</span></p>{% endif %}</section>
+</div>
+{% endblock %}

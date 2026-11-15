@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, csrf, icon %}
+{% block title %}{{ 'Stock' if readonly else 'Inventory' }}{% endblock %}
+{% block content %}
+{% if readonly %}<div class="page-head"><div><h1>Stock</h1><p>{{ counts.total }} items &middot; view only. Check available vaccines, medicines and supplies.</p></div>
+  <div class="actions"><a class="btn" href="{{ url_for('vaccination_new') }}">Record vaccination</a></div></div>
+{% else %}<div class="page-head"><div><h1>Inventory</h1><p>{{ counts.total }} items &middot; total value {{ counts.value|money }}</p></div>
+  <div class="actions"><a class="btn ghost" href="{{ url_for('inventory_transactions') }}">Transaction history</a><a class="btn" href="{{ url_for('inventory_new') }}">Add item</a></div></div>{% endif %}
+
+<form class="inv-filterbar" method="get">
+  <input type="hidden" name="view" value="{{ args.view }}">
+  <label class="inv-search" for="q"><span class="sr">Search items</span>{{ icon('search') }}
+    <input id="q" name="q" value="{{ args.q }}" placeholder="Search items, IDs or suppliers"></label>
+  <label class="inv-select" for="category"><span class="sr">Category</span>
+    <select id="category" name="category"><option value="">All categories</option>{% for c in categories %}<option {{ 'selected' if args.category==c }}>{{ c }}</option>{% endfor %}</select></label>
+  <button class="btn" type="submit">Apply</button>
+  <a class="btn ghost" href="{{ url_for('inventory') }}">Clear</a>
+</form>
+
+{% if rows %}
+<div class="inv-grid">
+  {% for i in rows %}
+  <div class="inv-card{{ ' off' if i.stock_status == 'Out of Stock' }}">
+    <div class="inv-pic">
+      <a class="inv-piclink" href="{{ url_for('inventory_view', item_id=i.item_id) }}" aria-label="{{ i.item_name }}">
+        {% if i.image_url %}<img src="{{ i.image_url }}" alt="{{ i.item_name }}" loading="lazy">
+        {% else %}<span class="ph" title="No picture">{{ icon('box') }}</span>{% endif %}
+      </a>
+      {% if not readonly %}<a class="inv-menu" href="{{ url_for('inventory_edit', item_id=i.item_id) }}" title="Edit {{ i.item_name }}" aria-label="Edit {{ i.item_name }}">{{ icon('dots') }}</a>{% endif %}
+    </div>
+    <div class="inv-body">
+      {% if not readonly %}<div class="inv-pricerow">
+        <b class="inv-price">{{ (i.selling_price or i.unit_cost)|money }}</b>
+      </div>{% endif %}
+      <a class="inv-namelink" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }}</a>
+      <div class="inv-meta"><span>Category</span><b>{{ i.category }}</b></div>
+      <div class="inv-meta"><span>Stock</span><b>{{ i.quantity }} {{ i.unit }}</b></div>
+      <div class="inv-foot">
+        <span class="inv-badge sev-{{ i.stock_status|slug }}">{{ i.stock_status }}</span>
+        {% if i.expiry_status and i.expiry_status != 'Valid' %}<span class="inv-badge sev-{{ i.expiry_status|slug }}">{{ i.expiry_status }}</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card inv-allbox">
+  <div class="inv-allhead">
+    <h2>ALL STOCK <span class="inv-alln">({{ rows|length }})</span></h2>
+    <button type="button" class="btn sm ghost" id="invAllToggle" aria-expanded="false" aria-controls="invAllList">{{ icon('chevron') }}<span>Full list</span></button>
+  </div>
+  <div class="inv-allwrap" id="invAllList" hidden>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Item</th><th>Category</th><th>Quantity</th><th>Min</th>{% if not readonly %}<th>Unit cost</th><th>Sell price</th><th>Total value</th>{% endif %}<th>Expiration</th><th>Stock</th><th>Expiry</th></tr></thead><tbody>
+    {% for i in rows %}<tr><td>{{ i.item_id }}</td><td><div class="item-cell">{% if i.image_url %}<img class="thumb" src="{{ i.image_url }}" alt="{{ i.item_name }}" loading="lazy">{% else %}<span class="thumb none" title="No picture">{{ icon('box') }}</span>{% endif %}<b>{{ i.item_name }}</b></div></td><td>{{ i.category }}</td><td>{{ i.quantity }} {{ i.unit }}</td><td>{{ i.min_stock }}</td>{% if not readonly %}<td class="nowrap">{{ i.unit_cost|money }}</td><td class="nowrap">{{ i.selling_price|money if i.selling_price else '-' }}</td><td class="nowrap">{{ i.value|money }}</td>{% endif %}
+    <td>{{ i.expiration_date|fmt_date if i.expiration_date else '-' }}</td><td>{{ badge(i.stock_status) }}</td><td>{{ badge(i.expiry_status) }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div>
+</div>
+{% else %}
+<p class="empty">No inventory items match.</p>
+{% endif %}
+{% endblock %}

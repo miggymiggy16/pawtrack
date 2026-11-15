@@ -1,0 +1,59 @@
+{% from '_macros.html' import logo, csrf, icon, theme_toggle %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><script>/* theme: apply saved choice before first paint (default = dark, the original PawTrack look) */
+(function(){var t='dark';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Login | PawTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+</head><body>
+{{ theme_toggle(true) }}
+<div class="auth">
+  <section class="auth-hero">
+    <div class="brand" style="padding-left:0">{{ logo() }}<span><b>PawTrack</b><small>Veterinary Clinic Management System</small></span></div>
+    <h1>Every paw, tracked with care.</h1>
+    <p>Animal records, vaccination reminders, QR identification, clinic inventory and analytics in one place.</p>
+    <div class="pill-row"><span>Animal records</span><span>Vaccinations</span><span>QR tags</span><span>Inventory</span></div>
+    <svg class="paws" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="14" cy="22" rx="3.6" ry="4.6"/><ellipse cx="22" cy="14" rx="3.6" ry="4.8"/><ellipse cx="32" cy="14" rx="3.6" ry="4.8"/><ellipse cx="36" cy="22" rx="3.6" ry="4.6"/><path d="M24 24c-6 0-11 6-11 10 0 3.5 3.5 4 6 3 2-.8 3.500-1.200 5-1.200s3 .4 5 1.200c2.500 1 6 .5 6-3 0-4-5-10-11-10z"/></svg>
+  </section>
+  <section class="auth-card">
+    <div class="auth-box">
+    <div class="auth-tabs" role="tablist" aria-label="Login method">
+      <button type="button" class="auth-tab active" data-auth-tab="password" role="tab" aria-selected="true">Password</button>
+      <button type="button" class="auth-tab" data-auth-tab="face" role="tab" aria-selected="false">Face ID</button>
+    </div>
+    <div id="auth-password" class="auth-panel">
+      <form method="post" novalidate>
+        {{ csrf() }}
+        <h2>Welcome back</h2><p class="muted">Log in to open the PawTrack dashboard.</p>
+        {% with messages = get_flashed_messages(with_categories=true) %}{% for cat, msg in messages %}<div class="flash {{ cat }}" style="margin-bottom:14px"><span>{{ msg }}</span></div>{% endfor %}{% endwith %}
+        <div class="field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required autofocus></div>
+        <div class="field"><label for="password">Password</label>
+          <div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" class="pw-eye" data-hold-pw="password" aria-label="Hold to show password" title="Hold to show password">{{ icon('eye') }}</button></div></div>
+        <button class="btn" type="submit">Log in</button>
+      </form>
+    </div>
+    <div id="auth-face" class="auth-panel" hidden>
+      <h2>Face login</h2>
+      <p class="muted">Look straight at the camera in good light, then click Scan face.</p>
+      <div class="face-camera">
+        <video id="login-face-video" autoplay playsinline muted></video>
+        <div id="login-face-placeholder" class="face-placeholder">Camera is off</div>
+      </div>
+      <div class="face-actions">
+        <button type="button" class="btn ghost" id="login-face-start">Start camera</button>
+        <button type="button" class="btn" id="login-face-scan" disabled>Scan face</button>
+      </div>
+      <div id="login-face-status" class="face-status" role="status" aria-live="polite"></div>
+      <p class="small" style="margin-top:12px"><a href="#" data-auth-tab="password">Use password instead</a></p>
+    </div>
+    </div>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/face.js') }}"></script>
+</body></html>

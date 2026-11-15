@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, icon %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+{% set primary = report.sections|selectattr('primary')|first %}
+{% set ns = namespace(sub=[]) %}
+{% for gtitle, gicon, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
+{% set adv_fields = [] %}{% for f in ['breed','sex','ownership'] %}{% if f in filters %}{% set _ = adv_fields.append(f) %}{% endif %}{% endfor %}
+{% set adv_open = namespace(v=false) %}{% for f in adv_fields %}{% if args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
+
+<div class="page-head no-print"><div><h1>Reports</h1><p>Generate, review, and export clinic reports.</p></div>
+  <span class="rp-hero" aria-hidden="true">{{ icon('chart') }}</span></div>
+
+{# Print-only header #}
+<div class="print-only rp-printhead"><h2>{{ clinic.name }} &middot; {{ report.title }}</h2>
+  <p>{% if clinic.address %}{{ clinic.address }} &middot; {% endif %}Generated {{ generated|fmt_dt }}</p>
+  <p>{% if chips %}Filters: {% for label, value in chips %}{{ label }}: {{ value }}{{ '; ' if not loop.last }}{% endfor %}{% else %}No filters applied - showing all records.{% endif %}</p></div>
+
+{# 1. Report tabs (main + sub) #}
+<section class="card rp-tabs no-print" aria-label="Report type">
+  <nav class="rp-main-tabs" aria-label="Report group">{% for gtitle, gicon, kinds in groups %}
+    <a href="{{ url_for('reports', type=kinds[0]) }}" class="{{ 'active' if kind in kinds }}"{% if kind in kinds %} aria-current="page"{% endif %}>{{ icon(gicon) }}{{ gtitle }}</a>{% endfor %}</nav>
+  <nav class="rp-sub-tabs" aria-label="Report">{% for k in ns.sub %}
+    <a href="{{ url_for('reports', type=k) }}" class="{{ 'active' if kind == k }}"{% if kind == k %} aria-current="page"{% endif %}>{{ tab_labels[k] }}</a>{% endfor %}</nav>
+</section>
+
+{# 2. Filters #}
+<form class="card rp-filters no-print" method="get"><input type="hidden" name="type" value="{{ kind }}">
+  <div class="rp-fhead"><span class="rp-fico">{{ icon('filter') }}</span>
+    <div><h2>Filters</h2><p>{{ hint }}</p></div>
+    {% if adv_fields %}<button type="button" class="rp-adv" data-adv aria-expanded="{{ 'true' if adv_open.v else 'false' }}" aria-controls="rpAdv">Advanced Filters {{ icon('chevron') }}</button>{% endif %}</div>
+  <div class="rp-frow">
+    {% if 'date_from' in filters %}<div class="field wide"><label for="date_from">{{ 'Registration date' if kind=='population' else 'Date administered' }}</label>
+      <div class="rp-date">{{ icon('calendar') }}<input id="date_from" type="date" name="date_from" value="{{ args.date_from }}" aria-label="From date"><span class="rp-arrow" aria-hidden="true">&rarr;</span><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}" aria-label="To date"></div></div>{% endif %}
+    {% if 'category' in filters %}<div class="field"><label for="category">Category</label><select id="category" name="category"><option value="">All</option>{% for c in categories %}<option {{ 'selected' if args.category==c }}>{{ c }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'status' in filters %}<div class="field"><label for="status">Vaccination status</label><select id="status" name="status"><option value="">All</option>{% for s in ['Completed','Upcoming','Due Today','Overdue'] %}<option {{ 'selected' if args.status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'stock_status' in filters %}<div class="field"><label for="stock_status">Stock status</label><select id="stock_status" name="stock_status"><option value="">All</option>{% for s in ['In Stock','Low Stock','Out of Stock'] %}<option {{ 'selected' if args.stock_status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'exp_status' in filters %}<div class="field"><label for="exp_status">Expiration status</label><select id="exp_status" name="exp_status"><option value="">All</option>{% for s in ['Valid','Expiring Soon','Expired'] %}<option {{ 'selected' if args.exp_status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'species' in filters %}<div class="field"><label for="species">Species</label><select id="species" name="species"><option value="">All</option>{% for s in species %}<option {{ 'selected' if args.species==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'vaccine' in filters %}<div class="field"><label for="vaccine">Vaccine name</label><select id="vaccine" name="vaccine"><option value="">All</option>{% for v in vaccines %}<option {{ 'selected' if args.vaccine==v }}>{{ v }}</option>{% endfor %}</select></div>{% endif %}
+    <div class="rp-fact"><a class="btn ghost rp-reset" href="{{ url_for('reports', type=kind) }}">{{ icon('reset') }}Reset</a><button class="btn" type="submit">{{ icon('filter') }}Apply Filters</button></div>
+  </div>
+  {% if adv_fields %}<div class="rp-adv-panel" id="rpAdv" {{ '' if adv_open.v else 'hidden' }}>
+    {% if 'breed' in filters %}<div class="field"><label for="breed">Breed</label><input id="breed" name="breed" value="{{ args.breed }}" placeholder="Any breed"></div>{% endif %}
+    {% if 'sex' in filters %}<div class="field"><label for="sex">Sex</label><select id="sex" name="sex"><option value="">All</option>{% for s in ['Male','Female','Unknown'] %}<option {{ 'selected' if args.sex==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+    {% if 'ownership' in filters %}<div class="field"><label for="ownership">Ownership</label><select id="ownership" name="ownership"><option value="">All</option>{% for s in ['Owned','Stray'] %}<option {{ 'selected' if args.ownership==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+  </div>{% endif %}
+</form>
+
+{# 3. Summary cards #}
+<div class="rp-stats" aria-label="Report summary">{% for s in report.summary %}
+  <div class="rp-stat {{ s.tone }}"><span class="rp-sico">{{ icon(s.icon) }}</span><div><span class="l">{{ s.label }}</span><span class="n">{{ s.value }}</span></div></div>{% endfor %}
+</div>
+
+{# 4. Records table #}
+<section class="card rp-records">
+  <div class="rp-rhead"><h2>{{ primary.title }}</h2><span class="rp-count" id="rpCount">{{ primary.rows|length }} matching record{{ '' if primary.rows|length == 1 else 's' }}</span>
+    <div class="rp-tools no-print">
+      <label class="rp-search"><span class="sr-only" style="position:absolute;left:-9999px">Search records</span><input id="rpSearch" type="search" placeholder="Search records..." autocomplete="off">{{ icon('search') }}</label>
+      <a class="rp-tbtn" href="{{ url_for('report_export', format='csv', **dict(args, type=kind)) }}">{{ icon('file') }}Export CSV</a>
+      <a class="rp-tbtn" href="{{ url_for('report_export', format='pdf', **dict(args, type=kind)) }}">{{ icon('file') }}Export PDF</a>
+      <button class="rp-tbtn" type="button" data-print>{{ icon('printer') }}Print</button>
+    </div></div>
+  {% if primary.rows %}
+  <div class="table-wrap"><table class="rp-table" id="rpTable"><thead><tr>{% for h in primary.headers %}<th>{{ h }}</th>{% endfor %}<th class="act"><span class="sr-only" style="position:absolute;left:-9999px">View</span></th></tr></thead>
+    <tbody>{% for row in primary.rows %}{% set m = primary.meta[loop.index0] %}<tr data-search="{{ m.search }}">
+      {% for c in row %}{% set h = primary.headers[loop.index0]|lower %}<td>{% if 'status' in h or h == 'ownership' %}{{ badge(c) }}{% else %}{{ c }}{% endif %}</td>{% endfor %}
+      <td class="act"><a class="rp-eye" href="{{ m.href }}" title="View details" aria-label="View details for {{ row[0] }}">{{ icon('eye') }}</a></td></tr>{% endfor %}</tbody></table></div>
+  <div class="rp-foot no-print"><span class="small muted" id="rpInfo"></span>
+    <div class="rp-pager" id="rpPager"></div></div>
+  {% else %}<p class="empty">No records match the selected filters.</p>{% endif %}
+</section>
+
+{# 5. Extra breakdown tables (population breakdowns, low / expired stock ...) #}
+{% set extra = [] %}{% for sec in report.sections %}{% if not sec.primary and sec.title != 'Summary' %}{% set _ = extra.append(sec) %}{% endif %}{% endfor %}
+{% if extra %}<div class="rp-break">{% for sec in extra %}
+  <section class="card {{ 'full' if sec.headers|length > 4 }}"><h3>{{ sec.title }}<span class="count rp-count">{{ sec.rows|length }} row{{ '' if sec.rows|length == 1 else 's' }}</span></h3>
+    {% if sec.rows %}<div class="table-wrap"><table style="min-width:0"><thead><tr>{% for h in sec.headers %}<th>{{ h }}</th>{% endfor %}</tr></thead><tbody>{% for row in sec.rows %}<tr>{% for c in row %}{% set h = sec.headers[loop.index0]|lower %}<td>{% if 'status' in h %}{{ badge(c) }}{% else %}{{ c }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
+    {% else %}<p class="empty">Nothing to show here.</p>{% endif %}</section>{% endfor %}</div>{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  // Advanced filters toggle
+  const adv = document.querySelector('[data-adv]'), panel = document.getElementById('rpAdv');
+  if (adv && panel) adv.addEventListener('click', () => {
+    const open = adv.getAttribute('aria-expanded') !== 'true';
+    adv.setAttribute('aria-expanded', open); panel.hidden = !open;
+  });
+
+  // Search + pagination of the records table (all in the browser; exports always include every matching record)
+  const table = document.getElementById('rpTable'); if (!table) return;
+  const rows = Array.from(table.tBodies[0].rows), pager = document.getElementById('rpPager'),
+        info = document.getElementById('rpInfo'), count = document.getElementById('rpCount'), box = document.getElementById('rpSearch');
+  rows.forEach(r => r.dataset.all = (r.dataset.search + ' ' + r.textContent).toLowerCase().replace(/\s+/g, ' '));
+  let page = 1, size = 10, term = '';
+  const match = () => rows.filter(r => !term || r.dataset.all.includes(term));
+
+  function btn(label, on, opts = {}) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = label;
+    if (opts.active) b.classList.add('active'); if (opts.disabled) b.disabled = true;
+    if (opts.aria) b.setAttribute('aria-label', opts.aria); b.addEventListener('click', on); return b;
+  }
+  function render() {
+    const f = match(), pages = Math.max(1, Math.ceil(f.length / size)); page = Math.min(page, pages);
+    const start = (page - 1) * size; rows.forEach(r => r.hidden = true);
+    f.slice(start, start + size).forEach(r => r.hidden = false);
+    count.textContent = f.length + ' matching record' + (f.length === 1 ? '' : 's');
+    info.textContent = f.length ? 'Showing ' + (start + 1) + '-' + Math.min(start + size, f.length) + ' of ' + f.length + ' record' + (f.length === 1 ? '' : 's') : 'No matching records';
+    pager.textContent = '';
+    if (pages > 1) {
+      pager.append(btn('\u2039', () => { page--; render(); }, {disabled: page === 1, aria: 'Previous page'}));
+      for (let p = 1; p <= pages; p++) {
+        if (pages > 7 && p !== 1 && p !== pages && Math.abs(p - page) > 1) { if (p === 2 || p === pages - 1) { const d = document.createElement('span'); d.textContent = '\u2026'; d.className = 'muted'; pager.append(d); } continue; }
+        pager.append(btn(p, () => { page = p; render(); }, {active: p === page, aria: 'Page ' + p}));
+      }
+      pager.append(btn('\u203A', () => { page++; render(); }, {disabled: page === pages, aria: 'Next page'}));
+    }
+    if (rows.length > 10) {
+      const sel = document.createElement('select'); sel.setAttribute('aria-label', 'Rows per page');
+      [10, 25, 50, 100].forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n + ' / page'; o.selected = n === size; sel.append(o); });
+      sel.addEventListener('change', () => { size = +sel.value; page = 1; render(); }); pager.append(sel);
+    }
+  }
+  box.addEventListener('input', () => { term = box.value.trim().toLowerCase(); page = 1; render(); });
+  window.addEventListener('beforeprint', () => { const f = match(); rows.forEach(r => r.hidden = !f.includes(r)); });
+  window.addEventListener('afterprint', render);
+  render();
+})();
+</script>
+{% endblock %}

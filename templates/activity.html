@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon %}
+{% block title %}Activity Logs{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Activity logs</h1><p>Animal registrations, vaccination entries, stock transactions and emails, newest first. Older records saved before user tracking show "Not recorded".</p></div></div>
+<form class="card filters" method="get" role="search"><div class="field"><label for="q">Search</label><input id="q" name="q" value="{{ q }}" placeholder="User, activity, animal, vaccine or reference"></div>
+  <div class="actions"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('activity_log') }}">Clear</a></div></form>
+<div class="card">{% if rows %}<p class="dnote" style="margin-top:0">Showing {{ rows|length }} of {{ total }} entries.</p>
+  <div class="table-wrap"><table><thead><tr><th>Date and time</th><th>User</th><th>Activity</th><th>Related record</th><th>Reference</th></tr></thead><tbody>
+  {% for e in rows %}<tr><td class="nowrap">{{ e.when|fmt_dt }}</td><td>{{ e.user or 'Not recorded' }}</td><td>{{ e.action }}</td><td>{% if e.url %}<a href="{{ e.url }}">{{ e.subject }}</a>{% else %}{{ e.subject }}{% endif %}</td><td class="mono-ref">{{ e.ref }}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<p class="empty">No activity matches.</p>{% endif %}</div>
+{% endblock %}

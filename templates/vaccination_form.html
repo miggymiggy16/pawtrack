@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf %}
+{% block title %}{{ 'Edit' if editing else 'Add' }} vaccination{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Edit vaccination' if editing else 'Add vaccination' }}</h1><p>The status is calculated automatically from the next due date.</p></div></div>
+<form class="card" method="post" novalidate>{{ csrf() }}{% if not editing %}<input type="hidden" name="form_token" value="{{ form.form_token }}">{% endif %}
+  <div class="form-grid">
+    <div class="field full"><label for="animal_id">Animal <span class="req">*</span></label>
+      <select id="animal_id" name="animal_id" required data-animal-search><option value="">Choose an animal...</option>
+      {% for a in animals %}<option value="{{ a.animal_id }}" data-name="{{ a.animal_name }}" data-species="{{ a.species }}" data-breed="{{ a.breed or '' }}" data-owner="{{ a.owner_name if a.ownership_status == 'Owned' else 'Stray (no owner)' }}" {{ 'selected' if form.animal_id==a.animal_id }}>{{ a.animal_id }} - {{ a.animal_name }} ({{ a.species }})</option>{% endfor %}</select>
+      <small>Type an Animal ID (e.g. PT-0003) or the animal's name, then pick from the list.</small></div>
+    <div class="field"><label for="vaccine_name">Vaccine name <span class="req">*</span></label><input id="vaccine_name" name="vaccine_name" list="vlist" value="{{ form.vaccine_name }}" required><datalist id="vlist">{% for v in suggestions %}<option value="{{ v }}">{% endfor %}</datalist></div>
+    <div class="field"><label for="date_administered">Date administered <span class="req">*</span></label><input id="date_administered" name="date_administered" type="date" max="{{ today }}" value="{{ form.date_administered }}" required></div>
+    <div class="field"><label for="next_due_date">Next due date</label><input id="next_due_date" name="next_due_date" type="date" value="{{ form.next_due_date }}"><small>Leave empty if no booster is needed.</small></div>
+    <div class="field"><label for="inventory_item_id">Vaccine stock used</label>
+      <select id="inventory_item_id" name="inventory_item_id" data-stock-link><option value="">Do not deduct from inventory</option>
+      {% for i in stock_items %}<option value="{{ i.item_id }}" data-name="{{ i.item_name }}" {{ 'selected' if form.inventory_item_id==i.item_id }} {{ 'disabled' if not i.usable }}>{{ i.item_name }} &mdash; {{ i.quantity }} {{ i.unit }}{% if i.expiry_status=='Expired' %} (expired){% elif i.quantity<=0 %} (out of stock){% elif i.expiry_status=='Expiring Soon' %} (expiring soon){% endif %}</option>{% endfor %}</select>
+      <small>{% if editing and form.inventory_item_id and form.quantity_used %}Currently deducted: {{ form.quantity_used }} from this record. Changing it adjusts stock automatically (no double deduction).{% else %}Choose the vaccine used so the dose is deducted once when you save. Leave empty for old or outside records.{% endif %}</small></div>
+    <div class="field"><label for="quantity_used">Quantity used</label><input id="quantity_used" name="quantity_used" type="number" min="1" max="1000" step="1" value="{{ form.quantity_used if form.quantity_used else 1 }}"><small>Units deducted from stock (usually 1).</small></div>
+    <div class="field full"><label for="notes">Notes</label><textarea id="notes" name="notes">{{ form.notes }}</textarea></div>
+  </div>
+  <div class="check"><input type="checkbox" id="email_owner" name="email_owner" value="1"><label for="email_owner">Email the owner about this update (records the result in Notifications)</label></div>
+  <div class="actions"><button class="btn" type="submit">{{ 'Save changes' if editing else 'Save vaccination' }}</button><a class="btn ghost" href="{{ url_for('vaccinations') }}">Cancel</a></div>
+</form>
+{% endblock %}

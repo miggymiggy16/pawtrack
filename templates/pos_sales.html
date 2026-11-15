@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}My sales{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My sales</h1><p>Your own sales only. Reprint any receipt from here.</p></div><a class="btn" href="{{ url_for('pos_screen') }}">{{ icon('cart') }}Back to POS</a></div>
+<form class="card filters" method="get"><div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+  <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+  <div class="field"><label for="q">Search</label><input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer or item"></div>
+  <div class="actions"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('pos_my_sales') }}">Today</a></div></form>
+<section class="kpis k4"><div class="kpi ok"><span class="kl">Sales</span><span class="kpi-n">{{ summary.count }}</span></div>
+  <div class="kpi"><span class="kl">Total</span><span class="kpi-n sm">{{ summary.total|money }}</span></div>
+  <div class="kpi"><span class="kl">Items sold</span><span class="kpi-n">{{ summary.units }}</span></div>
+  <div class="kpi"><span class="kl">Cash / other</span><span class="kpi-n sm">{% for m, v in summary.by_payment %}<small style="display:block">{{ m }}: {{ v|money }}</small>{% else %}-{% endfor %}</span></div></section>
+<div class="card">{% if rows %}<div class="table-wrap"><table><thead><tr><th>Sale no.</th><th>Date and time</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody>
+{% for s in rows %}<tr><td class="mono-ref">{{ s.sale_id }}</td><td class="nowrap">{{ s.datetime|fmt_dt }}</td><td>{{ s.customer_name or '-' }}</td><td>{{ s['items']|sum(attribute='qty') }}</td><td class="nowrap">{{ s.total|money }}</td><td>{{ s.payment_method }}</td><td>{{ s.status }}</td><td><a class="btn sm ghost" href="{{ url_for('sale_receipt', sale_id=s.sale_id) }}">Receipt</a></td></tr>{% endfor %}</tbody></table></div>
+{% if total > rows|length %}<p class="dnote">Showing the latest {{ rows|length }} of {{ total }}. Narrow the dates to see the rest.</p>{% endif %}
+{% else %}<p class="empty">No sales in this period.</p>{% endif %}</div>
+{% endblock %}
