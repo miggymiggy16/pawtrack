@@ -7,7 +7,8 @@
 {{ theme_toggle(true) }}
 <div class="public">
   <div class="brand" style="justify-content:center">{{ logo() }}<span><b>PawTrack</b><small>Animal information</small></span></div>
-  <div class="hero"><div class="ring">{{ a.animal_name[0]|upper }}</div><h1 style="margin:0">{{ a.animal_name }}</h1><p class="muted" style="margin:0">{{ a.animal_id }}</p></div>
+  {% set photo = animal_photo_url(a) %}
+  <div class="hero">{% if photo %}<div class="ring has-photo"><img src="{{ photo }}" alt="Photo of {{ a.animal_name }}"></div>{% else %}<div class="ring">{{ a.animal_name[0]|upper }}</div>{% endif %}<h1 style="margin:0">{{ a.animal_name }}</h1><p class="muted" style="margin:0">{{ a.animal_id }}</p></div>
   <section class="card"><dl class="kv">
     <dt>Species</dt><dd>{{ a.species }}</dd><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd><dt>Sex</dt><dd>{{ a.sex }}</dd>
     <dt>Ownership</dt><dd>{{ badge(a.ownership_status) }}</dd><dt>Vaccination</dt><dd>{{ badge(info.status) }}</dd>
