@@ -89,6 +89,6 @@ SAMPLE_SERVICES = [("Consultation", 350), ("Deworming", 250), ("Nail trimming", 
                    ("Grooming (small pet)", 400)]
 
 # ---------------------------------------------------------------------------
-# MySQL configuration (blank DB_NAME = use data/*.json files)
+# MySQL/MariaDB (required - the database is the only store)
 # ---------------------------------------------------------------------------
 DB_NAME = os.getenv("DB_NAME", "").strip()

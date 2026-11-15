@@ -13,9 +13,13 @@ the UI freely without touching anything live.
 - **Python 3.13** from <https://www.python.org/downloads/> (during install,
   tick *"Add python.exe to PATH"*)
 - **Git** from <https://git-scm.com/download/win>
-- *(Optional, only if you want MySQL instead of the built-in file storage)*
-  **XAMPP** (MariaDB) — you can skip this entirely, see 3.2.
+- **MariaDB/MySQL** — easiest: **XAMPP** from <https://www.apachefriends.org/>
+  (install everything, then start the **MySQL** service in the XAMPP Control
+  Panel — default port 3306, user `root`, no password). Any other MySQL 8 or
+  MariaDB 10.6+ server works too.
 - Your editor of choice (VS Code is recommended)
+
+*(PawTrack stores everything in the database - there is no file storage anymore.)*
 
 ### 1.2 Clone and enter the project
 ```powershell
@@ -61,6 +65,8 @@ copy .env.example .env
 ```
 The default works out of the box for local development. **Do not** put real
 credentials into `.env`, and **never commit it** — it's already in `.gitignore`.
+Make sure **MySQL is running** before the first launch (XAMPP Control Panel
+-> Start next to MySQL).
 
 ### 1.5 Run it
 ```powershell
@@ -101,27 +107,25 @@ dark values instead of hard-coding white/black.
 
 ---
 
-## 3. Data: two ways to run
+## 3. Data: MySQL only
 
-### 3.1 File storage (default, recommended for UI work)
-`.env` with `DB_NAME` empty. The app reads/writes `data/*.json` and seeds
-sample inventory, vaccinations and default accounts. Your changes never
-touch the live database.
+PawTrack stores **everything** in a MySQL/MariaDB database — there is no
+file storage anymore. On the first run PawTrack creates the database
+`pawtrack`, the tables, the default accounts and the sample data
+**automatically** (sample pictures included). Your data stays on your own
+machine, completely separate from the production database.
 
-> **Why your clone has no pictures or animals from the live clinic:**
-> by design, the repository contains **no** runtime data — no uploaded
-> photos (`static/uploads/`), no `data/*.json`, no `certs/`, no `.env`.
-> On your machine the app seeds its own sample data (inventory items have
-> no photos and show the "no picture" box). That is intentional: live
-> clinic media belongs on the production PC only. If you specifically need
-> the same demo images as the production PC, ask the project owner for a
-> private ZIP of `static\uploads\inventory\` — do **not** commit photos
-> to the repo.
+Setup: start MySQL (XAMPP), then run `python app.py`. The default `.env`
+is already set to `DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_USER=root`,
+`DB_PASSWORD=` (blank suits a default XAMPP install) and `DB_NAME=pawtrack`,
+with `DB_AUTO_CREATE=True`.
 
-### 3.2 MySQL/MariaDB (same as production)
-Run MariaDB (XAMPP), then in `.env`: `DB_NAME=pawtrack`
-(`DB_AUTO_CREATE=True` creates the schema with no manual steps).
-Use this only if you want to test against a database like production.
+> **Why your clone has no data from the live clinic:** by design, the
+> repository contains **no** runtime data — no uploaded photos from the
+> production PC (`static/uploads/` contains only the committed demo
+> pictures), no database. Everything you create on your machine stays yours.
+> If the app cannot connect to MySQL, it stops at startup and prints exactly
+> what to check in `.env` and the XAMPP panel - read the message first.
 
 ---
 
@@ -148,8 +152,7 @@ compare: `ui/dashboard-refresh` → open it. The project owner reviews and merge
 ### Rules that keep the project mergeable
 - Work **only inside `templates/` and `static/`** if you own the UI. Don't
   edit `pawtrack/` Python files, `.env`, or root config unless you coordinated.
-- Don't commit: `.env`, `venv/`, `data/*.json`, `certs/`, `static/qr/*.png`,
-  uploaded photos — `.gitignore` covers all of them.
+- Don't commit: `.env`, `venv/`, `data/*.json`, `certs/`, `static/qr/*.png` — `.gitignore` covers all of them. (The committed sample pictures in `static/uploads/` are part of the repo on purpose — please keep them.)
 - Keep commits small and descriptive (`ui: ...`, `feat: ...`, `fix: ...`).
 - Never push passwords, tokens, or API keys.
 - Delete your feature branch after merge.
@@ -178,3 +181,6 @@ production host handles all of that. Your side of the work is done at the merge.
 | Templates unchanged | Ctrl+F5 to bypass browser cache |
 | `insightface` won't install | That's fine - skip it. The app runs without it; only face login is unavailable. Run `pip install -r requirements-face.txt` only if you want face features. |
 | Port 5000 in use | Another app is on it; stop it or set `PAWTRACK_PORT=5050` in `.env` |
+| `[PawTrack] DATABASE ERROR: could not connect to MySQL/MariaDB` | MySQL isn't running or `.env` points elsewhere. Start it in the XAMPP Control Panel (button next to MySQL), then check `DB_HOST=127.0.0.1`, `DB_PORT=3306`, `DB_USER=root`, `DB_PASSWORD=` and `DB_NAME=pawtrack` in `.env` |
+| `[PawTrack] DATABASE ERROR: DB_NAME is not set in .env` | Your `.env` is blank or empty. Copy `.env.example` to `.env` and fill in the `DB_*` lines as shown there |
+| "It seeded empty animals/inventory?" | It won't - on first start it creates the database and the sample clinic automatically. Delete your local database (`DROP DATABASE pawtrack;`) only if you want a pristine copy, then start the app again |

@@ -1,6 +1,6 @@
 ﻿# PawTrack - Veterinary Clinic Management System
 
-PawTrack is a modern veterinary clinic management system for **animal records, vaccination monitoring, QR identification, inventory, email notifications and business analytics**. It is built with Python, Flask, HTML, CSS, JavaScript, Jinja2 and **MySQL storage** (with an optional JSON-file fallback). The UI is fully responsive on phones, tablets and desktops: **Bootstrap 5.3.3** (grid + utilities, vendored locally in `static/css/bootstrap.min.css` and `static/js/bootstrap.bundle.min.js` so it works offline) is loaded before the PawTrack design system in `static/css/style.css`, which keeps the original look while providing the responsive layout at every screen width.
+PawTrack is a modern veterinary clinic management system for **animal records, vaccination monitoring, QR identification, inventory, email notifications and business analytics**. It is built with Python, Flask, HTML, CSS, JavaScript, Jinja2 and **MySQL/MariaDB storage**. The UI is fully responsive on phones, tablets and desktops: **Bootstrap 5.3.3** (grid + utilities, vendored locally in `static/css/bootstrap.min.css` and `static/js/bootstrap.bundle.min.js` so it works offline) is loaded before the PawTrack design system in `static/css/style.css`, which keeps the original look while providing the responsive layout at every screen width.
 
 > SMS integration is planned for a future version and is not enabled in this version.
 
@@ -257,31 +257,33 @@ then `venv\Scripts\Activate.ps1`. (Or use Command Prompt.)
 
 **Charts are empty or say "need internet".** Chart.js and the web font load from the internet (CDN). Connect to the internet and refresh.
 
-**Data disappeared.** All data is in the `data/` folder (JSON files). Deleting or replacing those files removes records. Back up the folder regularly. A damaged file is renamed `*.corrupt-<time>` and PawTrack starts that file empty.
+**Data disappeared.** All data now lives in the database, not in files. If the MySQL/MariaDB server is not running, or `.env` points at the wrong place, PawTrack refuses to start and prints exactly what to fix (see *How to fix it* in the error message). Back up the database regularly - use phpMyAdmin or `mysqldump -u root pawtrack > pawtrack-backup.sql`. Uploaded photos (`static/uploads/`) and QR images (`static/qr/`) are still files in `static/` - back those up too, or back up the whole folder.
 
 ---
 
 ## 5. How PawTrack works (for BSIT students)
 
-- **Flask and routes.** `app.py` starts the server. The application itself lives in the `pawtrack/` package: `extensions.py` creates the Flask app, `routes/` holds the pages grouped by area (animals, vaccinations, inventory, POS, ...), `services/` holds the business logic (reports, analytics, email, POS, ...), `storage.py` is the only code that reads or writes MySQL / the JSON files, `config.py` keeps the constants, `helpers.py` has the formatting and image helpers, and `security.py` handles logins and permissions. A *route* such as `@app.route("/animals")` is a Python function that runs when a URL is opened. It reads data, then returns a template.
+- **Flask and routes.** `app.py` starts the server. The application itself lives in the `pawtrack/` package: `extensions.py` creates the Flask app, `routes/` holds the pages grouped by area (animals, vaccinations, inventory, POS, ...), `services/` holds the business logic (reports, analytics, email, POS, ...), `storage.py` is the only code that reads or writes the MySQL database, `config.py` keeps the constants, `helpers.py` has the formatting and image helpers, and `security.py` handles logins and permissions. A *route* such as `@app.route("/animals")` is a Python function that runs when a URL is opened. It reads data, then returns a template.
 - **Templates (Jinja2).** Files in `templates/` are HTML with placeholders like `{{ animal.animal_name }}` and loops `{% for %}`. `base.html` holds the sidebar and layout; other pages extend it. `_macros.html` holds reusable pieces (icons, badges).
-- **JSON storage.** Three functions - `load(name)`, `save(name, data)` and `edit(name)` - are the only code that touches `data/*.json`. Writes go to a temp file and then replace the real file, so a crash cannot leave half a file, and a lock keeps threads in this one process apart. JSON is *not* a database: there are no transactions and it does not protect against several PawTrack processes writing at once. It is fine for a school demo and a small clinic.
+- **MySQL database.** Three functions - `load(name)`, `save(name, data)` and `edit(name)` - are the only code that talks to the database. Each save is a real SQL transaction, which protects every clinic record at once, and several processes can share the same database safely. `storage.py` stops the app at startup with a clear message if it cannot reach the database, so PawTrack never silently runs on stale or split data.
 - **Authentication.** Login checks the username and password hash; the user id is stored in a signed Flask session cookie. `@login_required` and `@admin_required` protect routes. Forms carry a CSRF token so other websites cannot submit them for you.
-- **Password hashing.** Passwords are turned into a one-way hash (Werkzeug) with a random salt. Even with the JSON file, the original password cannot be read back. New passwords must be **at least 8 characters** and include **a letter, a number, and a symbol**.
+- **Password hashing.** Passwords are turned into a one-way hash (Werkzeug) with a random salt. Even in the database, the original password cannot be read back. New passwords must be **at least 8 characters** and include **a letter, a number, and a symbol**.
 - **QR codes.** Each animal has a random `qr_token`. The `qrcode` + Pillow libraries draw a PNG of `<base URL>/animal/<token>`. The public route looks up the token and shows only safe fields.
 - **Vaccination status.** `record_status()` compares the next due date with today and the reminder days. `vax_index()` finds the latest record per animal + vaccine; `animal_vax_info()` combines them into the animal's status.
 - **Email.** `send_email()` uses Python's `smtplib` with your `.env` settings. `notify()` sends and always writes a history row (Sent or Failed with the error). The notification check builds a key `record|type|due date` and skips keys already Sent.
 - **Vaccine stock and vaccinations.** `adjust_vaccine_stock(old, new, ...)` compares what a vaccination record had deducted before with what it should deduct now and applies only the difference, after checking everything first. The record stores `inventory_item_id` and `quantity_used`; the stock history row stores `vaccination_id`. A hidden `form_token` stops a repeated form from being recorded twice.
-- **Inventory.** Quantity lives in `inventory.json`. Stock In / Out / Adjustment change it and append a row to `inventory_transactions.json` holding quantity before, after and the change, so the history always matches reality. Stock Out is refused if it would go below zero.
+- **Inventory.** Quantity lives in the database (`inventory`). Stock In / Out / Adjustment change it and append a row to `inventory_transactions` holding quantity before, after and the change, so the history always matches reality. Stock Out is refused if it would go below zero.
 - **Analytics.** `analytics_data()` counts and groups the real records; the page gives that data to Chart.js, which draws the charts in the browser.
 - **Reports and exports.** `build_report()` applies the filters and returns sections of rows. The same result is shown on screen, written to CSV (`csv` module) or PDF (ReportLab), so exports always match what you see.
 
 ## 6. MySQL database
 
-PawTrack stores its data in MySQL when `DB_NAME` is set in `.env`. If `DB_NAME` is blank it keeps using the `data/*.json` files.
+PawTrack stores **all** data in MySQL/MariaDB (an older install used `data/*.json` files; that mode was removed). The database is required: the app stops at startup with a readable error if it cannot connect.
+
+**Every fresh install seeds itself.** With `DB_AUTO_CREATE=True`, PawTrack creates the database and tables, first-run accounts and sample data automatically. Sample pictures come along too - fresh installs will already show them.
 
 **Setup**
-1. Install MySQL 8 (or MariaDB 10.6+) and make sure the server is running.
+1. Install MySQL 8 (or MariaDB 10.6+; XAMPP is easiest on Windows) and make sure the server is running.
 2. `pip install -r requirements.txt` (adds PyMySQL).
 3. In `.env` set `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (see `.env.example`).
 4. Run `python app.py`. With `DB_AUTO_CREATE=True` PawTrack creates the database and tables itself. To do it by hand instead, run `schema.sql` in MySQL (`mysql -u root -p < schema.sql`) and set `DB_AUTO_CREATE=False`.
