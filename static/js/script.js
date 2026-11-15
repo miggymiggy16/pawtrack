@@ -253,6 +253,27 @@ function pawRedrawCharts() {
   });
 })();
 
+/* ---------- Drop-in file zone: dropping a picture selects it like the picker would ---------- */
+(function () {
+  const dz = document.querySelector('.dropzone');
+  const file = document.getElementById('image') || document.getElementById('photo');
+  if (!dz || !file) return;
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); dz.classList.add('drag');
+  }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+    e.preventDefault(); e.stopPropagation(); dz.classList.remove('drag');
+  }));
+  dz.addEventListener('drop', e => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (!f) return;
+    const dt = new DataTransfer();
+    dt.items.add(f);
+    file.files = dt.files;
+    file.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+})();
+
 /* ---------- Inventory: show vaccine-only fields only for the Vaccines category ---------- */
 (function () {
   const cat = document.getElementById('category');

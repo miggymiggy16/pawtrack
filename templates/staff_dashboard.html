@@ -9,7 +9,7 @@
   <span class="due due-{{ tone }}">{% if r.days < 0 %}{{ -r.days }}d late{% elif r.days == 0 %}Today{% else %}in {{ r.days }}d{% endif %}</span>
   <a class="btn sm" href="{{ url_for('vaccination_new', animal_id=r.animal_id) }}">Record</a></li>{% endfor %}</ul>{% endmacro %}
 
-<div class="crumb">PawTrack <i>/</i> <b>Overview</b></div>
+
 <div class="page-head"><div><h1>Overview</h1><p class="mono-s">{{ today|fmt_date }}</p></div>
   <div class="actions"><a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div></div>
 {% if problems %}<div class="notice warn" role="alert">Some data could not be loaded ({{ problems|join(', ') }}).</div>{% endif %}

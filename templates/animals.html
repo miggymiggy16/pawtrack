@@ -58,16 +58,13 @@
       <h2>Search and filter</h2>
       {% if args.ownership %}<input type="hidden" name="ownership" value="{{ args.ownership }}">{% endif %}
       <div class="filters">
-        <div class="field"><label for="animal_id">Animal ID</label><input id="animal_id" name="animal_id" value="{{ args.animal_id }}" placeholder="PT-0001"></div>
-        <div class="field"><label for="name">Name</label><input id="name" name="name" value="{{ args.name }}"></div>
+        <div class="field"><label for="q">Search</label><input id="q" name="q" value="{{ args.q }}" placeholder="ID, name or breed" autofocus></div>
         <div class="field"><label for="species">Species</label><select id="species" name="species"><option value="">All</option>{% for s in species %}<option {{ 'selected' if args.species==s }}>{{ s }}</option>{% endfor %}</select></div>
-        <div class="field"><label for="breed">Breed</label><input id="breed" name="breed" value="{{ args.breed }}"></div>
         <div class="field"><label for="status">Vaccination status</label><select id="status" name="status"><option value="">All</option>
           <option value="vaccinated" {{ 'selected' if args.status=='vaccinated' }}>Vaccinated (up to date)</option>
           <option value="unvaccinated" {{ 'selected' if args.status=='unvaccinated' }}>Unvaccinated (none or overdue)</option>
           {% for s in ['Upcoming','Due Today','Overdue','No Record'] %}<option {{ 'selected' if args.status==s }}>{{ s }}</option>{% endfor %}</select></div>
       </div>
-      <div class="filter-actions"><a class="btn ghost" href="{{ url_for('animals_list') }}">Clear</a><button class="btn" type="submit">Apply filters</button></div>
     </form>
 
     <section class="card ar-list">
@@ -93,16 +90,60 @@
 {% block scripts %}
 <script>
 (function () {
-  const rows = document.querySelectorAll('.ar-row'), panels = document.querySelectorAll('.ar-panel');
-  function show(id) {
-    panels.forEach(p => p.hidden = p.dataset.panel !== id);
-    rows.forEach(r => r.classList.toggle('selected', r.dataset.select === id));
-    if (window.matchMedia('(max-width:1100px)').matches) document.querySelector('.ar-detail').scrollIntoView({behavior: 'smooth', block: 'start'});
+  var head = document.querySelector('.page-head');
+  var layout = document.querySelector('.ar-layout');
+  if (!layout) return;
+  var form = layout.querySelector('.ar-filters');
+  var debounce = null;
+
+  function bindRows() {
+    const rows = layout.querySelectorAll('.ar-row'), panels = layout.querySelectorAll('.ar-panel');
+    function show(id) {
+      panels.forEach(p => p.hidden = p.dataset.panel !== id);
+      rows.forEach(r => r.classList.toggle('selected', r.dataset.select === id));
+      if (window.matchMedia('(max-width:1100px)').matches) layout.querySelector('.ar-detail').scrollIntoView({behavior: 'smooth', block: 'start'});
+    }
+    rows.forEach(r => {
+      r.addEventListener('click', e => { if (!e.target.closest('a')) show(r.dataset.select); });
+      r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(r.dataset.select); } });
+    });
   }
-  rows.forEach(r => {
-    r.addEventListener('click', e => { if (!e.target.closest('a')) show(r.dataset.select); });
-    r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(r.dataset.select); } });
-  });
+
+  function bindFilters() {
+    form.querySelector('input[name="q"]').addEventListener('input', scheduleReload);
+    form.querySelectorAll('select').forEach(s => s.addEventListener('change', scheduleReload));
+  }
+
+  function scheduleReload() {
+    clearTimeout(debounce);
+    debounce = setTimeout(reload, 350);
+  }
+
+  function reload() {
+    const url = window.location.pathname + '?' + new URLSearchParams(new FormData(form)).toString();
+    fetch(url, { headers: { 'X-Requested-With': 'fetch' } })
+      .then(r => r.text())
+      .then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const freshLayout = doc.querySelector('.ar-layout');
+        const freshHead = doc.querySelector('.page-head');
+        if (!freshLayout) { window.location = url; return; }   // safety: fall back to plain navigation
+        if (head && freshHead) head.replaceWith(freshHead);
+        layout.replaceWith(freshLayout);
+        layout = document.querySelector('.ar-layout');
+        head = document.querySelector('.page-head');
+        form = layout.querySelector('.ar-filters');
+        history.replaceState(null, '', url);
+        bindRows();
+        bindFilters();
+        const q = form.querySelector('input[name="q"]');
+        if (q) { const n = q.value.length; q.focus(); q.setSelectionRange(n, n); }
+      })
+      .catch(function () { /* keep current view on network hiccup */ });
+  }
+
+  bindRows();
+  bindFilters();
 })();
 </script>
 {% endblock %}

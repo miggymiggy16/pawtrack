@@ -63,21 +63,17 @@ ANIMALS_PER_PAGE = 12
 @permission_required("animals.view")
 def animals_list():
     args = {k: request.args.get(k, "").strip() for k in
-            ("q", "animal_id", "name", "species", "breed", "status", "ownership")}
+            ("q", "species", "status", "ownership")}
     all_animals = load("animals")
     matches = []                       # every animal that passes the filters except the Owned/Stray tab
     for a in all_animals:
         info = animal_vax_info(a["animal_id"])
         st = info["status"]
-        if args["q"] and args["q"].lower() not in (a["animal_id"] + " " + a["animal_name"]).lower():
-            continue
-        if args["animal_id"] and args["animal_id"].lower() not in a["animal_id"].lower():
-            continue
-        if args["name"] and args["name"].lower() not in a["animal_name"].lower():
-            continue
+        if args["q"]:
+            haystack = (str(a.get("animal_id", "")) + " " + str(a.get("animal_name", "")) + " " + str(a.get("breed") or "")).lower()
+            if args["q"].lower() not in haystack:
+                continue
         if args["species"] and a["species"] != args["species"]:
-            continue
-        if args["breed"] and args["breed"].lower() not in a["breed"].lower():
             continue
         if args["status"] == "vaccinated" and st not in UP_TO_DATE:
             continue

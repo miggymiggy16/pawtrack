@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><script>/* theme: apply saved choice before first paint (default = dark, the original PawTrack look) */
-(function(){var t='dark';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script><meta name="viewport" content="width=device-width, initial-scale=1">
+(function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Login | PawTrack</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">

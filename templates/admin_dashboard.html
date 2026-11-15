@@ -6,7 +6,7 @@
   <div class="hrow"><span class="hl">{{ name }}</span><span class="htrack"><i class="f-{{ tone }}" style="width:{{ [v,100]|min }}%"></i>{% if target %}<u style="left:{{ target }}%"></u>{% endif %}</span><b class="hv">{{ v|round|int }}{{ suffix }}</b></div>{% endfor %}</div>{% endmacro %}
 {% set owned_pct = (cards.owned / cards.animals * 100) if cards.animals else 0 %}
 
-<div class="crumb">PawTrack <i>/</i> <b>Overview</b></div>
+
 <div class="page-head"><div><h1>Overview</h1><p class="mono-s">{{ today|fmt_date }}</p></div>
   <div class="actions">
     <form class="period" method="get" action="{{ url_for('admin_dashboard') }}"><label for="days">Period</label>
