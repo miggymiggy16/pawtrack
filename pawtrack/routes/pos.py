@@ -67,7 +67,8 @@ def pos_my_sales():
         if args[k] and not parse_date(args[k]):
             args[k] = ""
     rows = filter_sales(args, only_cashier=me["username"])
-    return render_template("pos_sales.html", rows=rows[:300], total=len(rows), args=args, summary=sale_summary(rows))
+    return render_template("pos_sales.html", rows=rows[:300], total=len(rows), args=args,
+                           summary=sale_summary(rows), payments=list(PAYMENT_METHODS))
 
 
 @app.route("/pos/receipt/<sale_id>")
