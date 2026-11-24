@@ -294,7 +294,7 @@ PawTrack stores **all** data in MySQL/MariaDB (an older install used `data/*.jso
 
 **Not in the database:** animal photos, product pictures and QR images remain files in `static/`. Back those up with the database.
 
-Routes still call only `load()`, `save()` and `edit()`; the SQL lives in `mysql_store.py`.
+Routes still call only `load()`, `save()` and `edit()`; the SQL lives in `pawtrack/mysql_store.py`.
 
 ## 7. Testing results (honest report)
 

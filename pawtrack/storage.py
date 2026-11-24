@@ -4,7 +4,7 @@ PawTrack - storage layer
 The ONLY place that touches stored data. Every route and service reads/writes
 through load(), save() and edit().
 
-If DB_NAME is set in .env these calls go to MySQL (see mysql_store.py and
+If DB_NAME is set in .env these calls go to MySQL (see pawtrack/mysql_store.py and
 schema.sql) - there is no other store. A lock inside this process serialises
 read-modify-write blocks; each save() is a single database transaction.
 
@@ -43,7 +43,7 @@ def init_mysql():
     database = DB_NAME
     if not database:
         _fatal_mysql("DB_NAME is not set in .env.")
-    from mysql_store import MySQLStore
+    from .mysql_store import MySQLStore
     store = MySQLStore(host=host, port=int(port), user=user,
                        password=os.getenv("DB_PASSWORD", ""), database=database)
     try:
