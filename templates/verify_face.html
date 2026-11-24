@@ -29,7 +29,7 @@
       <li>Ensure your entire face is visible.</li>
       <li>Maintain proper lighting during capture.</li>
     </ul>
-    <p class="small"><a href="{{ url_for('verify_start') }}">Re-upload ID</a> | <button type="button" class="btn ghost" style="padding:2px 8px" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Back</button></p>
+    <p class="small"><a href="{{ url_for('verify_start') }}">Re-upload ID</a> | <button type="button" class="btn ghost" style="padding:2px 8px" onclick="if(window.parent&&window.parent!==window){window.location.href='{{ url_for('verify_cancel') }}';}else{window.location.href='{{ url_for('animals_list') }}';}">Back</button></p>
   </div>
 </div>
 <script>

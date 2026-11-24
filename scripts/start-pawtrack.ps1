@@ -2,7 +2,7 @@
 # Waits for MariaDB to answer on 3306, then starts the app with no console window.
 # Logs app output to pawtrack.log.
 
-Set-Location "C:\Users\Juan Miguel\Documents\test\PawTrack"
+Set-Location "C:\Users\Juan Miguel\Documents\pawtrack backup\PawTrack"
 
 for ($i = 0; $i -lt 90; $i++) {
     $tcp = New-Object System.Net.Sockets.TcpClient
@@ -17,8 +17,8 @@ for ($i = 0; $i -lt 90; $i++) {
 }
 
 if (-not $tcp.Connected) {
-    Add-Content "C:\Users\Juan Miguel\Documents\test\PawTrack\pawtrack.log" `
+    Add-Content "C:\Users\Juan Miguel\Documents\pawtrack backup\PawTrack\pawtrack.log" `
         "$(Get-Date -Format s) MariaDB did not answer on 127.0.0.1:3306; starting anyway"
 }
 
-& .\venv\Scripts\pythonw.exe app.py *>> "C:\Users\Juan Miguel\Documents\test\PawTrack\pawtrack.log"
+& .\venv\Scripts\pythonw.exe app.py *>> "C:\Users\Juan Miguel\Documents\pawtrack backup\PawTrack\pawtrack.log"

@@ -9,7 +9,7 @@
     <span class="flash success" style="display:inline-block">Owner ID verified: {{ verification.full_name }}</span>
   {% else %}
     <span class="flash warning" style="display:inline-block">Owner not verified yet.</span>
-    <button type="button" class="btn ghost" style="margin-left:8px" data-bs-toggle="modal" data-bs-target="#verifyModal" id="openVerifyBtn">Verify Owner ID</button>
+    <button type="button" class="btn ghost" style="margin-left:8px" id="openVerifyBtn">Verify Owner ID</button>
   {% endif %}
 </div>
 {% endif %}
@@ -88,7 +88,7 @@
 
   <div class="form-actions">
     <button class="btn" type="submit">{{ icon('save') }}{{ 'Save changes' if editing else 'Register animal' }}</button>
-    <a class="btn ghost" href="{{ url_for('animal_view', animal_id=form.animal_id) if editing else url_for('animals_list') }}">{{ icon('x') }}Cancel</a>
+    <a class="btn ghost" href="{{ url_for('animal_cancel_register') if not editing else url_for('animal_view', animal_id=form.animal_id) }}">{{ icon('x') }}Cancel</a>
   </div>
 </form>
 
@@ -118,14 +118,18 @@
     overlay.style.display='none';
     if(frame) frame.src='about:blank';
   }
+  function cancelVerify(){
+    if(frame && (window.location.origin)) frame.src='{{ url_for('verify_cancel') }}';
+    closeModal();
+  }
   if(btn) btn.addEventListener('click', openModal);
-  if(closeBtn) closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal(); });
+  if(closeBtn) closeBtn.addEventListener('click', cancelVerify);
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) cancelVerify(); });
   window.addEventListener('message', function(e){
     if(e.data === 'verified'){ closeModal(); window.location.reload(); }
     if(e.data === 'close'){ closeModal(); window.location.reload(); }
   });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') cancelVerify(); });
 })();
 </script>
 {% endblock %}

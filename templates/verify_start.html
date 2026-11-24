@@ -31,7 +31,7 @@
       <button class="btn" type="button" onclick="var f=this.form;if(f){this.disabled=true;this.textContent='Scanning... please wait';f.submit();}">Scan ID</button>
     </form>
     <p class="small muted" style="margin-top:12px">Use a clear, well-lit photo of your ID. The system will extract your details and detect the face on the ID.</p>
-    <p style="margin-top:12px"><button type="button" class="btn ghost" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Back</button></p>
+    <p style="margin-top:12px"><button type="button" class="btn ghost" onclick="if(window.parent&&window.parent!==window){window.location.href='{{ url_for('verify_cancel') }}';}else{window.location.href='{{ url_for('animals_list') }}';}">Back</button></p>
   </div>
 </div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>

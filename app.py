@@ -77,4 +77,4 @@ if __name__ == "__main__":
         if server == "waitress":
             print("[PawTrack] waitress has no TLS support; using the built-in server for HTTPS.")
         # host 0.0.0.0 lets phones on the same Wi-Fi open PawTrack (see README).
-        app.run(host=host, port=port, debug=False, threaded=True, ssl_context=ssl_context)
+        app.run(host=host, port=port, debug=True, threaded=True, ssl_context=ssl_context)

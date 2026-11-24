@@ -20,7 +20,7 @@ from .inventory import add_transaction, expiry_status
 
 
 def pos_catalog():
-    """What the cashier may sell: inventory items that have a selling price, plus active services.
+    """What the cashier may sell: inventory items that have a selling price.
     Cost prices are never included."""
     warn = get_settings()["expiry_warning_days"]
     rows = []
@@ -36,12 +36,7 @@ def pos_catalog():
         rows.append({"kind": "product", "id": it["item_id"], "name": it["item_name"], "category": it["category"],
                      "unit": it["unit"], "price": price, "stock": qty, "state": state,
                      "low": 0 < qty <= it["min_stock"], "image": item_image_url(it) or ""})
-    for sv in load("pos_services"):
-        if sv.get("active", True):
-            rows.append({"kind": "service", "id": sv["service_id"], "name": sv["name"], "category": "Services",
-                         "unit": "service", "price": float(sv["price"]), "stock": None, "state": "ok",
-                         "low": False, "image": ""})
-    rows.sort(key=lambda r: (r["category"] != "Services", r["category"], r["name"].lower()))
+    rows.sort(key=lambda r: (r["category"], r["name"].lower()))
     return rows
 
 
@@ -73,7 +68,7 @@ def create_sale(form, user):
     wanted = {}                                              # (kind, id) -> quantity
     for c in cart:
         qty = c.get("qty") if isinstance(c, dict) else None
-        if not isinstance(c, dict) or c.get("kind") not in ("product", "service") or isinstance(qty, bool) \
+        if not isinstance(c, dict) or c.get("kind") != "product" or isinstance(qty, bool) \
                 or not isinstance(qty, int) or not 1 <= qty <= MAX_SALE_QTY:
             return None, f"Each cart line needs a valid quantity (1 to {MAX_SALE_QTY:,}).", False
         key = (c["kind"], str(c.get("id", "")))
@@ -110,34 +105,24 @@ def create_sale(form, user):
             if not animal:
                 return None, f"Animal {animal_id} was not found. Clear the field or pick a registered animal.", False
         inventory = {i["item_id"]: i for i in load("inventory")}
-        services = {s["service_id"]: s for s in load("pos_services")}
         lines, subtotal, cost_total = [], Decimal("0"), Decimal("0")
         for (kind, cid), qty in wanted.items():
-            if kind == "product":
-                it = inventory.get(cid)
-                try:
-                    price = _q(it.get("selling_price") or 0) if it else Decimal("0")
-                except (InvalidOperation, ValueError):
-                    price = Decimal("0")
-                if not it or price <= 0:
-                    return None, "An item in the cart is no longer for sale. Refresh the page.", False
-                if expiry_status(it) == "Expired":
-                    return None, f"{it['item_name']} expired on {fmt_date(it.get('expiration_date'))} and cannot be sold.", False
-                if it["quantity"] < qty:
-                    return None, f"Not enough stock. {it['item_name']} has only {it['quantity']} {it['unit']} available.", False
-                cost = _q(it.get("unit_cost") or 0)
-                lines.append({"kind": "product", "item_id": cid, "name": it["item_name"], "category": it["category"],
-                              "unit": it["unit"], "qty": qty, "unit_price": float(price),
-                              "line_total": float(price * qty), "unit_cost": float(cost)})
-                cost_total += cost * qty
-            else:
-                sv = services.get(cid)
-                if not sv or not sv.get("active", True):
-                    return None, "A service in the cart is no longer available. Refresh the page.", False
-                price = _q(sv["price"])
-                lines.append({"kind": "service", "item_id": cid, "name": sv["name"], "category": "Services",
-                              "unit": "service", "qty": qty, "unit_price": float(price),
-                              "line_total": float(price * qty), "unit_cost": 0.0})
+            it = inventory.get(cid)
+            try:
+                price = _q(it.get("selling_price") or 0) if it else Decimal("0")
+            except (InvalidOperation, ValueError):
+                price = Decimal("0")
+            if not it or price <= 0:
+                return None, "An item in the cart is no longer for sale. Refresh the page.", False
+            if expiry_status(it) == "Expired":
+                return None, f"{it['item_name']} expired on {fmt_date(it.get('expiration_date'))} and cannot be sold.", False
+            if it["quantity"] < qty:
+                return None, f"Not enough stock. {it['item_name']} has only {it['quantity']} {it['unit']} available.", False
+            cost = _q(it.get("unit_cost") or 0)
+            lines.append({"kind": "product", "item_id": cid, "name": it["item_name"], "category": it["category"],
+                          "unit": it["unit"], "qty": qty, "unit_price": float(price),
+                          "line_total": float(price * qty), "unit_cost": float(cost)})
+            cost_total += cost * qty
             subtotal += price * qty
         if discount > subtotal:
             return None, "The discount cannot be more than the subtotal.", False
@@ -271,17 +256,4 @@ def filter_sales(args, only_cashier=None):
     return rows
 
 
-def service_form(form):
-    """Validate the add/edit service form. Returns (name, price, errors)."""
-    name = form.get("name", "").strip()
-    errors = []
-    if not 2 <= len(name) <= 80:
-        errors.append("Service name must be 2 to 80 characters.")
-    try:
-        price = parse_money(form.get("price", ""))
-        if not Decimal("0") < price <= Decimal("1000000"):
-            raise ValueError
-    except ValueError:
-        price = None
-        errors.append("Price must be more than zero, in pesos with at most 2 decimals, for example 350.00.")
-    return name, price, errors
+

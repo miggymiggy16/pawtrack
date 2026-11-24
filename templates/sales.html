@@ -3,7 +3,7 @@
 {% block title %}Sales (POS){% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>Sales (POS)</h1><p>Every sale the cashier made. {{ 'Void a sale from its receipt page.' if show_profit else 'View only.' }}</p></div>
-  <div class="actions"><a class="btn ghost" href="{{ url_for('sales_export', **args) }}">Export CSV</a><a class="btn ghost" href="{{ url_for('pos_services') }}">{{ icon('tag') }}Services</a></div></div>
+  <div class="actions"><a class="btn ghost" href="{{ url_for('sales_export', **args) }}">Export CSV</a></div></div>
 <form class="card filters" method="get">
   <div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
   <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>

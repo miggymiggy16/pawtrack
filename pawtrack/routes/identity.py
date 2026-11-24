@@ -186,12 +186,15 @@ def verify_info():
             "raw_text": fields.get("raw_text", ""),
             "created_by": (current_user() or {}).get("username", "guest"),
         }
-        vid = save_verification(rec)
-        session["verification_id"] = vid
+        # Do NOT save to the database yet. Keep the record pending in the session;
+        # it is only persisted when the animal registration is actually submitted.
+        session["pending_verification"] = rec
+        session["verification_id"] = None
         flash("Identity verified successfully.", "success")
-        nxt = session.pop("verify_next", None)
-        if nxt:
-            return redirect(url_for(nxt) if nxt in ("animal_new",) else nxt)
+        # Always go to the result page. When verification runs inside the
+        # register-animal iframe, the result page tells the parent to close the
+        # popup and reload the main screen (instead of loading the app in the iframe).
+        session.pop("verify_next", None)
         return redirect(url_for("verify_result"))
     return render_template("verify_info.html", fields=fields,
                            id_type=session.get("verify_id_type"),
@@ -201,18 +204,33 @@ def verify_info():
 
 @app.route("/verify/result", methods=["GET"])
 def verify_result():
-    vid = session.get("verification_id")
-    rec = None
-    if vid:
-        rec = None
-        for v in load("verifications"):
-            if v.get("verification_id") == vid:
-                rec = v
-                break
+    rec = session.get("pending_verification")
+    if not rec:
+        vid = session.get("verification_id")
+        if vid:
+            for v in load("verifications"):
+                if v.get("verification_id") == vid:
+                    rec = v
+                    break
     if not rec:
         flash("No verification record found.", "warning")
         return redirect(url_for("verify_start"))
     return render_template("verify_result.html", rec=rec)
+
+
+@app.route("/verify/cancel", methods=["GET"])
+def verify_cancel():
+    """Exit verification without saving. Clears all in-progress verification state."""
+    for key in ("verification_id", "pending_verification", "verify_next", "verify_id_type",
+                "verify_image_path", "verify_demo_mode", "verify_fields",
+                "verify_id_face_descriptor", "verify_id_face_crop", "verify_face_matched",
+                "verify_captured_descriptor", "verify_match_score"):
+        session.pop(key, None)
+    html = ("<!DOCTYPE html><html><body><script>"
+            "try{window.parent.postMessage('close','*');}catch(e){}"
+            "setTimeout(function(){window.close();},200);"
+            "</script><p>Closing...</p></body></html>")
+    return Response(html, mimetype="text/html")
 
 
 @app.route("/verify/retry", methods=["POST"])

@@ -26,8 +26,7 @@
       <li><b>Status:</b> {{ rec.status if rec else '' }}</li>
     </ul>
     <p class="small muted">Limitation: OCR extraction and facial matching do not guarantee the ID is authentic. This is for demonstration only. Handle facial data and IDs with consent and data-privacy practices.</p>
-    <a class="btn" href="{{ url_for('verify_start') }}">Start new verification</a>
-    <button type="button" class="btn ghost" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Close</button>
+    <button type="button" class="btn" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('verified','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Done</button>
   </div>
 </div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>

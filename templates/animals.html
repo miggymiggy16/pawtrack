@@ -2,6 +2,89 @@
 {% from '_macros.html' import badge, csrf, initial, icon, photo_upload %}
 {% block title %}Animals{% endblock %}
 {% block content %}
+
+<!-- ============ MOBILE-ONLY ANIMALS VIEW ============ -->
+<div class="ma-dash">
+  <div class="ma-body">
+    <div class="ma-title-row">
+      <h1>Animals</h1>
+      <span class="ma-count-pill">{{ icon('paw') }} {{ total }} Registered</span>
+    </div>
+
+    <form class="ma-search" method="get">
+      {% if args.ownership %}<input type="hidden" name="ownership" value="{{ args.ownership }}">{% endif %}
+      {{ icon('search') }}<input name="q" value="{{ args.q }}" placeholder="Search animal name or ID...">
+    </form>
+
+    <nav class="ma-tabs" aria-label="Ownership">
+      <a class="{{ 'active' if not args.ownership }}" href="{{ link(ownership='', page=None) }}">All <span>{{ tab_counts[''] }}</span></a>
+      <a class="{{ 'active' if args.ownership=='Owned' }}" href="{{ link(ownership='Owned', page=None) }}">Owned <span>{{ tab_counts['Owned'] }}</span></a>
+      <a class="{{ 'active' if args.ownership=='Stray' }}" href="{{ link(ownership='Stray', page=None) }}">Stray <span>{{ tab_counts['Stray'] }}</span></a>
+    </nav>
+
+    {% for a in rows %}
+    {% if a.animal_id == selected %}
+    {% set photo = animal_photo_url(a) %}
+    {% set qr = animal_qr_url(a) %}
+    <section class="ma-card">
+      <div class="ma-hero {{ '' if photo else 'nophoto' }}">
+        {% if photo %}<img src="{{ photo }}" alt="Photo of {{ a.animal_name }}">{% else %}<span class="ma-initial">{{ initial(a) }}</span>{% endif %}
+        <div class="ma-hero-text"><h2>{{ a.animal_name }}</h2><span>{{ a.age or 'Age unknown' }}</span></div>
+        {% if qr %}<a class="ma-qr" href="{{ url_for('qr_download', animal_id=a.animal_id) }}" title="Download QR">{{ icon('qr') }}<img src="{{ qr }}" alt="QR for {{ a.animal_name }}"></a>{% endif %}
+      </div>
+
+      <div class="ma-tags"><span class="ma-tag own">{{ a.ownership_status }}</span><span class="ma-tag vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
+
+      <dl class="ma-facts">
+        <div><dt>Animal ID</dt><dd>{{ a.animal_id }}</dd></div>
+        <div><dt>Species</dt><dd>{{ a.species }}</dd></div>
+        <div><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd></div>
+        <div><dt>Sex</dt><dd>{{ a.sex }}</dd></div>
+        <div><dt>Colour</dt><dd>{{ a.color or '-' }}</dd></div>
+        <div><dt>Next vaccination due</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
+      </dl>
+
+      <div class="ma-owner">
+        <span class="ma-owner-label">Owner</span>
+        {% if a.ownership_status == 'Owned' %}
+        <a href="{{ url_for('animal_view', animal_id=a.animal_id) }}" class="ma-owner-row"><span class="ma-ownavatar">{{ (a.owner_name or '?')[0]|upper }}</span><span><b>{{ a.owner_name }}</b>{% if a.owner_mobile %}<small>{{ a.owner_mobile }}</small>{% endif %}</span>{{ icon('chevron') }}</a>
+        {% else %}<p class="ma-muted">Stray - no registered owner</p>{% endif %}
+      </div>
+
+      <div class="ma-actions">
+        <a class="ma-btn primary" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('users') }} View Profile</a>
+        <a class="ma-btn ghost" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }} Edit</a>
+      </div>
+      <div class="ma-actions sub">
+        {{ photo_upload(a, url_for('animals_list', **dict(request.args.to_dict(), selected=a.animal_id)), sm=True) }}
+        <a class="ma-btn ghost" href="{{ url_for('vaccinations', animal_id=a.animal_id) }}">{{ icon('syringe') }} Vaccinations</a>
+        <a class="ma-btn ghost" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">{{ icon('file') }} Print ID</a>
+      </div>
+    </section>
+    {% endif %}
+    {% endfor %}
+
+    {% if rows|length > 1 %}
+    <section class="ma-others">
+      <div class="ma-others-head"><h2>Other Registered Animals</h2><a href="{{ url_for('animals_list') }}">View All →</a></div>
+      <div class="ma-others-list">
+        {% for a in rows if a.animal_id != selected %}
+        <a class="ma-other" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">
+          {% set photo = animal_photo_url(a) %}
+          <span class="ma-othumb">{% if photo %}<img src="{{ photo }}" alt="">{% else %}{{ initial(a) }}{% endif %}</span>
+          <span class="ma-oinfo"><b>{{ a.animal_name }}</b><small>{{ a.animal_id }} &bull; {{ a.species }}{% if a.age %} &bull; {{ a.age }}{% endif %}</small></span>
+          <span class="ma-badge b-{{ a.vax_status|slug }}">{{ a.vax_status }}</span>
+          {{ icon('chevron') }}
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+<!-- ============ /MOBILE-ONLY ANIMALS VIEW ============ -->
+
+<div class="desk-only">
 <div class="page-head"><div><h1>Animals</h1><p>Showing {{ rows|length }} of {{ matched }} matching animals ({{ total }} registered).</p></div>
   <a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a></div>
 
@@ -86,8 +169,80 @@
     </section>
   </div>
 </div>
+</div>
 {% endblock %}
 {% block scripts %}
+<style>
+/* ===== Mobile Animals view — strictly <=700px, desktop untouched ===== */
+.ma-dash{display:none}
+@media(max-width:700px){
+  .desk-only{display:none!important}
+  .ma-dash{display:block;font-family:Poppins,Arial,sans-serif;color:#12233B;background:#F4F7FD;min-height:calc(100vh - 90px)}
+  .ma-body{padding:14px 16px 0}
+  .ma-title-row{display:flex;align-items:center;justify-content:space-between;margin:0 2px 14px}
+  .ma-title-row h1{font-size:2rem;font-weight:800;margin:0;border-bottom:4px solid #1E40AF;display:inline-block;padding-bottom:4px;line-height:1.1}
+  .ma-count-pill{display:inline-flex;align-items:center;gap:6px;background:#DCF3E6;color:#14693F;font-size:.72rem;font-weight:700;padding:8px 12px;border-radius:20px}
+  .ma-count-pill svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2}
+  .ma-search{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:13px 16px;box-shadow:0 3px 12px rgba(11,36,64,.06);margin-bottom:14px}
+  .ma-search svg{width:19px;height:19px;fill:none;stroke:#8794A8;stroke-width:2;flex:none}
+  .ma-search input{border:0;outline:0;background:none;font-size:.9rem;width:100%;color:#12233B}
+  .ma-search input::placeholder{color:#9AA6B2}
+  .ma-tabs{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-bottom:16px;padding-bottom:2px}
+  .ma-tabs::-webkit-scrollbar{display:none}
+  .ma-tabs a{flex:none;text-decoration:none;color:#2E5FD0;font-size:.82rem;font-weight:600;padding:9px 16px;border:1px solid #C9D8F5;border-radius:20px;background:#fff;white-space:nowrap}
+  .ma-tabs a span{color:#8794A8;font-size:.72rem;margin-left:3px}
+  .ma-tabs a.active{background:#0B2440;color:#fff;border-color:#0B2440}
+  .ma-tabs a.active span{color:#BFD0EE}
+  .ma-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(11,36,64,.07);margin-bottom:18px}
+  .ma-hero{position:relative;height:230px;background:#0B2440}
+  .ma-hero img{width:100%;height:100%;object-fit:cover;display:block}
+  .ma-hero.nophoto{display:grid;place-items:center}
+  .ma-initial{font-size:4rem;color:#fff;font-weight:800}
+  .ma-hero-text{position:absolute;left:16px;bottom:16px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+  .ma-hero-text h2{font-size:1.8rem;margin:0;font-weight:800;line-height:1.1}
+  .ma-hero-text span{font-size:.85rem;opacity:.9}
+  .ma-qr{position:absolute;right:14px;bottom:14px;background:#fff;border-radius:10px;padding:6px;display:grid;place-items:center}
+  .ma-qr>svg{display:none}
+  .ma-qr img{width:64px;height:64px;object-fit:contain;display:block}
+  .ma-tags{display:flex;gap:8px;padding:14px 16px 0}
+  .ma-tag{font-size:.72rem;font-weight:700;padding:5px 12px;border-radius:14px;border:1px solid #E2B23C;color:#9A6A0E}
+  .ma-tag.vax{border-color:#E23B4E;color:#C0283A}
+  .ma-tag.vax.st-vaccinated,.ma-tag.vax.st-up-to-date{border-color:#1F9D61;color:#14693F}
+  .ma-facts{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;margin:12px 16px 4px}
+  .ma-facts>div{border-bottom:1px solid #EEF2F8;padding:9px 0}
+  .ma-facts dt{color:#8794A8;font-size:.72rem;margin-bottom:3px}
+  .ma-facts dd{margin:0;font-weight:700;font-size:.9rem;color:#12233B}
+  .ma-owner{padding:12px 16px}
+  .ma-owner-label{color:#8794A8;font-size:.7rem;letter-spacing:.06em;font-weight:700}
+  .ma-owner-row{display:flex;align-items:center;gap:10px;text-decoration:none;color:#12233B;margin-top:6px}
+  .ma-ownavatar{width:38px;height:38px;border-radius:50%;background:#1E40AF;color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+  .ma-owner-row b{display:block;font-size:.88rem}
+  .ma-owner-row small{display:block;color:#8794A8;font-size:.74rem}
+  .ma-owner-row svg{width:18px;height:18px;fill:none;stroke:#1E40AF;stroke-width:2;margin-left:auto}
+  .ma-muted{color:#8794A8;font-size:.82rem;margin:6px 0}
+  .ma-actions{display:flex;gap:10px;padding:0 16px 10px;flex-wrap:wrap}
+  .ma-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:12px;padding:12px 16px;font-size:.82rem;font-weight:700;text-decoration:none;border:1px solid #C9D8F5;background:#fff;color:#1E40AF;flex:1;white-space:nowrap}
+  .ma-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2}
+  .ma-btn.primary{background:#0B2440;color:#fff;border-color:#0B2440;flex:1.4}
+  .ma-actions.sub .ma-btn{flex:1;font-size:.76rem;padding:10px 8px}
+  .ma-actions.sub .btn{padding:10px 8px!important;font-size:.76rem!important;border-radius:12px!important;flex:1}
+  .ma-actions.sub .btn .ico,.ma-actions.sub .btn svg{width:15px!important;height:15px!important}
+  .ma-others{margin-bottom:12px}
+  .ma-others-head{display:flex;justify-content:space-between;align-items:center;margin:0 2px 12px}
+  .ma-others-head h2{font-size:1.05rem;font-weight:800;margin:0}
+  .ma-others-head a{color:#2E5FD0;text-decoration:none;font-size:.8rem;font-weight:700}
+  .ma-others-list{display:flex;flex-direction:column;gap:10px}
+  .ma-other{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:10px 12px;text-decoration:none;color:#12233B;box-shadow:0 3px 12px rgba(11,36,64,.05)}
+  .ma-othumb{width:48px;height:48px;border-radius:10px;overflow:hidden;background:#E4EEFF;color:#1E40AF;display:grid;place-items:center;font-weight:800;flex:none}
+  .ma-othumb img{width:100%;height:100%;object-fit:cover}
+  .ma-oinfo{flex:1;min-width:0}
+  .ma-oinfo b{display:block;font-size:.88rem}
+  .ma-oinfo small{display:block;color:#8794A8;font-size:.72rem}
+  .ma-other>svg{width:16px;height:16px;fill:none;stroke:#8794A8;stroke-width:2;flex:none}
+  .ma-badge{font-size:.66rem;font-weight:700;padding:5px 9px;border-radius:12px;border:1px solid #E23B4E;color:#C0283A;white-space:nowrap}
+  .ma-badge.b-vaccinated,.ma-badge.b-up-to-date{border-color:#1F9D61;color:#14693F}
+}
+</style>
 <script>
 (function () {
   var head = document.querySelector('.page-head');

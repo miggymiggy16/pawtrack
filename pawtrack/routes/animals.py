@@ -59,9 +59,24 @@ def get_animal_or_404(animal_id):
 ANIMALS_PER_PAGE = 12
 
 
+@app.route("/animals/cancel-register")
+@permission_required("animals.create")
+def animal_cancel_register():
+    """Cancel registration: discard any pending/completed owner verification."""
+    for key in ("pending_verification", "verification_id", "verify_next",
+                "verify_id_type", "verify_image_path", "verify_demo_mode",
+                "verify_fields", "verify_id_face_descriptor", "verify_id_face_crop",
+                "verify_face_matched", "verify_captured_descriptor", "verify_match_score"):
+        session.pop(key, None)
+    flash("Registration cancelled.", "info")
+    return redirect(url_for("animals_list"))
+
+
 @app.route("/animals")
 @permission_required("animals.view")
 def animals_list():
+    # Leaving the register page without submitting discards a pending verification.
+    session.pop("pending_verification", None)
     args = {k: request.args.get(k, "").strip() for k in
             ("q", "species", "status", "ownership")}
     all_animals = load("animals")
@@ -108,8 +123,10 @@ def animals_list():
 @permission_required("animals.create")
 def animal_new():
     from ..services.identity import get_verification
-    vid = session.get("verification_id")
-    verification = get_verification(vid) if vid else None
+    verification = session.get("pending_verification")
+    if not verification:
+        vid = session.get("verification_id")
+        verification = get_verification(vid) if vid else None
     form = {"ownership_status": "Owned", "registration_date": date.today().isoformat()}
     if verification:
         form["owner_name"] = verification.get("full_name", "")
@@ -128,6 +145,12 @@ def animal_new():
                 flash(e, "error")
         else:
             form.update({"qr_token": secrets.token_urlsafe(8), "created_at": now_str(), "created_by": current_user()["username"]})
+            # Only persist the ID verification now that registration succeeds.
+            pending = session.pop("pending_verification", None)
+            if pending:
+                from ..services.identity import save_verification
+                vid = save_verification(pending)
+                session["verification_id"] = vid
             with edit("animals") as items:                 # lock held: ID + save are one step
                 form["animal_id"] = issue_animal_id()
                 if img:

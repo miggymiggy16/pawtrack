@@ -66,40 +66,33 @@ def _silence_fd(func, *args, **kwargs):
 
 
 def _load_ocr():
+    """Configure and return pytesseract (lightweight OCR, no heavy ML models)."""
     global _ocr_engine, _ocr_error
     if _ocr_engine is not None:
         return _ocr_engine
     with _ocr_lock:
         if _ocr_engine is not None:
             return _ocr_engine
-        import os
-        os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
-        os.environ.setdefault("GLOG_minloglevel", "2")
-        os.environ.setdefault("OMP_NUM_THREADS", "2")
-        os.environ.setdefault("MKL_NUM_THREADS", "2")
         try:
-            import logging
-            logging.getLogger().setLevel(logging.WARNING)
-            for name in ("ppocr", "paddle", "paddlex", "paddleocr", "paddlepaddle"):
-                logging.getLogger(name).setLevel(logging.WARNING)
-            # disable propagation of noisy child loggers
-            logging.getLogger("paddlex").propagate = False
-        except Exception:
-            pass
-        try:
-            from paddleocr import PaddleOCR
+            import pytesseract
+            # Tesseract is installed on Windows but may not be on PATH.
+            candidates = [
+                os.getenv("TESSERACT_CMD", ""),
+                r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+                r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe",
+            ]
+            for exe in candidates:
+                if exe and os.path.exists(exe):
+                    pytesseract.pytesseract.tesseract_cmd = exe
+                    break
+            # Verify Tesseract actually runs.
+            pytesseract.get_tesseract_version()
         except Exception as exc:
             _ocr_error = str(exc)
-            raise RuntimeError("PaddleOCR is not installed. Run: pip install paddleocr") from exc
-        try:
-            engine = PaddleOCR(use_angle_cls=True, lang="en",
-                              use_doc_orientation_classify=False,
-                              use_doc_unwarping=False)
-        except Exception as exc:
-            _ocr_error = str(exc)
-            raise RuntimeError("PaddleOCR could not start: " + str(exc)) from exc
-        _ocr_engine = engine
-        return engine
+            raise RuntimeError("Tesseract OCR is not installed. Install Tesseract from "
+                               "https://github.com/tesseract-ocr/tesseract") from exc
+        _ocr_engine = pytesseract
+        return _ocr_engine
 
 
 def ocr_status():
@@ -125,43 +118,47 @@ def run_ocr(image_bytes):
     """Return (full_text, list_of_(text, box)) from an image."""
     engine = _load_ocr()
     img = _decode_image(image_bytes)
-    arr = np.array(img)
+    # Preprocess: grayscale + autocontrast + upscale helps Tesseract read
+    # low-contrast text (e.g. red numbers on a busy ID background).
+    from PIL import ImageOps
+    proc = ImageOps.autocontrast(ImageOps.grayscale(img), cutoff=1)
+    proc = proc.resize((proc.width * 2, proc.height * 2))
     try:
-        result = engine.predict(arr)
+        data = engine.image_to_data(proc, lang="eng", config="--psm 6",
+                                    output_type=engine.Output.DICT)
     except Exception as exc:
         raise RuntimeError("OCR failed: " + str(exc))
     lines = []
     boxes = []
-    # result is a list of OCRResult (dict-like) from predict()
-    pages = result if isinstance(result, (list, tuple)) else [result]
-    for page in pages:
-        if not page:
+    n = len(data.get("text", []))
+    for i in range(n):
+        text = str(data["text"][i]).strip()
+        if not text:
             continue
-        texts = None
-        scores = None
-        polys = None
-        if hasattr(page, "get"):
-            texts = page.get("rec_texts")
-            scores = page.get("rec_scores")
-            polys = page.get("rec_polys") or page.get("rec_boxes")
-        if texts is None and hasattr(page, "rec_texts"):
-            texts = page.rec_texts
-            scores = getattr(page, "rec_scores", None)
-            polys = getattr(page, "rec_polys", None) or getattr(page, "rec_boxes", None)
-        if not texts:
-            continue
-        for i, t in enumerate(texts):
-            if not t:
-                continue
-            score = 1.0
-            if scores and i < len(scores):
-                score = float(scores[i])
-            box = None
-            if polys and i < len(polys):
-                box = polys[i]
-            lines.append(str(t).strip())
-            boxes.append((box, str(t).strip(), score))
-    full = "\n".join(lines)
+        try:
+            conf = float(data["conf"][i])
+        except Exception:
+            conf = -1.0
+        left, top, w, h = (int(data["left"][i]), int(data["top"][i]),
+                           int(data["width"][i]), int(data["height"][i]))
+        box = [(left, top), (left + w, top), (left + w, top + h), (left, top + h)]
+        lines.append(text)
+        boxes.append((box, text, conf / 100.0 if conf >= 0 else 0.0))
+    # Prefer line-based text from Tesseract so date/label parsing works.
+    # Fall back to joining words if image_to_string is unavailable.
+    try:
+        clean = engine.image_to_string(img, lang="eng")
+    except Exception:
+        clean = "\n".join(lines)
+    if not clean or not clean.strip():
+        clean = "\n".join(lines)
+    try:
+        enhanced = engine.image_to_string(proc, lang="eng", config="--psm 6")
+    except Exception:
+        enhanced = ""
+    # Merge both passes: clean text first for readable names/labels/dates,
+    # then enhanced text to add faint details (e.g. red ID number).
+    full = (clean or "") + "\n" + (enhanced or "")
     return full, boxes
 
 

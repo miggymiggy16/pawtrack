@@ -6,6 +6,87 @@
 {% set keep = {} %}{% for k, v in args.items() if v and k != 'status' %}{% set _ = keep.update({k: v}) %}{% endfor %}
 {% set adv = args.vaccine or args.due_from or args.due_to %}
 
+<!-- ============ MOBILE-ONLY VACCINATION VIEW ============ -->
+<div class="mv-dash">
+  <div class="mv-body">
+    <div class="mv-title"><h1>Vaccination<br>Monitoring</h1></div>
+
+    <section class="mv-kpis" aria-label="Summary">
+      <div class="mv-kpi"><span class="mv-ico c-blue">{{ icon('shield') }}</span><span class="mv-ktext"><span class="mv-l">Total Records</span><span class="mv-n">{{ counts.total }}</span></span></div>
+      <a class="mv-kpi" href="{{ url_for('vaccinations', status='Completed') }}"><span class="mv-ico c-green">{{ icon('check') }}</span><span class="mv-ktext"><span class="mv-l">Completed</span><span class="mv-n good">{{ counts['Completed'] }}</span></span></a>
+      <a class="mv-kpi" href="{{ url_for('vaccinations', status='Upcoming') }}"><span class="mv-ico c-violet">{{ icon('clock') }}</span><span class="mv-ktext"><span class="mv-l">Upcoming</span><span class="mv-n">{{ counts['Upcoming'] }}</span></span></a>
+      <a class="mv-kpi" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="mv-ico c-red">{{ icon('alert') }}</span><span class="mv-ktext"><span class="mv-l">Overdue</span><span class="mv-n bad">{{ counts['Overdue'] }}</span></span></a>
+    </section>
+
+    <form class="mv-search" method="get" action="{{ url_for('vaccinations') }}" role="search">
+      {% if args.animal_id %}<input type="hidden" name="animal_id" value="{{ args.animal_id }}">{% endif %}
+      {% if args.status %}<input type="hidden" name="status" value="{{ args.status }}">{% endif %}
+      {{ icon('search') }}<input type="search" name="q" value="{{ args.q }}" placeholder="Search animal name or ID...">
+    </form>
+
+    <form class="mv-filters" method="get" action="{{ url_for('vaccinations') }}">
+      {% if args.animal_id %}<input type="hidden" name="animal_id" value="{{ args.animal_id }}">{% endif %}
+      {% if args.q %}<input type="hidden" name="q" value="{{ args.q }}">{% endif %}
+      {% if args.status %}<input type="hidden" name="status" value="{{ args.status }}">{% endif %}
+      <div class="mv-field"><label>Vaccine</label><div class="mv-select">{{ icon('chevron') }}<select name="vaccine"><option value="">All Vaccines</option>{% for v in vaccine_options %}<option value="{{ v }}" {{ 'selected' if args.vaccine|lower == v|lower }}>{{ v }}</option>{% endfor %}</select></div></div>
+      <div class="mv-field"><label>Due From</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_from" value="{{ args.due_from }}" placeholder="mm/dd/yyyy"></div></div>
+      <div class="mv-field"><label>Due To</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_to" value="{{ args.due_to }}" placeholder="mm/dd/yyyy"></div></div>
+    </form>
+
+    <nav class="mv-tabs" aria-label="Filter by status">
+      <a class="{{ 'active' if not args.status }}" href="{{ url_for('vaccinations', **keep) }}">All Records <span>{{ counts.total }}</span></a>
+      {% for s in ['Upcoming','Due Today','Overdue','Completed'] %}<a class="{{ 'active' if args.status==s }}" href="{{ url_for('vaccinations', status=s, **keep) }}">{{ s }}</a>{% endfor %}
+    </nav>
+
+    <div class="mv-add-row"><a class="mv-add" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }} Add Vaccination</a></div>
+
+    <section class="mv-list-card">
+      <div class="mv-list-head"><span class="mv-lh-ico">{{ icon('paw') }}</span><h2>Vaccination Records</h2><span class="mv-lh-count">{{ rows|length }}</span></div>
+      {% if rows %}
+      <div class="mv-table-wrap"><table class="mv-table">
+        <thead><tr><th>Animal</th><th>Vaccine</th><th>Administered</th><th>Next Due</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>{% for r in rows %}
+        <tr>
+          <td><span class="mv-av">{{ initial(r.animal) }}</span><span class="mv-an"><b>{{ r.animal.animal_name }}</b><small>{{ r.animal_id }}</small></span></td>
+          <td>{{ r.vaccine_name }}</td>
+          <td>{{ r.date_administered|fmt_date }}</td>
+          <td>{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
+          <td>{{ badge(r.status) }}</td>
+          <td class="mv-acts">
+            <a href="{{ url_for('animal_view', animal_id=r.animal_id) }}" title="View profile">{{ icon('eye') }}</a>
+            {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button type="submit" title="Delete record">{{ icon('trash') }}</button></form>{% endif %}
+          </td>
+        </tr>{% endfor %}</tbody>
+      </table></div>
+      <a class="mv-view-all" href="{{ url_for('vaccinations') }}">View All Records →</a>
+      {% else %}<p class="mv-empty">No vaccination records match. <a href="{{ url_for('vaccinations') }}">Clear filters</a></p>{% endif %}
+    </section>
+
+    {% if rows %}
+    <div class="mv-mobile-list">
+      {% for r in rows %}
+      <div class="mv-item">
+        <span class="mv-av">{{ initial(r.animal) }}</span>
+        <div class="mv-item-body">
+          <a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a>
+          <small>{{ r.animal_id }} &middot; {{ r.vaccine_name }}</small>
+          <span class="mv-item-dates">Given {{ r.date_administered|fmt_date }}{% if r.next_due_date %} &middot; Next due <b>{{ r.next_due_date|fmt_date }}</b>{% endif %}</span>
+          <span>{{ badge(r.status) }}</span>
+        </div>
+        <div class="mv-item-acts">
+          <a href="{{ url_for('animal_view', animal_id=r.animal_id) }}" title="View">{{ icon('eye') }}</a>
+          <a href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" title="Edit">{{ icon('edit') }}</a>
+          {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button type="submit" title="Delete">{{ icon('trash') }}</button></form>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+<!-- ============ /MOBILE-ONLY VACCINATION VIEW ============ -->
+
+<div class="desk-only">
 <div class="page-head vm-head">
   <div><h1>Vaccination Monitoring</h1><p>Monitor vaccination records and schedules.</p></div>
   <a class="btn" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }}Add vaccination</a>
@@ -83,8 +164,81 @@
   </ul>
   {% else %}<p class="empty">No vaccination records match. <a href="{{ url_for('vaccinations') }}">Clear filters</a></p>{% endif %}
 </section>
+</div>
 {% endblock %}
 {% block scripts %}
+<style>
+/* ===== Mobile Vaccination view — strictly <=700px, desktop untouched ===== */
+.mv-dash{display:none}
+@media(max-width:700px){
+  .desk-only{display:none!important}
+  .mv-dash{display:block;font-family:Poppins,Arial,sans-serif;color:#12233B;background:#F4F7FD;min-height:calc(100vh - 90px)}
+  .mv-body{padding:14px 16px 0}
+  .mv-title h1{font-size:2rem;font-weight:800;line-height:1.05;margin:0 0 18px}
+  .mv-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .mv-kpi{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:16px 14px;box-shadow:0 3px 12px rgba(11,36,64,.05);text-decoration:none;color:inherit;min-height:96px}
+  .mv-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+  .mv-ico svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2}
+  .mv-ico.c-blue{background:#E4EEFF;color:#2E5FD0}
+  .mv-ico.c-green{background:#DFF6E9;color:#1F9D61}
+  .mv-ico.c-violet{background:#ECE8FF;color:#6C4BD8}
+  .mv-ico.c-red{background:#FDE7EA;color:#E23B4E}
+  .mv-ktext{display:flex;flex-direction:column;gap:2px}
+  .mv-l{color:#7C8AA0;font-size:.74rem}
+  .mv-n{font-size:1.7rem;font-weight:800;line-height:1}
+  .mv-n.good{color:#1F9D61}.mv-n.bad{color:#E23B4E}
+  .mv-search{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:13px 16px;box-shadow:0 3px 12px rgba(11,36,64,.06);margin:16px 0}
+  .mv-search svg{width:19px;height:19px;fill:none;stroke:#8794A8;stroke-width:2;flex:none}
+  .mv-search input{border:0;outline:0;background:none;font-size:.9rem;width:100%;color:#12233B}
+  .mv-search input::placeholder{color:#9AA6B2}
+  .mv-filters{display:flex;flex-direction:column;gap:12px}
+  .mv-field label{display:block;color:#44546B;font-size:.8rem;font-weight:600;margin-bottom:6px}
+  .mv-select,.mv-date{display:flex;align-items:center;gap:10px;background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 2px 10px rgba(11,36,64,.05)}
+  .mv-select svg,.mv-date svg{width:17px;height:17px;fill:none;stroke:#8794A8;stroke-width:2;flex:none}
+  .mv-select select,.mv-date input{border:0;outline:0;background:none;width:100%;font-size:.86rem;color:#12233B;appearance:none;font-family:inherit}
+  .mv-select{position:relative}
+  .mv-select svg{position:absolute;right:14px;transform:rotate(90deg)}
+  .mv-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:16px 0;padding-bottom:2px}
+  .mv-tabs::-webkit-scrollbar{display:none}
+  .mv-tabs a{flex:none;text-decoration:none;color:#2E5FD0;font-size:.8rem;font-weight:700;padding:10px 16px;border-radius:20px;background:#E7EDF7;white-space:nowrap}
+  .mv-tabs a span{background:#1E40AF;color:#fff;font-size:.66rem;padding:1px 7px;border-radius:10px;margin-left:4px}
+  .mv-tabs a.active{background:#0B2440;color:#fff}
+  .mv-tabs a.active span{background:#fff;color:#0B2440}
+  .mv-add-row{display:flex;justify-content:flex-end;margin:6px 0 16px}
+  .mv-add{display:inline-flex;align-items:center;gap:7px;background:#0B2440;color:#fff;text-decoration:none;font-size:.82rem;font-weight:700;padding:12px 18px;border-radius:22px}
+  .mv-add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
+  .mv-list-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(11,36,64,.06)}
+  .mv-list-head{display:flex;align-items:center;gap:10px;padding:16px;background:#EDF2FA}
+  .mv-lh-ico{width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center;color:#1E40AF}
+  .mv-lh-ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2}
+  .mv-list-head h2{font-size:1rem;font-weight:800;margin:0}
+  .mv-lh-count{margin-left:auto;background:#DCE6F7;color:#1E40AF;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:12px}
+  .mv-table-wrap{overflow-x:auto}
+  .mv-table{width:100%;border-collapse:collapse;font-size:.72rem;min-width:560px}
+  .mv-table th{background:#F5F8FD;color:#7C8AA0;font-size:.66rem;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:10px 12px;white-space:nowrap}
+  .mv-table td{padding:12px;border-bottom:1px solid #EEF2F8;color:#44546B;white-space:nowrap}
+  .mv-table .mv-an{display:inline-flex;flex-direction:column;vertical-align:middle;margin-left:8px}
+  .mv-table .mv-an b{color:#12233B;font-size:.78rem}
+  .mv-table .mv-an small{color:#8794A8;font-size:.64rem}
+  .mv-av{width:32px;height:32px;border-radius:50%;background:#1E40AF;color:#fff;display:inline-grid;place-items:center;font-weight:800;font-size:.8rem;vertical-align:middle;flex:none}
+  .mv-acts{display:flex;align-items:center;gap:8px}
+  .mv-acts a,.mv-acts button{color:#8794A8;background:none;border:0;padding:2px;cursor:pointer}
+  .mv-acts a svg,.mv-acts button svg{width:16px;height:16px;fill:none;stroke:#E23B4E;stroke-width:2}
+  .mv-view-all{display:block;text-align:center;padding:16px;color:#2E5FD0;font-weight:800;text-decoration:none;font-size:.85rem}
+  .mv-empty{padding:20px;color:#8794A8;font-size:.85rem;text-align:center}
+  .mv-mobile-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .mv-item{display:flex;align-items:flex-start;gap:11px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 3px 12px rgba(11,36,64,.05)}
+  .mv-item-body{flex:1;min-width:0}
+  .mv-item-body>a{color:#12233B;text-decoration:none;font-size:.9rem}
+  .mv-item-body small{display:block;color:#8794A8;font-size:.7rem;margin-top:2px}
+  .mv-item-dates{display:block;color:#7C8AA0;font-size:.72rem;margin:6px 0}
+  .mv-item-dates b{color:#1E40AF}
+  .mv-item-acts{display:flex;flex-direction:column;gap:6px}
+  .mv-item-acts a,.mv-item-acts button{color:#8794A8;background:none;border:0;padding:2px}
+  .mv-item-acts svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2}
+  .mv-item-acts button svg{stroke:#E23B4E}
+}
+</style>
 <script>
 (function () {
   var btn = document.getElementById('vmFilterBtn'), panel = document.getElementById('vmFilters');

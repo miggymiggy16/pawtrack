@@ -1,7 +1,90 @@
 {% extends 'base.html' %}
-{% from '_macros.html' import icon %}
+{% from '_macros.html' import icon, logo, theme_toggle %}
 {% block title %}Overview{% endblock %}
+{% block body_class %}mobile-dash{% endblock %}
 {% block content %}
+
+<!-- ============ MOBILE-ONLY DASHBOARD ============ -->
+<div class="m-dash">
+  <div class="m-body">
+    <div class="m-title-row">
+      <div><h1>Overview</h1><p class="m-hello">Welcome back, {{ (user.full_name or user.username or 'Admin')|title }}!</p></div>
+      <div class="m-date">{{ icon('clock') }}<span>{{ today|fmt_date }}</span></div>
+    </div>
+
+    <section class="m-kpis" aria-label="Summary">
+      <a class="m-kpi" href="{{ url_for('animals_list') }}">
+        <span class="m-kico c-blue">{{ icon('paw') }}</span>
+        <span class="m-kl">Animals</span>
+        <div class="m-kn">{{ cards.animals }}</div>
+        <div class="m-kf up">{{ icon('chart') }} {{ cards.owned }} owned</div>
+      </a>
+      <a class="m-kpi" href="{{ url_for('vaccinations') }}">
+        <span class="m-kico c-violet">{{ icon('syringe') }}</span>
+        <span class="m-kl">Vaccinations</span>
+        <div class="m-kn">{{ cards.vax_period }}</div>
+        <div class="m-kf {{ 'up' if cards.vax_trend is not none and cards.vax_trend >= 0 else 'down' }}">
+          {{ '↑' if cards.vax_trend is not none and cards.vax_trend >= 0 else '↓' }} {{ cards.vax_trend|abs if cards.vax_trend is not none else 0 }}%
+        </div>
+      </a>
+      <div class="m-kpi">
+        <span class="m-kico c-green">{{ icon('shield') }}</span>
+        <span class="m-kl">Coverage</span>
+        <div class="m-kn">{{ cards.coverage }}<small>%</small></div>
+        <div class="m-meter"><i style="width:{{ cards.coverage }}%"></i></div>
+        <div class="m-kf up">↑ {{ cards.vaccinated }} / {{ cards.animals }}</div>
+      </div>
+      <a class="m-kpi {{ 'is-bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}">
+        <span class="m-kico c-red">{{ icon('alert') }}</span>
+        <span class="m-kl">Overdue</span>
+        <div class="m-kn">{{ cards.overdue }}</div>
+        <div class="m-kf {{ 'down' if cards.overdue else 'up' }}">{{ 'needs attention' if cards.overdue else 'all clear' }}</div>
+      </a>
+    </section>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('chart') }} Vaccinations</h2><span class="m-sel">Monthly {{ icon('chevron') }}</span></div>
+      <div class="m-chart"><canvas id="mMonthly"></canvas></div>
+    </section>
+
+    <div class="m-pair">
+      <section class="m-card">
+        <div class="m-card-head"><h2>{{ icon('grid') }} Status</h2></div>
+        <div class="m-chart m-donut"><canvas id="mStatus"></canvas></div>
+        <div class="m-legend" id="mLegend"></div>
+      </section>
+      <section class="m-card">
+        <div class="m-card-head"><h2>{{ icon('paw') }} Coverage by Species</h2></div>
+        {% if species_cov %}<div class="m-bars">{% for name, v in species_cov %}
+          <div class="m-bar-row"><span class="m-bl">{{ name }}</span><span class="m-bt"><i style="width:{{ [v,100]|min }}%"></i></span><b class="m-bv">{{ v|round|int }}%</b></div>{% endfor %}</div>
+        {% else %}<p class="m-empty">No data yet.</p>{% endif %}
+        <a class="m-more" href="{{ url_for('analytics') }}">See more →</a>
+      </section>
+    </div>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('syringe') }} Top Vaccines</h2><a class="m-more" href="{{ url_for('analytics') }}">View all →</a></div>
+      {% if top_vaccines %}{% set mx = top_vaccines[0][1] or 1 %}<div class="m-bars">{% for name, v in top_vaccines %}
+        <div class="m-bar-row"><span class="m-bl">{{ name }}</span><span class="m-bt"><i style="width:{{ v / mx * 100 }}%"></i></span><b class="m-bv">{{ v }}</b></div>{% endfor %}</div>
+      {% else %}<p class="m-empty">No data yet.</p>{% endif %}
+    </section>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('box') }} Stock Flow</h2><span class="m-sel">{{ period_label }}</span></div>
+      {% set tot = [stats.in_units, stats.out_units, stats.adj_lost, 1]|max %}
+      <div class="m-flow">
+        <div class="m-fl"><span class="m-chip ok">{{ icon('plus') }}</span><span>In</span><b>+{{ stats.in_units }}</b></div>
+        <div class="m-fl"><span class="m-chip">{{ icon('minus') }}</span><span>Used</span><b>-{{ stats.out_units }}</b></div>
+        <div class="m-fl"><span class="m-chip warn">{{ icon('alertc') }}</span><span>Lost</span><b>{{ stats.adj_lost }}</b></div>
+      </div>
+      {% if low_items %}<div class="m-restock"><span>Restock</span><div>{% for i in low_items %}<a href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }} · {{ i.quantity }}</a>{% endfor %}</div></div>{% endif %}
+    </section>
+  </div>
+
+</div>
+<!-- ============ /MOBILE-ONLY DASHBOARD ============ -->
+
+<div class="desk-only">
 {% macro bars(rows, target=None, suffix='') %}<div class="hbars">{% for name, v in rows %}{% set tone = 'bad' if v < 60 else 'warn' if v < 85 else 'ok' %}
   <div class="hrow"><span class="hl">{{ name }}</span><span class="htrack"><i class="f-{{ tone }}" style="width:{{ [v,100]|min }}%"></i>{% if target %}<u style="left:{{ target }}%"></u>{% endif %}</span><b class="hv">{{ v|round|int }}{{ suffix }}</b></div>{% endfor %}</div>{% endmacro %}
 {% set owned_pct = (cards.owned / cards.animals * 100) if cards.animals else 0 %}
@@ -63,5 +146,82 @@ if (pawCharts()) {
   const S = {{ status_counts|tojson }};
   pawChart('cStatus','doughnut',Object.keys(S),Object.values(S));
 }
+/* mobile-only charts */
+if (window.matchMedia('(max-width: 700px)').matches && typeof Chart !== 'undefined') {
+  const ML = {{ charts.labels|tojson }}, MV = {{ charts.vaccinations|tojson }};
+  Chart.defaults.font.family = 'Poppins, sans-serif';
+  new Chart(document.getElementById('mMonthly'), {type:'bar', data:{labels:ML, datasets:[{data:MV, backgroundColor:['#8FB4F4','#2E5FD0','#1E40AF','#7EA6F0','#1E40AF','#8FB4F4'], borderRadius:5, barPercentage:0.62}]}, options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#9AA6B2',font:{size:9}}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.06)'},ticks:{color:'#9AA6B2',font:{size:10},stepSize:1}}},maintainAspectRatio:false,responsive:true}});
+  const S = {{ status_counts|tojson }};
+  new Chart(document.getElementById('mStatus'), {type:'doughnut', data:{labels:Object.keys(S), datasets:[{data:Object.values(S), backgroundColor:['#2E5FD0','#8FB4F4','#1E40AF','#C9D8F5'], borderWidth:0}]}, options:{cutout:'64%',plugins:{legend:{display:false}},maintainAspectRatio:false,responsive:true}});
+  const leg = document.getElementById('mLegend');
+  if (leg) { Object.entries(S).forEach(function(e,i){ var colors=['#2E5FD0','#8FB4F4','#1E40AF','#C9D8F5']; leg.insertAdjacentHTML('beforeend','<span class="m-lgi"><i style="background:'+colors[i%4]+'"></i>'+e[0]+'</span>'); }); }
+}
 </script>
+<style>
+/* ===== Mobile dashboard — strictly ≤700px, desktop untouched ===== */
+.m-dash{display:none}
+@media(max-width:700px){
+  body.mobile-dash .sidebar,body.mobile-dash .topbar,body.mobile-dash .footer,body.mobile-dash .desk-only{display:none!important}
+  body.mobile-dash .content{padding:0!important;margin:0!important}
+  body.mobile-dash .app,body.mobile-dash .main{display:block;margin:0!important}
+  .m-dash{display:block;font-family:Poppins,Arial,sans-serif;background:#F4F7FD;min-height:100vh;color:#12233B;padding-bottom:96px}
+  .m-body{padding:14px 16px 0}
+  .m-title-row{display:flex;justify-content:space-between;align-items:flex-start;margin:16px 2px 18px}
+  .m-title-row h1{font-size:2rem;margin:0;font-weight:800;line-height:1.1;border-bottom:4px solid #1E40AF;display:inline-block;padding-bottom:4px}
+  .m-hello{color:#7C8AA0;font-size:.86rem;margin:10px 0 0}
+  .m-date{display:flex;align-items:center;gap:6px;color:#6B7A90;font-size:.78rem;background:#fff;border-radius:20px;padding:7px 11px;box-shadow:0 2px 8px rgba(11,36,64,.05)}
+  .m-date svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2}
+  .m-kpis{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .m-kpi{position:relative;background:#fff;border-radius:16px;padding:16px;text-decoration:none;color:inherit;box-shadow:0 4px 14px rgba(11,36,64,.05);display:block;min-height:146px}
+  .m-kpi.is-bad{border:1px solid #F6C9CF}
+  .m-kico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;margin-bottom:12px}
+  .m-kico svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:2}
+  .m-kico.c-blue{background:#E4EEFF;color:#2E5FD0}
+  .m-kico.c-violet{background:#ECE8FF;color:#6C4BD8}
+  .m-kico.c-green{background:#DFF6E9;color:#1F9D61}
+  .m-kico.c-red{background:#FDE7EA;color:#E23B4E}
+  .m-kl{color:#5B6B80;font-size:.82rem}
+  .m-kn{font-size:1.9rem;font-weight:800;margin-top:2px;line-height:1.1}
+  .m-kn small{font-size:1.1rem}
+  .m-kf{font-size:.72rem;margin-top:6px;font-weight:600;display:flex;align-items:center;gap:4px}
+  .m-kf svg{width:12px;height:12px}
+  .m-kf.up{color:#1F9D61}.m-kf.down{color:#E23B4E}
+  .m-meter{height:6px;background:#E8EDF5;border-radius:6px;overflow:hidden;margin-top:8px}
+  .m-meter i{display:block;height:100%;background:#2E5FD0;border-radius:6px}
+  .m-card{background:#fff;border-radius:18px;padding:16px;margin-top:16px;box-shadow:0 4px 14px rgba(11,36,64,.05)}
+  .m-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .m-card-head h2{font-size:1rem;font-weight:700;margin:0;display:flex;align-items:center;gap:8px}
+  .m-card-head h2 svg{width:18px;height:18px;fill:none;stroke:#1E40AF;stroke-width:2}
+  .m-sel{color:#8794A8;font-size:.78rem;display:flex;align-items:center;gap:3px}
+  .m-sel svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2}
+  .m-chart{position:relative;height:180px}
+  .m-donut{height:150px}
+  .m-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:8px}
+  .m-lgi{font-size:.66rem;color:#6B7A90;display:flex;align-items:center;gap:4px}
+  .m-lgi i{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .m-pair{display:grid;grid-template-columns:1fr;gap:0}
+  .m-bars{display:flex;flex-direction:column;gap:12px}
+  .m-bar-row{display:grid;grid-template-columns:96px 1fr 46px;align-items:center;gap:8px}
+  .m-bl{font-size:.78rem;color:#44546B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .m-bt{height:9px;background:#E8EDF5;border-radius:8px;overflow:hidden}
+  .m-bt i{display:block;height:100%;background:#1E40AF;border-radius:8px}
+  .m-bv{font-size:.8rem;text-align:right;text-decoration:underline;text-underline-offset:3px}
+  .m-empty{color:#8794A8;font-size:.82rem}
+  .m-more{color:#2E5FD0;font-size:.8rem;font-weight:600;text-decoration:none;float:right}
+  .m-flow{display:flex;flex-direction:column;gap:10px}
+  .m-fl{display:flex;align-items:center;gap:10px;font-size:.85rem;color:#44546B}
+  .m-fl b{margin-left:auto;color:#12233B}
+  .m-chip{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#EEF2F8;color:#5B6B80}
+  .m-chip.ok{background:#DFF6E9;color:#1F9D61}.m-chip.warn{background:#FDE7EA;color:#E23B4E}
+  .m-chip svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2}
+  .m-restock{margin-top:14px;border-top:1px solid #EEF2F8;padding-top:12px}
+  .m-restock>span{font-size:.78rem;color:#8794A8}
+  .m-restock>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .m-restock a{background:#FDEBD9;color:#B5651D;font-size:.72rem;text-decoration:none;padding:5px 10px;border-radius:12px}
+  .m-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;display:flex;justify-content:space-around;padding:10px 6px 18px;box-shadow:0 -4px 18px rgba(11,36,64,.08);border-radius:18px 18px 0 0;z-index:50}
+  .m-nav a{display:flex;flex-direction:column;align-items:center;gap:3px;color:#8794A8;text-decoration:none;font-size:.68rem;padding:6px 14px;border-radius:14px}
+  .m-nav a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+  .m-nav a.active{background:#E4EEFF;color:#1E40AF;font-weight:700}
+}
+</style>
 {% endblock %}

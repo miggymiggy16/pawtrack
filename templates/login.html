@@ -22,10 +22,7 @@
   </section>
   <section class="auth-card">
     <div class="auth-box">
-    <div class="auth-tabs" role="tablist" aria-label="Login method">
-      <button type="button" class="auth-tab active" data-auth-tab="password" role="tab" aria-selected="true">Password</button>
-      <button type="button" class="auth-tab" data-auth-tab="face" role="tab" aria-selected="false">Face ID</button>
-    </div>
+
     <div id="auth-password" class="auth-panel">
       <form method="post" novalidate>
         {{ csrf() }}
@@ -37,23 +34,8 @@
         <button class="btn" type="submit">Log in</button>
       </form>
     </div>
-    <div id="auth-face" class="auth-panel" hidden>
-      <h2>Face login</h2>
-      <p class="muted">Look straight at the camera. PawTrack signs you in automatically when it recognizes you.</p>
-      <div class="face-camera">
-        <video id="login-face-video" autoplay playsinline muted></video>
-        <div id="login-face-placeholder" class="face-placeholder">Camera is off</div>
-      </div>
-      <div class="face-actions">
-        <button type="button" class="btn ghost" id="login-face-start">Start camera</button>
-        <button type="button" class="btn" id="login-face-scan" disabled>Scan face</button>
-      </div>
-      <div id="login-face-status" class="face-status" role="status" aria-live="polite"></div>
-      <p class="small" style="margin-top:12px"><a href="#" data-auth-tab="password">Use password instead</a></p>
-    </div>
     </div>
   </section>
 </div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-<script src="{{ url_for('static', filename='js/face.js') }}"></script>
 </body></html>

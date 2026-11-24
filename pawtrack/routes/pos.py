@@ -15,7 +15,7 @@ from ..helpers import _safe_cell, now_str, parse_date
 from ..security import (can, current_user, login_required,
                         permission_required)
 from ..services.pos import (create_sale, filter_sales, pos_catalog,
-                            sale_summary, service_form, void_sale)
+                            sale_summary, void_sale)
 from ..storage import edit, get_settings, load, next_id
 
 
@@ -136,59 +136,3 @@ def sale_void(sale_id):
         flash(err or f"{sale_id} was voided and its products were returned to stock.", "error" if err else "success")
     return redirect(url_for("sale_receipt", sale_id=sale_id))
 
-
-# ---------- services (things sold that are not stock, e.g. consultation) ----------
-@app.route("/pos/services")
-@permission_required("pos.data")
-def pos_services():
-    return render_template("pos_services.html", rows=sorted(load("pos_services"), key=lambda r: r["name"].lower()))
-
-
-@app.route("/pos/services/save", methods=["POST"])
-@permission_required("pos.manage")
-def pos_service_save():
-    name, price, errors = service_form(request.form)
-    sid = request.form.get("service_id", "").strip()
-    rows = load("pos_services")
-    if sid and not any(r["service_id"] == sid for r in rows):
-        abort(404)
-    if any(r["name"].lower() == name.lower() and r["service_id"] != sid for r in rows):
-        errors.append("A service with that name already exists.")
-    if errors:
-        for e in errors:
-            flash(e, "error")
-    else:
-        with edit("pos_services") as services:
-            if sid:
-                for r in services:
-                    if r["service_id"] == sid:
-                        r["name"], r["price"] = name, float(price)
-            else:
-                services.append({"service_id": next_id("SVC", services, "service_id", 3), "name": name,
-                                 "price": float(price), "active": True, "created_at": now_str()})
-        flash(f"Service '{name}' saved.", "success")
-    return redirect(url_for("pos_services"))
-
-
-@app.route("/pos/services/<sid>/toggle", methods=["POST"])
-@permission_required("pos.manage")
-def pos_service_toggle(sid):
-    with edit("pos_services") as services:
-        target = next((r for r in services if r["service_id"] == sid), None)
-        if not target:
-            abort(404)
-        target["active"] = not target.get("active", True)
-    flash(f"{target['name']} is now {'available' if target['active'] else 'hidden from the cashier'}.", "success")
-    return redirect(url_for("pos_services"))
-
-
-@app.route("/pos/services/<sid>/delete", methods=["POST"])
-@permission_required("pos.manage")
-def pos_service_delete(sid):
-    with edit("pos_services") as services:
-        target = next((r for r in services if r["service_id"] == sid), None)
-        if not target:
-            abort(404)
-        services[:] = [r for r in services if r["service_id"] != sid]
-    flash(f"Service '{target['name']}' deleted. Past sales keep their receipts.", "success")
-    return redirect(url_for("pos_services"))

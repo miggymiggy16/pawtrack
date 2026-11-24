@@ -1687,3 +1687,44 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 @media (max-width:1100px){.fi-grid{grid-template-columns:1fr 1fr}.fi-photo{grid-column:span 2}}
 @media (max-width:720px){.fi-grid{grid-template-columns:1fr}.fi-photo{grid-column:auto}.fi-pair{grid-template-columns:1fr}}
 :root[data-theme="light"] .dropzone.drag{border-color:#16305C;background:#EDECE8}
+
+/* ===== Mobile bottom navigation (swipeable) — every page, <=700px only ===== */
+.mobile-nav,.mobile-head{display:none}
+@media(max-width:700px){
+  /* Clean shared mobile header */
+  .mobile-head{display:flex;align-items:center;justify-content:space-between;background:#0B2440;color:#fff;padding:16px 18px 26px;border-radius:0 0 26px 26px;position:sticky;top:0;z-index:50}
+  .mobile-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none}
+  .mobile-brand .logo-img{width:40px;height:40px;background:#fff;border-radius:12px;display:grid;place-items:center;padding:3px}
+  .mobile-brand .logo-img img{width:100%;height:100%;object-fit:contain}
+  .mobile-brand b{font-size:1.05rem;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+  .mobile-head-actions{display:flex;align-items:center;gap:10px}
+  .mobile-hbtn{position:relative;background:rgba(255,255,255,.14);border:0;border-radius:50%;width:40px;height:40px;color:#fff;display:grid;place-items:center;text-decoration:none}
+  .mobile-hbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2}
+  .mobile-hbadge{position:absolute;top:-3px;right:-3px;background:#E23B4E;color:#fff;font:700 .62rem Poppins,sans-serif;border-radius:9px;padding:1px 5px}
+  .mobile-head .theme-btn{background:rgba(255,255,255,.14)!important;border:0!important;color:#fff!important;width:40px;height:40px;border-radius:50%}
+  /* Mobile profile dropdown — same items as desktop */
+  .mobile-profile{position:relative}
+  .mobile-avatar{width:40px;height:40px;border-radius:50%;background:#fff;color:#0B2440;display:grid;place-items:center;font-weight:800;font-size:.95rem;cursor:pointer;list-style:none;user-select:none}
+  .mobile-avatar::-webkit-details-marker{display:none}
+  .mobile-pm-pop{position:absolute;top:calc(100% + 10px);right:0;min-width:190px;background:#fff;color:#12233B;border-radius:14px;box-shadow:0 10px 30px rgba(11,36,64,.18);padding:8px;z-index:70}
+  .mobile-pm-head{padding:8px 10px 10px;border-bottom:1px solid #EEF2F8;margin-bottom:6px}
+  .mobile-pm-head div{font-weight:700;font-size:.85rem}
+  .mobile-pm-head small{color:#8794A8;font-size:.7rem}
+  .mobile-pm-pop a,.mobile-pm-pop button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;background:none;color:#12233B;text-decoration:none;font-size:.82rem;border-radius:9px;cursor:pointer;text-align:left}
+  .mobile-pm-pop a:hover,.mobile-pm-pop button:hover{background:#EEF4FF}
+  .mobile-pm-pop svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+  /* Hide the desktop topbar; the mobile header replaces it */
+  .topbar{display:none!important}
+  .mobile-nav{display:block;position:fixed;left:0;right:0;bottom:0;z-index:60;background:#fff;border-top:1px solid #E6ECF5;box-shadow:0 -4px 18px rgba(11,36,64,.08);border-radius:18px 18px 0 0;padding:8px 0 max(12px,env(safe-area-inset-bottom))}
+  .mobile-nav-scroll{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 10px;scroll-snap-type:x proximity}
+  .mobile-nav-scroll::-webkit-scrollbar{display:none}
+  .mobile-nav-scroll a{flex:0 0 auto;min-width:72px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 10px;border-radius:14px;color:#8794A8;text-decoration:none;font-size:.68rem;white-space:nowrap}
+  .mobile-nav-scroll a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2}
+  .mobile-nav-scroll a.active{background:#E4EEFF;color:#1E40AF;font-weight:700}
+  /* Hide the left sidebar and its menu button on mobile; bottom nav replaces them */
+  body .sidebar,body .menu-btn{display:none!important}
+  .main{margin-left:0!important}
+  .app{grid-template-columns:1fr!important}
+  .content{padding-bottom:96px!important}
+  .footer{display:none!important}
+}
