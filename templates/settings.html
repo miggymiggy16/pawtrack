@@ -1,120 +1,334 @@
 {% extends 'base.html' %}
-{% from '_macros.html' import csrf %}
+{% from '_macros.html' import csrf, icon %}
 {% block title %}{{ 'Settings' if user.role == 'admin' else 'My profile' }}{% endblock %}
+{% block body_class %}settings-page{% endblock %}
+
+{% block head %}
+<style>
+/* ===== Settings — grouped panels with a side menu (layout only, colours come from the theme) ===== */
+.st-head h1{margin:0 0 6px;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.st-head p{margin:0;color:var(--muted);font-size:.92rem}
+
+/* setup summary */
+.st-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:14px;margin:18px 0 26px}
+.st-sum{display:flex;align-items:center;gap:12px;padding:13px 15px;min-width:0;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;color:var(--white)}
+.st-sum:hover{border-color:var(--light);color:var(--white)}
+.st-sico{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none}
+.st-sico .ico{width:20px;height:20px}
+.st-stxt{min-width:0}
+.st-stxt b{display:block;font-size:.88rem;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-stxt small{display:block;font-size:.76rem;font-weight:600;color:var(--muted)}
+.st-ok .st-sico{background:rgba(76,195,138,.16);color:var(--ok)}
+.st-ok small{color:var(--ok)}
+.st-warn .st-sico{background:rgba(245,160,74,.16);color:var(--warn)}
+.st-warn small{color:var(--warn)}
+
+/* side menu + content */
+.st-layout{display:grid;grid-template-columns:228px minmax(0,1fr);gap:28px;align-items:start}
+.st-nav{position:sticky;top:88px;display:flex;flex-direction:column;gap:2px;min-width:0;scrollbar-width:none}
+.st-nav::-webkit-scrollbar{display:none}
+.st-navlab{margin:16px 0 6px;padding:0 10px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.st-navlab:first-child{margin-top:0}
+.st-nav a{display:block;padding:8px 12px;border-radius:8px;font-size:.87rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.st-nav a:hover{background:var(--surface-2);color:var(--white)}
+.st-nav a.active{background:var(--royal);color:#fff}
+
+/* panels */
+.st-body{min-width:0}
+.st-group{margin:30px 0 10px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.st-group:first-child{margin-top:0}
+.st-sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px 18px;margin-bottom:18px;scroll-margin-top:96px}
+:root[data-theme="light"] .st-sec,:root[data-theme="light"] .st-sum{box-shadow:0 8px 22px rgba(15,36,80,.05)}
+.st-sec h2{margin:0 0 4px;font-size:1.12rem;font-weight:700;color:var(--white)}
+.st-lead{margin:0;color:var(--muted);font-size:.85rem;line-height:1.5}
+.st-sec .st-lead{margin-bottom:4px}
+
+/* label / control rows */
+.st-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:26px;padding:16px 0;border-top:1px solid var(--line);align-items:start}
+.st-sec .st-lead+.st-row,.st-sec .st-row:first-of-type{margin-top:16px}
+.st-lab{min-width:0}
+.st-lab label,.st-lab .st-name{display:block;margin:0 0 3px;font-size:.9rem;font-weight:700;color:var(--white)}
+.st-lab small{display:block;color:var(--muted);font-size:.78rem;line-height:1.55}
+.st-lab small code{font-size:.9em}
+.st-ct{min-width:0}
+.st-ct input,.st-ct select{margin:0}
+.st-ct .st-inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.st-ct .st-inline input{flex:1 1 200px;min-width:0}
+.st-check{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--white);font-size:.9rem}
+.st-check input{flex:none}
+.st-check label{margin:0;font-size:.9rem;font-weight:600;color:var(--white)}
+.st-ct input[type=file]{padding:9px 11px}
+.st-ct input[type=file]::file-selector-button{margin-right:12px;padding:7px 14px;border-radius:8px;border:1px solid var(--line);
+  background:var(--surface-2);color:var(--white);font:600 .85rem var(--font);cursor:pointer}
+.st-ct input[type=file]::file-selector-button:hover{border-color:var(--light)}
+
+/* footer actions */
+.st-foot{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--line);margin-top:4px}
+.st-foot.plain{border-top:0;padding-top:10px}
+.st-foot form{margin:0}
+
+/* status badge */
+.st-badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.75rem;font-weight:700;background:rgba(245,160,74,.16);color:var(--warn)}
+.st-badge.ok{background:rgba(76,195,138,.16);color:var(--ok)}
+
+/* danger zone */
+.st-danger{border-color:rgba(192,57,43,.45)}
+.st-danger h2{color:var(--bad)}
+.st-danger .st-row{border-top-color:rgba(192,57,43,.22)}
+.st-danger .st-foot{border-top-color:rgba(192,57,43,.22)}
+
+/* identity wizard */
+.idv-wizard{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 18px}
+.idv-step{font-size:.74rem;padding:6px 12px;border-radius:20px;background:var(--surface-2);color:var(--muted)}
+.idv-step b{margin-right:4px}
+.idv-step.active{background:var(--royal);color:#fff;font-weight:700}
+.idv-step.done{background:rgba(76,195,138,.16);color:var(--ok)}
+.idv-panel{border-top:1px solid var(--line);padding-top:4px;margin-top:4px}
+.idv-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.idv-fields div{background:var(--surface-2);border-radius:8px;padding:8px 10px;font-size:.82rem}
+.idv-fields span{display:block;color:var(--muted);font-size:.7rem}
+.idv-instructions{margin:0 0 10px;padding-left:20px;color:var(--muted);font-size:.85rem;line-height:1.9}
+.idv-instructions li.active{color:var(--light);font-weight:800}
+.idv-instructions li.done{color:var(--ok);text-decoration:line-through}
+
+@media(max-width:1100px){
+  .st-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .st-layout{grid-template-columns:minmax(0,1fr);gap:14px}
+  .st-nav{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .st-navlab{display:none}
+  .st-nav a{background:var(--surface-2)}
+}
+@media(max-width:640px){
+  .st-cards{grid-template-columns:minmax(0,1fr)}
+  .st-head h1{font-size:1.7rem}
+  .st-row{grid-template-columns:minmax(0,1fr);gap:8px;padding:14px 0}
+  .st-sec{padding:16px 16px 14px}
+  .st-foot .btn{flex:1;justify-content:center}
+}
+</style>
+{% endblock %}
+
 {% block content %}
 {% set admin = user.role == 'admin' %}
-<div class="page-head"><div><h1>{{ 'Settings' if admin else 'My profile' }}</h1>{% if not admin %}<p>Your account details and password. Clinic and system settings are managed by administrators.</p>{% endif %}</div></div>
-{% if not admin %}<section class="card" style="max-width:640px"><h2>Account</h2><dl class="kv"><dt>Name</dt><dd>{{ user.full_name or '-' }}</dd><dt>Username</dt><dd>{{ user.username }}</dd><dt>Email</dt><dd>{{ user.email or '-' }}</dd><dt>Role</dt><dd>{{ role_label }}</dd></dl></section>{% endif %}
-{% if admin %}<div class="grid g2">
-<section class="card"><h2>Notification settings</h2>
-  <form method="post" action="{{ url_for('settings_notifications') }}">{{ csrf() }}
-    <div class="field"><label for="reminder_days">Reminder days before due date</label><input id="reminder_days" name="reminder_days" type="number" min="0" max="365" value="{{ s.reminder_days }}" {{ 'disabled' if not admin }}><small>Example: due Dec 20 with 7 days becomes "Upcoming" on Dec 13.</small></div>
-    <div class="field"><label for="expiry_warning_days">Inventory "expiring soon" window (days)</label><input id="expiry_warning_days" name="expiry_warning_days" type="number" min="0" max="365" value="{{ s.expiry_warning_days }}" {{ 'disabled' if not admin }}></div>
-    <div class="check"><input type="checkbox" id="email_enabled" name="email_enabled" value="1" {{ 'checked' if s.email_enabled }} {{ 'disabled' if not admin }}><label for="email_enabled">Email reminders enabled</label></div>
-    {% if admin %}<button class="btn" type="submit">Save notification settings</button>{% endif %}</form>
-  {% if admin %}<hr style="border-color:var(--line);margin:22px 0">
-  <h3>Email configuration</h3>
-  <p class="small">Status: {% if mail.configured %}<b style="color:var(--ok)">credentials found</b> ({{ mail.server }}:{{ mail.port }}, {{ mail.username }}){% else %}<b style="color:var(--warn)">not configured</b> - edit <code>.env</code> and restart{% endif %}.</p>
-  <form method="post" action="{{ url_for('settings_test_email') }}">{{ csrf() }}<div class="field"><label for="to">Send a test email to</label><input id="to" name="to" type="email" required placeholder="you@example.com"></div><button class="btn ghost" type="submit">Send test email</button></form>
-  <form method="post" action="{{ url_for('notification_check') }}" style="margin-top:14px">{{ csrf() }}<input type="hidden" name="back" value="{{ url_for('settings') }}"><button class="btn" type="submit">Run notification check now</button></form>{% endif %}
-</section>
-<section class="card"><h2>Clinic information</h2>
-  <form method="post" action="{{ url_for('settings_clinic') }}">{{ csrf() }}
-    <div class="field"><label for="name">Clinic name</label><input id="name" name="name" value="{{ s.clinic.name }}" {{ 'disabled' if not admin }}></div>
-    <div class="field"><label for="address">Address</label><input id="address" name="address" value="{{ s.clinic.address }}" {{ 'disabled' if not admin }}></div>
-    <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" value="{{ s.clinic.phone }}" {{ 'disabled' if not admin }}></div>
-    <div class="field"><label for="cemail">Email</label><input id="cemail" name="email" type="email" value="{{ s.clinic.email }}" {{ 'disabled' if not admin }}></div>
-    <div class="field"><label for="public_base_url">QR base URL (optional)</label><input id="public_base_url" name="public_base_url" value="{{ s.public_base_url }}" placeholder="http://{{ lan }}:{{ port }}" {{ 'disabled' if not admin }}>
-      <small>The address phones use to open QR pages. <code>127.0.0.1</code> only works on this computer; use this computer's network address (maybe <b>http://{{ lan }}:{{ port }}</b>) or a deployed URL. Press "Regenerate all QR codes" after changing it.</small></div>
-    {% if admin %}<button class="btn" type="submit">Save clinic information</button>{% endif %}</form>
-  {% if admin %}<form method="post" action="{{ url_for('settings_regenerate_qr') }}" style="margin-top:14px">{{ csrf() }}<button class="btn ghost" type="submit">Regenerate all QR codes</button></form>{% endif %}
-</section>
-</div>{% endif %}
-<div class="grid g2">
-<section class="card"><h2>Change my password</h2>
-  <form method="post" action="{{ url_for('settings_password') }}">{{ csrf() }}
-    <div class="field"><label for="current_password">Current password</label><input id="current_password" name="current_password" type="password" autocomplete="current-password" required></div>
-    <div class="field"><label for="new_password">New password</label><input id="new_password" name="new_password" type="password" autocomplete="new-password" required><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>
-    <div class="field"><label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required></div>
-    <button class="btn" type="submit">Change password</button></form></section>
-<section class="card" id="identity-card" style="grid-column:1/-1">
-  <h2>Identity Verification</h2>
-  <p class="muted">One guided process: upload your ID, scan it, register your face, then match it against the ID photo. Face verification is required to finish signing in after your password. Only a face descriptor (numbers) and ID details are stored — never a face photo.</p>
-  <p id="idv-status" class="small">Status: {% if user.id_verified_at and user.face_descriptors %}<b style="color:var(--ok)">verified</b> on {{ user.id_verified_at }}{% else %}<b style="color:var(--warn)">not yet verified</b>{% endif %}</p>
+{% set verified = user.id_verified_at and user.face_descriptors %}
+{% set contact_ok = s.clinic.phone and s.clinic.email %}
+<div class="st-head">
+  <h1>{{ 'Settings' if admin else 'My profile' }}</h1>
+  <p>{% if admin %}Complete the setup items below to secure your account and enable reminders.{% else %}Your account details and password. Clinic and system settings are managed by administrators.{% endif %}</p>
+</div>
 
-  {% set verified = user.id_verified_at and user.face_descriptors %}
-  {% if not verified %}
-  <div class="idv-wizard">
-    <div class="idv-step active" data-step="1"><b>1</b> Upload ID</div>
-    <div class="idv-step" data-step="2"><b>2</b> Scan &amp; extract</div>
-    <div class="idv-step" data-step="3"><b>3</b> Face capture</div>
-    <div class="idv-step" data-step="4"><b>4</b> Match</div>
-    <div class="idv-step" data-step="5"><b>5</b> Result</div>
-  </div>
-
-  <div id="idv-panel-1" class="idv-panel">
-    <form id="idvScanForm" enctype="multipart/form-data">
-      {{ csrf() }}
-      <div class="field"><label>ID type</label><select id="idv_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select><small>Supported: Philippine National ID, Driver's License, Passport, UMID.</small></div>
-      <div class="field"><label>ID image</label><input id="idv_image" name="id_image" type="file" accept="image/*" required><small>Clear, well-lit photo of the front of your ID.</small></div>
-      <div class="field"><label>Current password (to confirm)</label><input id="idv_password" name="password" type="password" autocomplete="current-password" required></div>
-      <div class="field"><label><input type="checkbox" id="idv_consent" name="consent" value="1" required> I consent to ID and facial data processing.</label></div>
-      <button class="btn" type="submit">Scan ID</button>
-    </form>
-  </div>
-
-  <div id="idv-panel-2" class="idv-panel" hidden>
-    <h3>Extracted information</h3>
-    <div id="idvFields" class="idv-fields"></div>
-    <p class="small">Review the extracted details. Next you'll register your face and match it to the ID photo.</p>
-    <button type="button" class="btn" id="idvToFace">Continue to face capture</button>
-  </div>
-
-  <div id="idv-panel-3" class="idv-panel" hidden>
-    <h3>Face registration &amp; capture</h3>
-    <ol class="idv-instructions">
-      <li data-i="0">Look straight at the camera.</li>
-      <li data-i="1">Look to the left.</li>
-      <li data-i="2">Look to the right.</li>
-      <li data-i="3">Move closer to the camera.</li>
-      <li data-i="4">Move slightly farther away.</li>
-    </ol>
-    <p class="small">Ensure your entire face is visible and maintain proper lighting.</p>
-    <div class="face-camera"><video id="idvVideo" autoplay playsinline muted></video><div id="idvPlaceholder" class="face-placeholder">Camera is off</div></div>
-    <div class="face-actions"><button type="button" class="btn ghost" id="idvStart">Start camera</button><button type="button" class="btn" id="idvCapture" disabled>Capture pose 1 of 5</button><button type="button" class="btn ghost" id="idvRetake" hidden>Retake captures</button></div>
-  </div>
-
-  <div id="idv-panel-4" class="idv-panel" hidden><h3>Verifying your face against the ID photo...</h3></div>
-  <div id="idv-panel-5" class="idv-panel" hidden><h3 id="idvResultTitle"></h3><p id="idvResultMsg" class="small"></p><button type="button" class="btn ghost" id="idvAgain">Start over</button></div>
-
-  <div id="idvStatus" class="face-status" role="status" aria-live="polite"></div>
-  {% else %}
-  <p>Your identity is verified. Face verification will be required at login.</p>
+<div class="st-cards">
+  {% if admin %}
+  <a class="st-sum {{ 'st-ok' if s.email_enabled else 'st-warn' }}" href="#notifications">
+    <span class="st-sico">{{ icon('bell') }}</span>
+    <span class="st-stxt"><b>Notifications</b><small>{{ 'On' if s.email_enabled else 'Off' }}</small></span></a>
+  <a class="st-sum {{ 'st-ok' if contact_ok else 'st-warn' }}" href="#clinic">
+    <span class="st-sico">{{ icon('phone') }}</span>
+    <span class="st-stxt"><b>Clinic phone and email</b><small>{{ 'Complete' if contact_ok else 'Missing' }}</small></span></a>
+  <a class="st-sum {{ 'st-ok' if mail.configured else 'st-warn' }}" href="#email">
+    <span class="st-sico">{{ icon('mail') }}</span>
+    <span class="st-stxt"><b>Email sending</b><small>{{ 'Configured' if mail.configured else 'Not configured' }}</small></span></a>
   {% endif %}
+  <a class="st-sum {{ 'st-ok' if verified else 'st-warn' }}" href="#identity">
+    <span class="st-sico">{{ icon('shield') }}</span>
+    <span class="st-stxt"><b>ID verification</b><small>{{ 'Verified' if verified else 'Not verified' }}</small></span></a>
+</div>
 
-  <form method="post" action="{{ url_for('settings_identity_remove') }}" style="margin-top:14px" data-confirm="Remove all identity verification (ID + face)?">{{ csrf() }}<button class="btn danger" type="submit">Remove verification</button></form>
-</section>
-{% if admin %}<section class="card"><h2>Sample data</h2>
-  <p class="muted">PawTrack starts with sample animals, vaccinations and inventory so the dashboard has something to show. They are labelled internally and can be removed in one step. Your own records are never touched.</p>
-  {% if has_sample %}<form method="post" action="{{ url_for('settings_remove_sample') }}" data-confirm="Remove all sample animals, vaccinations, inventory and their history?">{{ csrf() }}<button class="btn danger" type="submit">Remove sample data</button></form>
-  {% else %}<p class="small">There is no sample data left.</p>{% endif %}</section>{% endif %}
+<div class="st-layout">
+  <nav class="st-nav" aria-label="Settings sections">
+    {% if admin %}
+    <p class="st-navlab">Clinic</p>
+    <a href="#clinic" class="active">Clinic information</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#email">Email configuration</a>
+    {% endif %}
+    <p class="st-navlab">Account and security</p>
+    <a href="#password">Change password</a>
+    <a href="#identity">Identity verification</a>
+    <p class="st-navlab">Data</p>
+    <a href="#danger">Danger zone</a>
+  </nav>
+
+  <div class="st-body">
+    {% if not admin %}
+    <p class="st-group">Account</p>
+    <section class="st-sec">
+      <h2>Account</h2>
+      <p class="st-lead">The details saved for your login.</p>
+      <dl class="kv"><dt>Name</dt><dd>{{ user.full_name or '-' }}</dd><dt>Username</dt><dd>{{ user.username }}</dd><dt>Email</dt><dd>{{ user.email or '-' }}</dd><dt>Role</dt><dd>{{ role_label }}</dd></dl>
+    </section>
+    {% endif %}
+
+    {% if admin %}
+    <p class="st-group">Clinic</p>
+    <section class="st-sec" id="clinic">
+      <h2>Clinic information</h2>
+      <p class="st-lead">Shown on printed records and QR pages.</p>
+      <form id="clinicForm" method="post" action="{{ url_for('settings_clinic') }}">{{ csrf() }}
+        <div class="st-row"><div class="st-lab"><label for="name">Clinic name</label></div>
+          <div class="st-ct"><input id="name" name="name" value="{{ s.clinic.name }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><label for="address">Address</label></div>
+          <div class="st-ct"><input id="address" name="address" value="{{ s.clinic.address }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><label for="phone">Phone</label><small>Optional</small></div>
+          <div class="st-ct"><input id="phone" name="phone" value="{{ s.clinic.phone }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><label for="cemail">Email</label><small>Optional</small></div>
+          <div class="st-ct"><input id="cemail" name="email" type="email" value="{{ s.clinic.email }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><label for="public_base_url">QR base URL</label>
+          <small>The address phones use to open QR pages. <code>127.0.0.1</code> only works on this computer; use this computer's network address (maybe <b>http://{{ lan }}:{{ port }}</b>) or a deployed URL.</small></div>
+          <div class="st-ct"><input id="public_base_url" name="public_base_url" value="{{ s.public_base_url }}" placeholder="http://{{ lan }}:{{ port }}" {{ 'disabled' if not admin }}></div></div>
+      </form>
+      <div class="st-foot">
+        <form method="post" action="{{ url_for('settings_regenerate_qr') }}">{{ csrf() }}<button class="btn ghost" type="submit">Regenerate all QR codes</button></form>
+        <button class="btn" type="submit" form="clinicForm">Save clinic information</button>
+      </div>
+    </section>
+
+    <section class="st-sec" id="notifications">
+      <h2>Notifications</h2>
+      <p class="st-lead">When reminders and inventory warnings appear.</p>
+      <form method="post" action="{{ url_for('settings_notifications') }}">{{ csrf() }}
+        <div class="st-row"><div class="st-lab"><label for="reminder_days">Reminder days before due date</label>
+          <small>Example: due Dec 20 with 7 days becomes "Upcoming" on Dec 13.</small></div>
+          <div class="st-ct"><input id="reminder_days" name="reminder_days" type="number" min="0" max="365" value="{{ s.reminder_days }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><label for="expiry_warning_days">Inventory "expiring soon" window</label><small>In days</small></div>
+          <div class="st-ct"><input id="expiry_warning_days" name="expiry_warning_days" type="number" min="0" max="365" value="{{ s.expiry_warning_days }}" {{ 'disabled' if not admin }}></div></div>
+        <div class="st-row"><div class="st-lab"><span class="st-name">Email reminders</span><small>Send reminders by email.</small></div>
+          <div class="st-ct"><label class="st-check"><input type="checkbox" id="email_enabled" name="email_enabled" value="1" {{ 'checked' if s.email_enabled }} {{ 'disabled' if not admin }}> Enabled</label></div></div>
+        <div class="st-foot"><button class="btn" type="submit">Save notification settings</button></div>
+      </form>
+    </section>
+
+    <section class="st-sec" id="email">
+      <h2>Email configuration</h2>
+      <p class="st-lead">Needed before reminders can be sent.</p>
+      <div class="st-row"><div class="st-lab"><span class="st-name">Status</span>
+        <small>{% if mail.configured %}{{ mail.server }}:{{ mail.port }}, {{ mail.username }}{% else %}Edit <code>.env</code> and restart to configure.{% endif %}</small></div>
+        <div class="st-ct"><span class="st-badge {{ 'ok' if mail.configured }}">{{ 'Configured' if mail.configured else 'Not configured' }}</span></div></div>
+      <form id="testEmailForm" method="post" action="{{ url_for('settings_test_email') }}">{{ csrf() }}
+        <div class="st-row"><div class="st-lab"><label for="to">Send a test email to</label><small>you@example.com</small></div>
+          <div class="st-ct"><input id="to" name="to" type="email" required placeholder="you@example.com"></div></div>
+      </form>
+      <div class="st-foot">
+        <form method="post" action="{{ url_for('notification_check') }}">{{ csrf() }}<input type="hidden" name="back" value="{{ url_for('settings') }}">
+          <button class="btn ghost" type="submit">Run notification check now</button></form>
+        <button class="btn" type="submit" form="testEmailForm">Send test email</button>
+      </div>
+    </section>
+    {% endif %}
+
+    <p class="st-group">Account and security</p>
+    <section class="st-sec" id="password">
+      <h2>Change my password</h2>
+      <p class="st-lead">At least 8 characters, with a letter, a number, and a symbol.</p>
+      <form method="post" action="{{ url_for('settings_password') }}">{{ csrf() }}
+        <div class="st-row"><div class="st-lab"><label for="current_password">Current password</label></div>
+          <div class="st-ct"><input id="current_password" name="current_password" type="password" autocomplete="current-password" required></div></div>
+        <div class="st-row"><div class="st-lab"><label for="new_password">New password</label></div>
+          <div class="st-ct"><input id="new_password" name="new_password" type="password" autocomplete="new-password" required></div></div>
+        <div class="st-row"><div class="st-lab"><label for="confirm_password">Confirm new password</label></div>
+          <div class="st-ct"><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required></div></div>
+        <div class="st-foot"><button class="btn" type="submit">Change password</button></div>
+      </form>
+    </section>
+
+    <section class="st-sec" id="identity">
+      <h2>Identity verification</h2>
+      <p class="st-lead">Upload your ID, scan it, register your face, then match it against the ID photo. Face verification is required to finish signing in after your password. Only a face descriptor (numbers) and ID details are stored — never a face photo.</p>
+      <p id="idv-status" class="small">Status: {% if verified %}<b style="color:var(--ok)">verified</b> on {{ user.id_verified_at }}{% else %}<b style="color:var(--warn)">not yet verified</b>{% endif %}</p>
+
+      {% if not verified %}
+      <div class="idv-wizard">
+        <div class="idv-step active" data-step="1"><b>1</b> Upload ID</div>
+        <div class="idv-step" data-step="2"><b>2</b> Scan &amp; extract</div>
+        <div class="idv-step" data-step="3"><b>3</b> Face capture</div>
+        <div class="idv-step" data-step="4"><b>4</b> Match</div>
+        <div class="idv-step" data-step="5"><b>5</b> Result</div>
+      </div>
+
+      <div id="idv-panel-1" class="idv-panel">
+        <form id="idvScanForm" enctype="multipart/form-data">
+          {{ csrf() }}
+          <div class="st-row"><div class="st-lab"><label for="idv_type">ID type</label><small>Supported: Philippine National ID, Driver's License, Passport, UMID.</small></div>
+            <div class="st-ct"><select id="idv_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select></div></div>
+          <div class="st-row"><div class="st-lab"><label for="idv_image">ID image</label><small>Clear, well-lit photo of the front of your ID.</small></div>
+            <div class="st-ct"><input id="idv_image" name="id_image" type="file" accept="image/*" required></div></div>
+          <div class="st-row"><div class="st-lab"><label for="idv_password">Current password</label><small>To confirm it is you.</small></div>
+            <div class="st-ct"><input id="idv_password" name="password" type="password" autocomplete="current-password" required></div></div>
+          <div class="st-row"><div class="st-lab"><span class="st-name">Consent</span><small>Required to continue.</small></div>
+            <div class="st-ct"><label class="st-check"><input type="checkbox" id="idv_consent" name="consent" value="1" required> I consent to ID and facial data processing.</label></div></div>
+          <div class="st-foot"><button class="btn" type="submit">Scan ID</button></div>
+        </form>
+      </div>
+
+      <div id="idv-panel-2" class="idv-panel" hidden>
+        <h3>Extracted information</h3>
+        <div id="idvFields" class="idv-fields"></div>
+        <p class="small">Review the extracted details. Next you'll register your face and match it to the ID photo.</p>
+        <button type="button" class="btn" id="idvToFace">Continue to face capture</button>
+      </div>
+
+      <div id="idv-panel-3" class="idv-panel" hidden>
+        <h3>Face registration &amp; capture</h3>
+        <ol class="idv-instructions">
+          <li data-i="0">Look straight at the camera.</li>
+          <li data-i="1">Look to the left.</li>
+          <li data-i="2">Look to the right.</li>
+          <li data-i="3">Move closer to the camera.</li>
+          <li data-i="4">Move slightly farther away.</li>
+        </ol>
+        <p class="small">Ensure your entire face is visible and maintain proper lighting.</p>
+        <div class="face-camera"><video id="idvVideo" autoplay playsinline muted></video><div id="idvPlaceholder" class="face-placeholder">Camera is off</div></div>
+        <div class="face-actions"><button type="button" class="btn ghost" id="idvStart">Start camera</button><button type="button" class="btn" id="idvCapture" disabled>Capture pose 1 of 5</button><button type="button" class="btn ghost" id="idvRetake" hidden>Retake captures</button></div>
+      </div>
+
+      <div id="idv-panel-4" class="idv-panel" hidden><h3>Verifying your face against the ID photo...</h3></div>
+      <div id="idv-panel-5" class="idv-panel" hidden><h3 id="idvResultTitle"></h3><p id="idvResultMsg" class="small"></p><button type="button" class="btn ghost" id="idvAgain">Start over</button></div>
+
+      <div id="idvStatus" class="face-status" role="status" aria-live="polite"></div>
+      {% else %}
+      <p>Your identity is verified. Face verification will be required at login.</p>
+      {% endif %}
+    </section>
+
+    <p class="st-group">Data</p>
+    <section class="st-sec st-danger" id="danger">
+      <h2>Danger zone</h2>
+      <p class="st-lead">These actions remove data.</p>
+      {% if admin %}
+      <div class="st-row"><div class="st-lab"><span class="st-name">Remove sample data</span>
+        <small>PawTrack starts with sample animals, vaccinations and inventory so the dashboard has something to show. They are labelled internally and can be removed in one step. Your own records are never touched.</small></div>
+        <div class="st-ct">
+        {% if has_sample %}<form method="post" action="{{ url_for('settings_remove_sample') }}" data-confirm="Remove all sample animals, vaccinations, inventory and their history?">{{ csrf() }}<button class="btn danger" type="submit">Remove sample data</button></form>
+        {% else %}<span class="small muted">There is no sample data left.</span>{% endif %}
+        </div></div>
+      {% endif %}
+      <div class="st-row"><div class="st-lab"><span class="st-name">Remove verification</span>
+        <small>Removes your ID details and face descriptor. You will need to verify again.</small></div>
+        <div class="st-ct"><form method="post" action="{{ url_for('settings_identity_remove') }}" data-confirm="Remove all identity verification (ID + face)?">{{ csrf() }}<button class="btn danger" type="submit">Remove verification</button></form></div></div>
+    </section>
+  </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
-<style>
-.idv-wizard{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
-.idv-step{font-size:.72rem;padding:6px 12px;border-radius:16px;background:#eef2f8;color:#8794a8}
-.idv-step b{margin-right:4px}
-.idv-step.active{background:#0B2440;color:#fff;font-weight:700}
-.idv-step.done{background:#DFF6E9;color:#14693F}
-.idv-panel{border-top:1px solid #eef2f8;padding-top:14px}
-.idv-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.idv-fields div{background:#f6f8fc;border-radius:8px;padding:8px 10px;font-size:.82rem}
-.idv-fields span{display:block;color:#8794a8;font-size:.7rem}
-.idv-instructions{margin:0 0 10px;padding-left:20px;color:#44546b;font-size:.85rem;line-height:1.9}
-.idv-instructions li.active{color:#1E40AF;font-weight:800}
-.idv-instructions li.done{color:#1F9D61;text-decoration:line-through}
-</style>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.st-nav a')); if(!links.length) return;
+  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));}).filter(Boolean);
+  function set(id){links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id);});}
+  function onScroll(){
+    var pos=window.scrollY+140, current=secs.length?secs[0].id:'';
+    secs.forEach(function(s){ if(s.getBoundingClientRect().top+window.scrollY<=pos) current=s.id; });
+    if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4) current=secs[secs.length-1].id;
+    set(current);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  window.addEventListener('resize',onScroll);
+  links.forEach(function(a){a.addEventListener('click',function(){set(a.getAttribute('href').slice(1));});});
+  onScroll();
+})();
+</script>
 <script>
 (function(){
   var form=document.getElementById('idvScanForm'); if(!form) return;
