@@ -28,18 +28,16 @@
 .st-layout{display:grid;grid-template-columns:228px minmax(0,1fr);gap:28px;align-items:start}
 .st-nav{position:sticky;top:88px;display:flex;flex-direction:column;gap:2px;min-width:0;scrollbar-width:none}
 .st-nav::-webkit-scrollbar{display:none}
-.st-navlab{margin:16px 0 6px;padding:0 10px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.st-navlab:first-child{margin-top:0}
 .st-nav a{display:block;padding:8px 12px;border-radius:8px;font-size:.87rem;font-weight:600;color:var(--muted);white-space:nowrap}
 .st-nav a:hover{background:var(--surface-2);color:var(--white)}
 .st-nav a.active{background:var(--royal);color:#fff}
 
 /* panels */
 .st-body{min-width:0}
-.st-group{margin:30px 0 10px;font-size:.68rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.st-group:first-child{margin-top:0}
 .st-sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px 18px;margin-bottom:18px;scroll-margin-top:96px}
 :root[data-theme="light"] .st-sec,:root[data-theme="light"] .st-sum{box-shadow:0 8px 22px rgba(15,36,80,.05)}
+body.tabs-on .st-body>.st-sec{display:none;margin-bottom:0}
+body.tabs-on .st-body>.st-sec.is-active{display:block}
 .st-sec h2{margin:0 0 4px;font-size:1.12rem;font-weight:700;color:var(--white)}
 .st-lead{margin:0;color:var(--muted);font-size:.85rem;line-height:1.5}
 .st-sec .st-lead{margin-bottom:4px}
@@ -96,7 +94,6 @@
   .st-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .st-layout{grid-template-columns:minmax(0,1fr);gap:14px}
   .st-nav{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
-  .st-navlab{display:none}
   .st-nav a{background:var(--surface-2)}
 }
 @media(max-width:640px){
@@ -138,23 +135,16 @@
 
 <div class="st-layout">
   <nav class="st-nav" aria-label="Settings sections">
-    {% if admin %}
-    <p class="st-navlab">Clinic</p>
-    <a href="#clinic" class="active">Clinic information</a>
-    <a href="#notifications">Notifications</a>
-    <a href="#email">Email configuration</a>
-    {% endif %}
-    <p class="st-navlab">Account and security</p>
+    {% if admin %}<a href="#clinic">Clinic information</a><a href="#notifications">Notifications</a><a href="#email">Email configuration</a>{% endif %}
+    {% if not admin %}<a href="#account">Account</a>{% endif %}
     <a href="#password">Change password</a>
     <a href="#identity">Identity verification</a>
-    <p class="st-navlab">Data</p>
     <a href="#danger">Danger zone</a>
   </nav>
 
   <div class="st-body">
     {% if not admin %}
-    <p class="st-group">Account</p>
-    <section class="st-sec">
+    <section class="st-sec" id="account">
       <h2>Account</h2>
       <p class="st-lead">The details saved for your login.</p>
       <dl class="kv"><dt>Name</dt><dd>{{ user.full_name or '-' }}</dd><dt>Username</dt><dd>{{ user.username }}</dd><dt>Email</dt><dd>{{ user.email or '-' }}</dd><dt>Role</dt><dd>{{ role_label }}</dd></dl>
@@ -162,7 +152,6 @@
     {% endif %}
 
     {% if admin %}
-    <p class="st-group">Clinic</p>
     <section class="st-sec" id="clinic">
       <h2>Clinic information</h2>
       <p class="st-lead">Shown on printed records and QR pages.</p>
@@ -218,7 +207,6 @@
     </section>
     {% endif %}
 
-    <p class="st-group">Account and security</p>
     <section class="st-sec" id="password">
       <h2>Change my password</h2>
       <p class="st-lead">At least 8 characters, with a letter, a number, and a symbol.</p>
@@ -292,7 +280,6 @@
       {% endif %}
     </section>
 
-    <p class="st-group">Data</p>
     <section class="st-sec st-danger" id="danger">
       <h2>Danger zone</h2>
       <p class="st-lead">These actions remove data.</p>
@@ -315,19 +302,27 @@
 {% block scripts %}
 <script>
 (function(){
-  var links=[].slice.call(document.querySelectorAll('.st-nav a')); if(!links.length) return;
-  var secs=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));}).filter(Boolean);
-  function set(id){links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id);});}
-  function onScroll(){
-    var pos=window.scrollY+140, current=secs.length?secs[0].id:'';
-    secs.forEach(function(s){ if(s.getBoundingClientRect().top+window.scrollY<=pos) current=s.id; });
-    if(window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4) current=secs[secs.length-1].id;
-    set(current);
+  var links=[].slice.call(document.querySelectorAll('.st-nav a'));
+  var secs=[].slice.call(document.querySelectorAll('.st-body .st-sec'));
+  if(!links.length||!secs.length) return;
+  document.body.classList.add('tabs-on');
+  function show(id){
+    if(!secs.some(function(s){return s.id===id;})) id=secs[0].id;
+    secs.forEach(function(s){s.classList.toggle('is-active',s.id===id);});
+    links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id);});
   }
-  window.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('resize',onScroll);
-  links.forEach(function(a){a.addEventListener('click',function(){set(a.getAttribute('href').slice(1));});});
-  onScroll();
+  function fromHash(){show((location.hash||'').replace('#',''));}
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="#"]'); if(!a) return;
+    var id=a.getAttribute('href').slice(1);
+    if(!secs.some(function(s){return s.id===id;})) return;
+    e.preventDefault();
+    if(history.replaceState) history.replaceState(null,'','#'+id); else location.hash=id;
+    show(id);
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+  window.addEventListener('hashchange',fromHash);
+  fromHash();
 })();
 </script>
 <script>
