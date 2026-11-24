@@ -120,12 +120,26 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
   .rpt-alert form{margin-left:0}
 }
 @media print{
-  .rpt-tabs,.rpt-subtabs,.rpt-pills,.rpt-search,.rpt-foot,.rpt-alert,.rpt-filters,.rpt-head .rpt-acts{display:none!important}
+  @page{size:A4 landscape;margin:12mm}
+  .rpt-head,.rpt-tabs,.rpt-subtabs,.rpt-pills,.rpt-search,.rpt-foot,.rpt-alert,.rpt-filters{display:none!important}
   .rpt-twrap{overflow:visible}
-  .rpt-table{min-width:0;font-size:.82rem}
-  .rpt-card,.rpt-stat,.rpt-cov{border-color:#bbb;background:#fff;color:#000}
-  .rpt-table th,.rpt-table td{color:#000;border-color:#ccc}
+  /* fixed layout keeps every column on the paper instead of clipping at the right edge */
+  .rpt-table{min-width:0;width:100%;table-layout:fixed;font-size:.7rem}
+  .rpt-table th,.rpt-table td{padding:4px 6px;overflow-wrap:break-word}
+  .rpt-table th{white-space:normal;line-height:1.2;font-size:.6rem;letter-spacing:.04em;padding:4px 5px}
+  .rpt-table tr{page-break-inside:avoid}
+  .rpt-table th.act,.rpt-table td.rpt-rowact{display:none}
+  .rpt-card,.rpt-stat,.rpt-cov{border-color:#bbb;background:#fff;color:#000;border-radius:0}
+  .rpt-stat .l,.rpt-stat .h,.rpt-count{color:#444}
+  .rpt-table th,.rpt-table td{color:#000;border-color:#bbb}
   .rpt-ghead td{background:#eee}
+  .rpt-ghead{page-break-after:avoid}
+  .rpt-gbtn .ico{display:none}
+  .rpt-pill{background:none;border:1px solid #777;color:#000}
+  .rpt-pill.bad{border-color:#B3261E;color:#B3261E}
+  .rpt-pill.warn{border-color:#8A5A00;color:#8A5A00}
+  .rpt-pill.good{border-color:#14693F;color:#14693F}
+  .rpt-btn{border:0;padding:0;color:#000;white-space:normal}
 }
 </style>
 {% endblock %}
@@ -389,8 +403,11 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
     rows.forEach(function (r) { r.hidden = !matches(r); });
     groups.forEach(function (g) {
       if (!g.head) return;
-      g.head.hidden = !g.rows.some(matches);
+      var total = g.rows.filter(matches).length;
+      g.head.hidden = !total;
       g.tb.classList.remove('closed');
+      // "3 of 3 on this page" makes no sense on paper: show the plain total instead
+      g.gcount.textContent = total + ' record' + (total === 1 ? '' : 's');
     });
   });
   window.addEventListener('afterprint', render);
