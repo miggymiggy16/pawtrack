@@ -11,20 +11,7 @@
 {%- endif -%}
 {%- endmacro %}
 
-{% macro stat_hint(label, value) -%}
-{%- if label == 'Total Records' -%}All records
-{%- elif label == 'Overdue' -%}{{ 'Needs action now' if value else 'Nothing overdue' }}
-{%- elif label == 'Due Today' -%}{{ 'Due now' if value else 'Nothing due' }}
-{%- elif label == 'Completed' -%}Up to date
-{%- elif label == 'Animals affected' -%}With records
-{%- elif label == 'Earliest due date' -%}Next due
-{%- elif label == 'Total animals' -%}Registered
-{%- elif label == 'Owned' -%}With owner
-{%- elif label == 'Stray' -%}No owner
-{%- elif label == 'Species' -%}Distinct
-{%- else -%} {{ '' }}
-{%- endif -%}
-{%- endmacro %}
+
 
 {% block head %}
 <style>
@@ -80,7 +67,7 @@
 .rpt-count{font-size:.8rem;color:var(--muted)}
 .rpt-pills{display:flex;gap:8px;flex-wrap:wrap}
 .rpt-pillbtn{padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:.79rem;font-weight:600;cursor:pointer}
-.rpt-pillbtn span{opacity:.85;margin-left:3px}
+.rpt-pillbtn span{opacity:.85}
 .rpt-pillbtn.on{background:rgba(76,123,234,.18);border-color:#4C7BEA;color:var(--white)}
 .rpt-search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:240px}
 .rpt-search input{border:0;background:transparent;color:var(--white);outline:none;width:100%;font-size:.85rem;margin:0;padding:0}
@@ -134,6 +121,8 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
 }
 @media print{
   .rpt-tabs,.rpt-subtabs,.rpt-pills,.rpt-search,.rpt-foot,.rpt-alert,.rpt-filters,.rpt-head .rpt-acts{display:none!important}
+  .rpt-twrap{overflow:visible}
+  .rpt-table{min-width:0;font-size:.82rem}
   .rpt-card,.rpt-stat,.rpt-cov{border-color:#bbb;background:#fff;color:#000}
   .rpt-table th,.rpt-table td{color:#000;border-color:#ccc}
   .rpt-ghead td{background:#eee}
@@ -145,12 +134,15 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
 {% set vax_kind = kind in ('vaccination', 'overdue', 'upcoming') %}
 {% set primary = report.sections|selectattr('primary')|first %}
 {% set ns = namespace(sub=[]) %}
-{% for gtitle, gicon, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
+{% for _t, _i, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
 {% set adv_fields = [] %}{% for f in ['breed','sex','ownership'] %}{% if f in filters %}{% set _ = adv_fields.append(f) %}{% endif %}{% endfor %}
 {% set adv_open = namespace(v=false) %}{% for f in adv_fields %}{% if args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
 {% set merge_id = primary.headers[0] == 'Animal ID' %}
 {% set st_idx = primary.headers.index('Status') if 'Status' in primary.headers else 0 %}
 {% set ncols = (primary.headers|length - 1 if merge_id else primary.headers|length) + 1 %}
+{% set hints = {'Total Records': 'All records', 'Overdue': 'Needs action now', 'Due Today': 'Nothing due',
+                'Completed': 'Up to date', 'Animals affected': 'With records', 'Earliest due date': 'Next due',
+                'Total animals': 'Registered', 'Owned': 'With owner', 'Stray': 'No owner', 'Species': 'Distinct'} %}
 
 {% set gtab = {'Vaccination Reports': 'Vaccination', 'Animal Reports': 'Animals', 'Inventory Reports': 'Inventory'} %}
 <div class="rpt-head">
@@ -169,7 +161,7 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
 
 {# 1. Report group tabs (+ the reports inside the active group) #}
 <section class="no-print" aria-label="Report type">
-  <nav class="rpt-tabs" aria-label="Report group">{% for gtitle, gicon, kinds in groups %}
+  <nav class="rpt-tabs" aria-label="Report group">{% for gtitle, _i, kinds in groups %}
     <a href="{{ url_for('reports', type=kinds[0]) }}" class="{{ 'active' if kind in kinds }}"{% if kind in kinds %} aria-current="page"{% endif %}>{{ gtab.get(gtitle, gtitle) }}</a>{% endfor %}</nav>
   {% if ns.sub|length > 1 %}<nav class="rpt-subtabs" aria-label="Report">{% for k in ns.sub %}
     <a href="{{ url_for('reports', type=k) }}" class="{{ 'active' if kind == k }}"{% if kind == k %} aria-current="page"{% endif %}>{{ tab_labels[k] }}</a>{% endfor %}</nav>{% endif %}
@@ -178,25 +170,27 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
 {# 2. Summary cards #}
 <div class="rpt-stats" aria-label="Report summary">{% for s in report.summary %}
   <div class="rpt-stat {{ s.tone }}"><span class="l">{{ s.label }}</span><span class="n">{{ s.value }}</span>
-    <span class="h">{{ stat_hint(s.label, s.value) }}</span></div>{% endfor %}
+    <span class="h">{{ 'Due now' if s.label == 'Due Today' and s.value else hints.get(s.label, '') }}</span></div>{% endfor %}
 </div>
 
 {# 3. Vaccination coverage #}
-{% set cov = namespace(total=0, done=0) %}
-{% for s in report.summary %}{% if s.label == 'Total Records' %}{% set cov.total = s.value|int %}{% endif %}{% if s.label == 'Completed' %}{% set cov.done = s.value|int %}{% endif %}{% endfor %}
-{% if kind == 'vaccination' and cov.total %}
-{% set pct = ((cov.done * 100 / cov.total)|round|int) %}
+{% set sv = namespace(total=0, done=0, overdue=0) %}
+{% for s in report.summary %}
+  {% if s.label == 'Total Records' %}{% set sv.total = s.value|int %}
+  {% elif s.label == 'Completed' %}{% set sv.done = s.value|int %}
+  {% elif s.label == 'Overdue' %}{% set sv.overdue = s.value|int %}{% endif %}
+{% endfor %}
+{% if kind == 'vaccination' and sv.total %}
+{% set pct = ((sv.done * 100 / sv.total)|round|int) %}
 <div class="rpt-cov"><div class="rpt-covtop"><b>Vaccination coverage</b>
-    <span>{{ cov.done }} of {{ cov.total }} up to date &middot; {{ pct }}%</span></div>
+    <span>{{ sv.done }} of {{ sv.total }} up to date &middot; {{ pct }}%</span></div>
   <div class="rpt-bar" role="img" aria-label="{{ pct }}% up to date"><i style="width:{{ pct }}%"></i></div></div>
 {% endif %}
 
 {# 4. Overdue call-out #}
-{% set ov = namespace(n=0) %}
-{% for s in report.summary %}{% if s.label == 'Overdue' %}{% set ov.n = s.value|int %}{% endif %}{% endfor %}
-{% if ov.n %}
+{% if sv.overdue %}
 <div class="rpt-alert no-print">{{ icon('alert') }}
-  <div><span class="t">{{ ov.n }} vaccination{{ ' is' if ov.n == 1 else 's are' }} overdue</span>
+  <div><span class="t">{{ sv.overdue }} vaccination{{ ' is' if sv.overdue == 1 else 's are' }} overdue</span>
     <span class="s">Notify owners so these animals can be vaccinated.</span></div>
   {% if can('settings.manage') %}
   <form method="post" action="{{ url_for('notification_check') }}">{{ csrf() }}
@@ -232,34 +226,28 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
 </form>
 
 {# 6. Records #}
-{% set counts = namespace(attn=0, up=0, done=0) %}
-{% for row in primary.rows %}
-  {% if row[st_idx] in ('Overdue', 'Due Today') %}{% set counts.attn = counts.attn + 1 %}{% endif %}
-  {% if row[st_idx] == 'Upcoming' %}{% set counts.up = counts.up + 1 %}{% endif %}
-  {% if row[st_idx] == 'Completed' %}{% set counts.done = counts.done + 1 %}{% endif %}
-{% endfor %}
-
-{% set gl = [] %}
 {% if vax_kind %}
-  {% for gkey, gtitle, gstatus in [('attn','Needs attention · Overdue',['Overdue','Due Today']),('up','Upcoming',['Upcoming']),('done','Completed',['Completed'])] %}
-    {% set idxs = namespace(v=[]) %}
-    {% for row in primary.rows %}{% if row[st_idx] in gstatus %}{% set _ = idxs.v.append(loop.index0) %}{% endif %}{% endfor %}
-    {% set _ = gl.append({'key': gkey, 'title': gtitle, 'idx': idxs.v}) %}
+  {% set gidx = {'attn': [], 'up': [], 'done': []} %}
+  {% for row in primary.rows %}
+    {% set st = row[st_idx] %}
+    {% set key = 'attn' if st in ('Overdue', 'Due Today') else 'up' if st == 'Upcoming' else 'done' if st == 'Completed' else '' %}
+    {% if key %}{% set _ = gidx[key].append(loop.index0) %}{% endif %}
   {% endfor %}
+  {% set gl = [{'key': 'attn', 'title': 'Needs attention · Overdue', 'idx': gidx.attn},
+               {'key': 'up', 'title': 'Upcoming', 'idx': gidx.up},
+               {'key': 'done', 'title': 'Completed', 'idx': gidx.done}] %}
 {% else %}
-  {% set idxs = namespace(v=[]) %}
-  {% for row in primary.rows %}{% set _ = idxs.v.append(loop.index0) %}{% endfor %}
-  {% set _ = gl.append({'key': 'all', 'title': '', 'idx': idxs.v}) %}
+  {% set gl = [{'key': 'all', 'title': '', 'idx': range(primary.rows|length)|list}] %}
 {% endif %}
 
 <section class="rpt-card">
   <div class="rpt-rhead">
     <h2>{{ primary.title }}</h2><span class="rpt-count" id="rptCount"></span>
     {% if vax_kind %}<div class="rpt-pills no-print" role="group" aria-label="Filter by status">
-      <button class="rpt-pillbtn on" type="button" data-pill="all">All &nbsp;<span>{{ primary.rows|length }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="attn">Overdue<span>{{ counts.attn }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="up">Upcoming<span>{{ counts.up }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="done">Completed<span>{{ counts.done }}</span></button>
+      <button class="rpt-pillbtn on" type="button" data-pill="all">All <span>{{ primary.rows|length }}</span></button>
+      <button class="rpt-pillbtn" type="button" data-pill="attn">Overdue <span>{{ gidx.attn|length }}</span></button>
+      <button class="rpt-pillbtn" type="button" data-pill="up">Upcoming <span>{{ gidx.up|length }}</span></button>
+      <button class="rpt-pillbtn" type="button" data-pill="done">Completed <span>{{ gidx.done|length }}</span></button>
     </div>{% endif %}
     <label class="rpt-search no-print">{{ icon('search') }}<input id="rptSearch" type="search" placeholder="Search records..." autocomplete="off" aria-label="Search records"></label>
   </div>
@@ -268,11 +256,10 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
   <div class="rpt-twrap"><table class="rpt-table" id="rptTable">
     <thead><tr>{% for h in primary.headers %}{% if not (merge_id and loop.first) %}<th>{{ h }}</th>{% endif %}{% endfor %}<th class="act">Action</th></tr></thead>
     {% for g in gl %}
-    <tbody{% if g.title %} class="rpt-grp" data-group="{{ g.key }}"{% endif %}>
+    <tbody{% if g.title %} class="rpt-grp"{% endif %}>
       {% if g.title %}<tr class="rpt-ghead"><td colspan="{{ ncols }}"><button class="rpt-gbtn" type="button" data-gtoggle aria-expanded="true">{{ icon('chevron') }}<span>{{ g.title }}</span><span class="rpt-gcount">{{ g.idx|length }} record{{ '' if g.idx|length == 1 else 's' }}</span></button></td></tr>{% endif %}
       {% for i in g.idx %}{% set row = primary.rows[i] %}{% set m = primary.meta[i] %}
-      <tr class="rpt-row{{ ' bad' if row[st_idx] == 'Overdue' }}" data-search="{{ m.search }}"
-          data-filter="{{ 'attn' if row[st_idx] in ('Overdue','Due Today') else ('up' if row[st_idx] == 'Upcoming' else ('done' if row[st_idx] == 'Completed' else 'other')) }}">
+      <tr class="rpt-row{{ ' bad' if row[st_idx] == 'Overdue' }}" data-search="{{ m.search }}" data-filter="{{ g.key }}">
         {% for c in row %}{% set h = primary.headers[loop.index0] %}{% set hl = h|lower %}
         {% if merge_id and loop.first %}
         {% elif merge_id and loop.index0 == 1 %}<td class="rpt-animal"><b>{{ c }}</b><small>{{ row[0] }}</small></td>
@@ -313,11 +300,14 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
   });
 
   var table = document.getElementById('rptTable'); if (!table) return;
-  var groups = Array.prototype.map.call(table.tBodies, function (tb) {
-    return { tb: tb, head: tb.querySelector('.rpt-ghead'), closed: false,
-             rows: Array.prototype.filter.call(tb.rows, function (r) { return r.classList.contains('rpt-row'); }) };
+  var groups = Array.from(table.tBodies, function (tb) {
+    var head = tb.querySelector('.rpt-ghead');
+    return { tb: tb, head: head, closed: false,
+             btn: head && head.querySelector('[data-gtoggle]'),
+             gcount: head && head.querySelector('.rpt-gcount'),
+             rows: Array.from(tb.rows).filter(function (r) { return r.classList.contains('rpt-row'); }) };
   });
-  var rows = [].concat.apply([], groups.map(function (g) { return g.rows; }));
+  var rows = groups.flatMap(function (g) { return g.rows; });
   var pager = document.getElementById('rptPager'), info = document.getElementById('rptInfo'),
       count = document.getElementById('rptCount'), box = document.getElementById('rptSearch');
   var page = 1, size = 10, term = '', pill = 'all';
@@ -351,8 +341,8 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
       var total = g.rows.filter(matches).length;
       g.tb.classList.toggle('closed', g.closed);
       g.head.hidden = !total || !onPage.length;
-      g.head.querySelector('[data-gtoggle]').setAttribute('aria-expanded', String(!g.closed));
-      g.head.querySelector('.rpt-gcount').textContent = onPage.length + ' of ' + total + ' on this page';
+      g.btn.setAttribute('aria-expanded', String(!g.closed));
+      g.gcount.textContent = onPage.length + ' of ' + total + ' on this page';
     });
 
     count.textContent = shown.length + ' record' + (shown.length === 1 ? '' : 's');
@@ -384,7 +374,7 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
     }
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll('[data-pill]'), function (b) {
+  document.querySelectorAll('[data-pill]').forEach(function (b) {
     b.addEventListener('click', function () {
       pill = b.dataset.pill; page = 1;
       document.querySelectorAll('[data-pill]').forEach(function (x) { x.classList.toggle('on', x === b); });
@@ -392,13 +382,16 @@ tbody.closed .rpt-gbtn .ico{transform:rotate(-90deg)}
     });
   });
   groups.forEach(function (g) {
-    var btn = g.head && g.head.querySelector('[data-gtoggle]');
-    if (btn) btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
+    if (g.btn) g.btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
   });
   box.addEventListener('input', function () { term = box.value.trim().toLowerCase(); page = 1; render(); });
   window.addEventListener('beforeprint', function () {
     rows.forEach(function (r) { r.hidden = !matches(r); });
-    groups.forEach(function (g) { if (g.head) g.head.hidden = !g.rows.some(matches); if (g.head) g.tb.classList.remove('closed'); });
+    groups.forEach(function (g) {
+      if (!g.head) return;
+      g.head.hidden = !g.rows.some(matches);
+      g.tb.classList.remove('closed');
+    });
   });
   window.addEventListener('afterprint', render);
   render();
