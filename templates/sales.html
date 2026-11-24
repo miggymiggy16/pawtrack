@@ -1,32 +1,237 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import badge, icon %}
 {% block title %}Sales (POS){% endblock %}
+{% block body_class %}sales-page{% endblock %}
+
+{% block head %}
+<style>
+/* ===== Sales (POS) — layout only; colours come from the app theme ===== */
+.sales-page{--sl-accent:#2563EB;--sl-tint:#E8F1FF;--sl-track:#DDE5F0}
+:root[data-theme="dark"] .sales-page{--sl-accent:#93C5FD;--sl-tint:rgba(59,130,246,.16);--sl-track:rgba(255,255,255,.12)}
+
+/* page head */
+.sl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.sl-head h1{margin:0 0 6px;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.sl-head p{margin:0;color:var(--muted);font-size:.95rem}
+.sl-head-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* filters */
+.sl-filters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) minmax(190px,1.35fr) auto;gap:14px;align-items:end;padding:16px 18px}
+.sl-field{display:flex;flex-direction:column;gap:7px;min-width:0;margin:0}
+.sl-field label{margin:0;font-size:.8rem;font-weight:600;color:var(--white)}
+.sl-search-box{position:relative;display:flex;align-items:center;min-width:0}
+.sl-search-box .ico{position:absolute;left:13px;width:18px;height:18px;color:var(--muted);pointer-events:none}
+body.sales-page .sl-search-box input{padding-left:40px}
+.sl-filter-btns{display:flex;gap:10px;align-items:center}
+.sl-filter-btns .btn{justify-content:center}
+
+/* stat cards */
+.sl-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.sl-stat{display:flex;align-items:center;gap:16px;min-width:0;padding:16px 18px;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.sl-ico{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--sb);color:var(--sc)}
+.sl-ico .ico{width:28px;height:28px;stroke-width:1.8}
+.sl-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sl-l{font-size:.8rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-v{font-size:1.3rem;font-weight:800;letter-spacing:-.02em;line-height:1.25;color:var(--white);font-variant-numeric:tabular-nums}
+.sl-f{font-size:.72rem;color:var(--muted)}
+.s-blue{--sb:#E3F0FF;--sc:#2563EB}
+.s-purple{--sb:#F3E8FF;--sc:#8B5CF6}
+.s-green{--sb:#E4F9EC;--sc:#16A34A}
+.s-red{--sb:#FFE4E6;--sc:#DC2626}
+.s-amber{--sb:#FEF3C7;--sc:#D97706}
+:root[data-theme="dark"] .s-blue{--sb:rgba(59,130,246,.18);--sc:#93C5FD}
+:root[data-theme="dark"] .s-purple{--sb:rgba(168,85,247,.18);--sc:#C4B5FD}
+:root[data-theme="dark"] .s-green{--sb:rgba(34,197,94,.18);--sc:#86EFAC}
+:root[data-theme="dark"] .s-red{--sb:rgba(239,68,68,.18);--sc:#FCA5A5}
+:root[data-theme="dark"] .s-amber{--sb:rgba(245,158,11,.18);--sc:#FCD34D}
+
+/* panels */
+.sl-mid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;margin-bottom:18px}
+.sl-panel{display:flex;flex-direction:column;min-width:0;padding:16px 18px 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+:root[data-theme="light"] .sl-stat,:root[data-theme="light"] .sl-panel{border-color:#E6EBF4;box-shadow:0 8px 22px rgba(15,36,80,.05)}
+.sl-ph{display:flex;align-items:center;gap:10px;margin:0 0 16px}
+.sl-ph .ico{width:20px;height:20px;color:var(--sl-accent)}
+.sl-ph h2{margin:0;font-size:1rem;font-weight:700;color:var(--white);white-space:nowrap}
+.sl-star .ico{fill:currentColor;stroke:none}
+
+/* payment method donut + legend */
+.sl-pay{display:flex;flex:1;align-items:center;gap:26px;flex-wrap:wrap;padding:2px 0 4px;min-height:152px}
+.sl-donut{position:relative;display:grid;place-items:center;width:150px;height:150px;border-radius:50%;flex:none}
+.sl-donut::before{content:"";position:absolute;inset:24px;border-radius:50%;background:var(--panel)}
+.sl-donut span{position:relative;max-width:98px;text-align:center;font-size:.8rem;font-weight:700;line-height:1.3;color:var(--white)}
+.sl-donut.empty{background:var(--sl-track)}
+.sl-legend{list-style:none;margin:0;padding:0;display:grid;gap:12px;flex:1 1 220px;max-width:460px;min-width:0}
+.sl-legend li{display:grid;grid-template-columns:9px minmax(0,1fr) auto;align-items:center;gap:10px;font-size:.88rem;color:var(--white)}
+.sl-legend i{width:9px;height:9px;border-radius:50%}
+.sl-legend span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl-legend b{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl-legend small{font-weight:600;color:var(--muted)}
+
+/* top items */
+.sl-tops{list-style:none;margin:0;padding:0}
+.sl-tops li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.sl-tops li:last-child{border-bottom:0}
+.sl-top-n{display:flex;flex-direction:column;min-width:0;font-size:.9rem;font-weight:600;line-height:1.35;color:var(--white)}
+.sl-top-n small{font-size:.74rem;font-weight:400;color:var(--muted)}
+.sl-tops b{font-size:.9rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* empty states */
+.sl-empty{display:flex;align-items:center;justify-content:center;gap:14px;min-height:150px;padding:26px 16px;color:var(--muted)}
+.sl-eico{width:56px;height:56px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--sl-tint);color:var(--sl-accent)}
+.sl-eico .ico{width:26px;height:26px;stroke-width:1.6}
+.sl-empty b{display:block;margin-bottom:1px;font-size:.95rem;color:var(--white)}
+.sl-empty small{font-size:.8rem}
+
+/* recent sales */
+.sl-recent{padding:0;overflow:hidden}
+.sl-recent .sl-ph{padding:16px 18px;margin:0}
+.sl-recent .table-wrap{border:0;border-top:1px solid var(--line);border-radius:0}
+.sl-recent table{min-width:980px}
+.sl-recent th:nth-child(1){min-width:170px}
+.sl-recent th:nth-child(4){min-width:190px}
+.sl-recent th:nth-child(5){min-width:230px}
+.sl-recent .dnote{margin:0;padding:12px 18px 16px}
+.sl-recent .sl-empty{min-height:150px}
+
+/* responsive */
+@media(max-width:1279px){.sl-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1280px) and (max-width:1400px){
+  .sl-ico{width:54px;height:54px}
+  .sl-ico .ico{width:24px;height:24px}
+  .sl-v{font-size:1.15rem}
+}
+@media(max-width:1200px){
+  .sl-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .sl-filter-btns{grid-column:1/-1;justify-content:flex-end}
+}
+@media(max-width:760px){
+  .sl-head h1{font-size:1.65rem}
+  .sl-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:14px}
+  .sl-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sl-head-actions{width:100%}
+  .sl-head-actions .btn{flex:1;justify-content:center}
+}
+@media(max-width:560px){
+  .sl-filter-btns .btn{flex:1}
+  .sl-stats{grid-template-columns:minmax(0,1fr)}
+  .sl-stat{padding:14px 16px;gap:14px}
+  .sl-ico{width:54px;height:54px}
+  .sl-ico .ico{width:24px;height:24px}
+  .sl-pay{gap:18px;justify-content:center}
+  .sl-donut{width:132px;height:132px}
+  .sl-donut::before{inset:21px}
+  .sl-legend{flex:1 1 100%}
+}
+@media(max-width:420px){.sl-filters,.sl-mid{grid-template-columns:minmax(0,1fr)}}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-head"><div><h1>Sales (POS)</h1><p>Every sale the cashier made. {{ 'Void a sale from its receipt page.' if show_profit else 'View only.' }}</p></div>
-  <div class="actions"><a class="btn ghost" href="{{ url_for('sales_export', **args) }}">Export CSV</a></div></div>
-<form class="card filters" method="get">
-  <div class="field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
-  <div class="field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
-  <div class="field"><label for="cashier">Cashier</label><select id="cashier" name="cashier"><option value="">All</option>{% for c in cashiers %}<option {{ 'selected' if args.cashier==c }}>{{ c }}</option>{% endfor %}</select></div>
-  <div class="field"><label for="payment">Payment</label><select id="payment" name="payment"><option value="">All</option>{% for p in payments %}<option {{ 'selected' if args.payment==p }}>{{ p }}</option>{% endfor %}</select></div>
-  <div class="field"><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for st in ['Completed','Voided'] %}<option {{ 'selected' if args.status==st }}>{{ st }}</option>{% endfor %}</select></div>
-  <div class="field"><label for="q">Search</label><input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer, pet, item"></div>
-  <div class="actions"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('sales_list') }}">Reset</a></div></form>
-<section class="kpis {{ 'k5' if show_profit else 'k4' }}">
-  <div class="kpi ok"><span class="kl">Total sales</span><span class="kpi-n sm">{{ summary.total|money }}</span><span class="kpi-foot">{{ summary.count }} transactions</span></div>
-  <div class="kpi"><span class="kl">Average sale</span><span class="kpi-n sm">{{ summary.average|money }}</span></div>
-  <div class="kpi"><span class="kl">Items sold</span><span class="kpi-n">{{ summary.units }}</span></div>
-  <div class="kpi {{ 'warn' if summary.voided }}"><span class="kl">Discounts / voided</span><span class="kpi-n sm">{{ summary.discount|money }}</span><span class="kpi-foot">{{ summary.voided }} voided</span></div>
-  {% if show_profit %}<div class="kpi info"><span class="kl">Gross profit</span><span class="kpi-n sm">{{ summary.profit|money }}</span><span class="kpi-foot">sales minus item cost</span></div>{% endif %}
-</section>
-<div class="grid g2">
-  <section class="card"><h2>By payment method</h2>{% if summary.by_payment %}<div class="table-wrap"><table style="min-width:0"><tbody>{% for m, v in summary.by_payment %}<tr><td>{{ m }}</td><td class="right">{{ v|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No sales.</p>{% endif %}</section>
-  <section class="card"><h2>Top items</h2>{% if summary.top_items %}<div class="table-wrap"><table style="min-width:0"><thead><tr><th>Item</th><th>Qty</th><th class="right">Revenue</th></tr></thead><tbody>{% for t in summary.top_items %}<tr><td>{{ t.name }}</td><td>{{ t.qty }}</td><td class="right">{{ t.revenue|money }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="empty">No sales.</p>{% endif %}</section>
+<div class="sl-head">
+  <div>
+    <h1>Sales (POS)</h1>
+    <p>Process sales, track transactions, and view sales summary.{% if show_profit %} Void a sale from its receipt page.{% else %} View only.{% endif %}</p>
+  </div>
+  <div class="sl-head-actions"><a class="btn ghost" href="{{ url_for('sales_export', **args) }}">{{ icon('download') }}Export CSV</a></div>
 </div>
-<div class="card">{% if rows %}<div class="table-wrap"><table><thead><tr><th>Sale no.</th><th>Date and time</th><th>Cashier</th><th>Customer / pet</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th></th></tr></thead><tbody>
-{% for s in rows %}<tr><td class="mono-ref">{{ s.sale_id }}</td><td class="nowrap">{{ s.datetime|fmt_dt }}</td><td>{{ s.cashier }}</td><td>{{ s.customer_name or '-' }}{% if s.animal_id %}<div class="mono-s">{{ s.animal_name }} &middot; {{ s.animal_id }}</div>{% endif %}</td>
-<td>{% for ln in s['items'][:2] %}{{ ln.qty }} &times; {{ ln.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if s['items']|length > 2 %} <span class="muted">+{{ s['items']|length - 2 }} more</span>{% endif %}</td>
-<td class="nowrap">{{ s.total|money }}</td><td>{{ s.payment_method }}</td><td>{{ badge('Voided' if s.status == 'Voided' else 'Completed') }}</td><td><a class="btn sm ghost" href="{{ url_for('sale_receipt', sale_id=s.sale_id) }}">Receipt</a></td></tr>{% endfor %}</tbody></table></div>
-{% if total > rows|length %}<p class="dnote">Showing the latest {{ rows|length }} of {{ total }}. Export CSV contains all {{ total }}.</p>{% endif %}
-{% else %}<p class="empty">No sales match these filters.</p>{% endif %}</div>
+
+<form class="card sl-filters" method="get">
+  <div class="sl-field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+  <div class="sl-field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+  <div class="sl-field"><label for="cashier">Cashier</label><select id="cashier" name="cashier"><option value="">All</option>{% for c in cashiers %}<option {{ 'selected' if args.cashier==c }}>{{ c }}</option>{% endfor %}</select></div>
+  <div class="sl-field"><label for="payment">Payment Method</label><select id="payment" name="payment"><option value="">All</option>{% for p in payments %}<option {{ 'selected' if args.payment==p }}>{{ p }}</option>{% endfor %}</select></div>
+  <div class="sl-field"><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for st in ['Completed','Voided'] %}<option {{ 'selected' if args.status==st }}>{{ st }}</option>{% endfor %}</select></div>
+  <div class="sl-field"><label class="sr" for="q">Search transactions</label>
+    <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Search transaction..."></div></div>
+  <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('sales_list') }}">Reset</a></div>
+</form>
+
+<div class="sl-stats">
+  <div class="sl-stat s-blue"><span class="sl-ico">{{ icon('cart') }}</span>
+    <span class="sl-txt"><span class="sl-l">Total Sales</span><span class="sl-v">{{ summary.total|money }}</span><span class="sl-f">{{ summary.count }} transactions</span></span></div>
+  <div class="sl-stat s-purple"><span class="sl-ico">{{ icon('chart') }}</span>
+    <span class="sl-txt"><span class="sl-l">Average Sale</span><span class="sl-v">{{ summary.average|money }}</span></span></div>
+  <div class="sl-stat s-green"><span class="sl-ico">{{ icon('box') }}</span>
+    <span class="sl-txt"><span class="sl-l">Items Sold</span><span class="sl-v">{{ summary.units }}</span></span></div>
+  <div class="sl-stat s-red"><span class="sl-ico">{{ icon('percent') }}</span>
+    <span class="sl-txt"><span class="sl-l">Discounts / Voided</span><span class="sl-v">{{ summary.discount|money }}</span><span class="sl-f">{{ summary.voided }} voided</span></span></div>
+  {% if show_profit %}<div class="sl-stat s-amber"><span class="sl-ico">{{ icon('coins') }}</span>
+    <span class="sl-txt"><span class="sl-l">Gross Profit</span><span class="sl-v">{{ summary.profit|money }}</span><span class="sl-f">sales minus item cost</span></span></div>{% endif %}
+</div>
+
+{% set pay_colors = ['#3B82F6', '#8B5CF6', '#22C55E', '#F59E0B', '#EF4444', '#14B8A6'] %}
+{% set pay_total = namespace(sum=0) %}
+{% for m, v in summary.by_payment %}{% set pay_total.sum = pay_total.sum + v %}{% endfor %}
+
+<div class="sl-mid">
+  <section class="sl-panel">
+    <div class="sl-ph">{{ icon('card') }}<h2>By Payment Method</h2></div>
+    <div class="sl-pay">
+      {% if summary.by_payment %}
+      {% set ring = namespace(acc=0, stops='') %}
+      {% for m, v in summary.by_payment %}
+        {% set ring.stops = ring.stops ~ ('' if loop.first else ', ') ~ pay_colors[loop.index0 % 6] ~ ' ' ~ ring.acc|round(2) ~ '%' %}
+        {% set ring.acc = ring.acc + (v / pay_total.sum * 100) %}
+      {% endfor %}
+      <div class="sl-donut" style="background-color:{{ pay_colors[0] }};background-image:conic-gradient({{ ring.stops }})"><span>{{ summary.total|money }}</span></div>
+      <ul class="sl-legend">
+        {% for m, v in summary.by_payment %}
+        <li><i style="background:{{ pay_colors[loop.index0 % 6] }}"></i><span>{{ m }}</span>
+          <b>{{ v|money }} <small>({{ (v / pay_total.sum * 100)|round|int }}%)</small></b></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="sl-donut empty"><span>No Sales</span></div>
+      <ul class="sl-legend">
+        {% for m in payments %}
+        <li><i style="background:{{ pay_colors[loop.index0 % 6] }}"></i><span>{{ m }}</span><b>{{ 0|money }} <small>(0%)</small></b></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="sl-panel">
+    <div class="sl-ph sl-star">{{ icon('star') }}<h2>Top Items</h2></div>
+    {% if summary.top_items %}
+    <ul class="sl-tops">
+      {% for t in summary.top_items %}
+      <li><span class="sl-top-n">{{ t.name }}<small>{{ t.qty }} sold</small></span><b>{{ t.revenue|money }}</b></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="sl-empty"><span class="sl-eico">{{ icon('cart') }}</span>
+      <div><b>No sales yet</b><small>Top selling items will appear here.</small></div></div>
+    {% endif %}
+  </section>
+</div>
+
+<section class="sl-panel sl-recent">
+  <div class="sl-ph">{{ icon('clock') }}<h2>Recent Sales</h2></div>
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date &amp; Time</th><th>Receipt #</th><th>Cashier</th><th>Customer / Pet</th><th>Items</th><th>Total Amount</th><th>Payment Method</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for s in rows %}
+    <tr>
+      <td class="nowrap">{{ s.datetime|fmt_dt }}</td>
+      <td class="mono-ref">{{ s.sale_id }}</td>
+      <td>{{ s.cashier }}</td>
+      <td>{{ s.customer_name or '-' }}{% if s.animal_id %}<div class="mono-s">{{ s.animal_name }} &middot; {{ s.animal_id }}</div>{% endif %}</td>
+      <td>{% for ln in s['items'][:2] %}{{ ln.qty }} &times; {{ ln.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if s['items']|length > 2 %} <span class="muted">+{{ s['items']|length - 2 }} more</span>{% endif %}</td>
+      <td class="nowrap">{{ s.total|money }}</td>
+      <td>{{ s.payment_method }}</td>
+      <td>{{ badge('Voided' if s.status == 'Voided' else 'Completed') }}</td>
+      <td><a class="btn sm ghost" href="{{ url_for('sale_receipt', sale_id=s.sale_id) }}">{{ icon('receipt') }}Receipt</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% if total > rows|length %}<p class="dnote">Showing the latest {{ rows|length }} of {{ total }}. Export CSV contains all {{ total }}.</p>{% endif %}
+  {% else %}
+  <div class="sl-empty"><span class="sl-eico">{{ icon('receipt') }}</span>
+    <div><b>No sales records found</b><small>Transactions will appear here once a sale is made.</small></div></div>
+  {% endif %}
+</section>
 {% endblock %}
