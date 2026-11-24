@@ -52,7 +52,7 @@
 .st-lab small{display:block;color:var(--muted);font-size:.78rem;line-height:1.55}
 .st-lab small code{font-size:.9em}
 .st-ct{min-width:0}
-.st-ct input,.st-ct select{margin:0}
+.st-ct input,.st-ct select{margin:0;max-width:460px}
 .st-ct .st-inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .st-ct .st-inline input{flex:1 1 200px;min-width:0}
 .st-check{display:flex;align-items:center;gap:10px;font-weight:600;color:var(--white);font-size:.9rem}
@@ -104,7 +104,8 @@
   .st-head h1{font-size:1.7rem}
   .st-row{grid-template-columns:minmax(0,1fr);gap:8px;padding:14px 0}
   .st-sec{padding:16px 16px 14px}
-  .st-foot .btn{flex:1;justify-content:center}
+  .st-foot{justify-content:flex-start}
+  .st-foot .btn{flex:0 0 auto;padding:9px 16px}
 }
 </style>
 {% endblock %}
