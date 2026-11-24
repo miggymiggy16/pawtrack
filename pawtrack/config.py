@@ -60,7 +60,7 @@ DEFAULT_SETTINGS = {
     "public_base_url": "",
     "sample_loaded": False,
     "animal_counter": 0,          # highest Animal ID number ever issued (never goes down)
-    "clinic": {"name": "PawTrack Veterinary Clinic", "address": "Naga City, Camarines Sur",
+    "clinic": {"name": "Light Animal Clinic", "address": "Naga City, Camarines Sur",
                "phone": "", "email": ""},
 }
 

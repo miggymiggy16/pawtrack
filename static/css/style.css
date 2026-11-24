@@ -1634,11 +1634,9 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
    dashed photo dropzone.
    ============================================================= */
 
-/* --- page head: navy circle with white paw before every H1 --- */
+/* --- page head: H1 without the paw icon circle --- */
 .page-head h1{display:flex;align-items:center;gap:14px;font-size:1.7rem;margin-bottom:2px}
-.page-head h1::before{content:"";width:56px;height:56px;border-radius:50%;flex:none;
-  background:#0F2440 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='6' cy='10' r='2'/%3E%3Ccircle cx='10' cy='5.5' r='2'/%3E%3Ccircle cx='15' cy='5.5' r='2'/%3E%3Ccircle cx='19' cy='10' r='2'/%3E%3Cpath d='M12.5 11c-3 0-6 3.5-6 6 0 2 2 2.5 3.5 2 1.2-.4 1.8-.6 2.5-.6s1.3.2 2.5.6c1.5.5 3.5 0 3.5-2 0-2.5-3-6-6-6z'/%3E%3C/svg%3E") center/28px no-repeat}
-.page-head p{margin:0 0 0 70px;color:var(--muted)}
+.page-head p{margin:0;color:var(--muted)}
 .page-head .actions{margin-left:auto}
 
 /* --- section card: icon circle + heading + divider line --- */

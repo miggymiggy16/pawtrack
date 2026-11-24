@@ -6,7 +6,7 @@
 <script>/* theme: apply saved choice before first paint (default = light, the reference design) */
 (function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Dashboard{% endblock %} | PawTrack</title>
+<title>{% block title %}Dashboard{% endblock %} | Light Animal Clinic</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
@@ -41,7 +41,7 @@
 <div class="app">
   <input type="hidden" id="pawCsrf" value="{{ csrf_token() }}">
   <aside class="sidebar" id="sidebar" aria-label="Sidebar">
-    <a class="brand" href="{{ role_home_url }}" title="PawTrack">{{ logo() }}<span><b>PawTrack</b></span></a>
+    <a class="brand" href="{{ role_home_url }}" title="Light Animal Clinic">{{ logo() }}<span><b>Light Animal Clinic</b></span></a>
     <nav class="nav" aria-label="Main navigation">
       {% if can('pos.use') %}<a href="{{ url_for('pos_screen') }}" title="Point of Sale" class="{{ 'active' if ep == 'pos_screen' }}">{{ icon('cart') }}<span>POS</span></a>
       <a href="{{ url_for('pos_my_sales') }}" title="My Sales" class="{{ 'active' if ep in ('pos_my_sales', 'sale_receipt') }}">{{ icon('receipt') }}<span>My Sales</span></a>
@@ -111,7 +111,7 @@
       {% endif %}{% endwith %}
       {% block content %}{% endblock %}
     </main>
-    <div class="footer">PawTrack &middot; {{ clinic.name }}{% if clinic.phone %} &middot; {{ clinic.phone }}{% endif %}</div>
+    <div class="footer">Light Animal Clinic &middot; {{ clinic.name }}{% if clinic.phone %} &middot; {{ clinic.phone }}{% endif %}</div>
   </div>
 </div>
 <!-- Mobile bottom navigation (swipeable) — shown on every page at <=700px -->
