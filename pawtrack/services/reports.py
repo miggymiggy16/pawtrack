@@ -13,7 +13,7 @@ from xml.sax.saxutils import escape as xml_escape
 from flask import send_file, url_for
 
 from ..config import BASE_DIR
-from ..helpers import fmt_date, money, now_str
+from ..helpers import days_until, fmt_date, money, now_str
 from ..storage import get_settings, load
 from .analytics import tally
 from .inventory import enriched_inventory
@@ -115,7 +115,13 @@ def build_report(kind, args):
             if kind == "vaccination" and args.get("status") and r["status"] != args["status"]:
                 continue
             stat_rows.append(r)
+            days = days_until(r.get("next_due_date"))
+            note = ("" if days is None else "Due today" if days == 0 else
+                    f"{-days} day{'s' if days != -1 else ''} overdue" if days < 0 else
+                    f"in {days} day{'' if days == 1 else 's'}")
             meta.append({"href": url_for("animal_view", animal_id=r["animal_id"]),
+                         "notify": url_for("animal_notify", animal_id=r["animal_id"]),
+                         "status": r["status"], "note": note,
                          "search": " ".join([r["animal_id"], r["animal"]["animal_name"], r["animal"]["species"],
                                              r["vaccine_name"], r["animal"].get("owner_name") or ""]).lower()})
             rows.append([r["animal_id"], r["animal"]["animal_name"], r["animal"]["species"], r["vaccine_name"],
