@@ -1,89 +1,207 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import csrf, icon %}
-{% block title %}{{ 'Edit' if editing else 'Add' }} inventory item{% endblock %}
+{% block title %}{{ 'Edit Item' if editing else 'Add Item' }}{% endblock %}
+{% block body_class %}ef-page{% endblock %}
+
+{% block head %}
+<style>
+/* ===== Inventory item form (reference layout) — scoped to .ef-page ===== */
+body.ef-page{
+  --ef-accent:#22467E;
+  --ef-field-bg:var(--surface); --ef-field-border:var(--line); --ef-field-text:var(--white);
+  --ef-focus:#E3B562; --ef-ring:rgba(227,181,98,.22)
+}
+:root[data-theme="light"] body.ef-page{
+  background-color:#F4F7FC;
+  --ef-accent:#16305C;
+  --ef-field-bg:#fff; --ef-field-border:#DCE3EF; --ef-field-text:#132A52;
+  --ef-focus:#16305C; --ef-ring:rgba(22,48,92,.16)
+}
+
+/* page head */
+.ef-head{margin-bottom:20px}
+.ef-head h1{margin:0 0 8px;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.ef-head p{margin:0;color:var(--muted);font-size:.95rem}
+
+/* card + section head: icon circle, title, rule */
+.ef-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:18px}
+:root[data-theme="light"] .ef-card{border-color:#E6EBF4;box-shadow:0 8px 22px rgba(15,36,80,.05)}
+.ef-shead{display:flex;align-items:center;gap:14px;margin:0 0 24px}
+.ef-sico{width:46px;height:46px;border-radius:50%;background:var(--ef-accent);color:#fff;display:grid;place-items:center;flex:none}
+.ef-sico .ico{width:22px;height:22px;stroke-width:1.9}
+.ef-shead h2{margin:0;font-size:1.05rem;font-weight:700;color:var(--white);white-space:nowrap}
+.ef-rule{flex:1;height:1px;background:var(--line);margin-left:4px}
+
+/* two field columns + picture panel */
+.ef-top{display:grid;grid-template-columns:minmax(0,1fr) clamp(280px,30%,420px);gap:24px;align-items:start}
+.ef-main{min-width:0}
+.ef-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 28px}
+.ef-span2{grid-column:1/-1;min-width:0}
+.ef-desc{margin-top:24px}
+
+/* labels + fields */
+.ef-field{display:flex;flex-direction:column;gap:8px;min-width:0;margin:0}
+.ef-lbl{display:flex;align-items:center;gap:8px;margin:0;font-size:.87rem;font-weight:600;color:var(--white)}
+.ef-lbl .ico{width:16px;height:16px;color:#7C8BA1;stroke-width:1.9}
+.ef-req{color:#E5484D;margin-left:-3px}
+.ef-help{font-size:.75rem;color:var(--muted);line-height:1.45}
+body.ef-page .ef-field input,
+body.ef-page .ef-field select,
+body.ef-page .ef-field textarea{width:100%;height:46px;padding:0 14px;border:1px solid var(--ef-field-border);border-radius:9px;
+  background-color:var(--ef-field-bg);color:var(--ef-field-text);font:400 .92rem var(--font);box-shadow:none}
+body.ef-page .ef-field select{appearance:none;cursor:pointer;padding-right:38px;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;background-size:14px}
+body.ef-page .ef-field textarea{height:auto;min-height:58px;padding:12px 14px;line-height:1.5;resize:vertical}
+body.ef-page .ef-field input:focus,
+body.ef-page .ef-field select:focus,
+body.ef-page .ef-field textarea:focus{border-color:var(--ef-focus);outline:3px solid var(--ef-ring);outline-offset:0}
+
+/* product picture panel */
+.ef-photo{background:var(--surface-2);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+:root[data-theme="light"] .ef-photo{background:#EFF5FE}
+body.ef-page .ef-photo .dropzone{display:grid;justify-items:center;gap:6px;margin:0;padding:24px 16px 18px;text-align:center;
+  border:1.5px dashed var(--line);border-radius:10px;background:transparent;cursor:pointer;transition:border-color .15s,background .15s}
+:root[data-theme="light"] body.ef-page .ef-photo .dropzone{background:#F7FAFF;border-color:#C6D6EC}
+body.ef-page .ef-photo .dropzone:hover{border-color:var(--ef-focus);background:var(--surface)}
+:root[data-theme="light"] body.ef-page .ef-photo .dropzone:hover{background:#EDF3FD}
+.ef-dz-circle{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;margin:2px 0;
+  background:rgba(255,255,255,.07);color:#9FB2CE}
+:root[data-theme="light"] .ef-dz-circle{background:#E4ECFA;color:#2B4A78}
+.ef-dz-circle .ico{width:30px;height:30px;stroke-width:1.6}
+.ef-dz-txt{font-size:.86rem;font-weight:600;color:var(--white);line-height:1.35}
+.ef-dz-or{font-size:.76rem;color:var(--muted)}
+.ef-dz-btn{display:inline-flex;align-items:center;gap:8px;margin:6px 0 2px;padding:10px 18px;border-radius:8px;
+  background:var(--ef-accent);color:#fff;font-weight:600;font-size:.86rem}
+.ef-dz-btn .ico{width:16px;height:16px}
+.ef-dz-note{font-size:.72rem;color:var(--muted);line-height:1.45}
+.ef-pic{display:grid;place-items:center;width:100%}
+.ef-pic img{display:block;max-width:100%;max-height:180px;object-fit:contain;border-radius:8px}
+.ef-check{display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--muted);cursor:pointer}
+.ef-check input{width:16px;height:16px;margin:0;padding:0;accent-color:var(--ef-accent);cursor:pointer}
+
+/* actions */
+.ef-actions{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;margin:4px 0 10px}
+.ef-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:46px;padding:0 26px;border-radius:9px;
+  border:1px solid transparent;font:700 .9rem var(--font);cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s}
+.ef-btn .ico{width:17px;height:17px}
+.ef-btn.ghost{background:var(--ef-field-bg);border-color:var(--ef-field-border);color:var(--ef-field-text)}
+.ef-btn.ghost:hover{background:var(--surface-2);color:var(--ef-field-text)}
+.ef-btn.primary{background:var(--ef-accent);color:#fff}
+.ef-btn.primary:hover{filter:brightness(1.18);color:#fff}
+
+/* responsive */
+@media(max-width:1180px){.ef-top{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:820px){
+  .ef-card{padding:20px}
+  .ef-head h1{font-size:1.7rem}
+  .ef-grid{grid-template-columns:minmax(0,1fr);gap:18px}
+}
+@media(max-width:520px){
+  .ef-card{padding:16px;border-radius:12px}
+  .ef-shead{gap:10px;margin-bottom:18px}
+  .ef-sico{width:38px;height:38px}
+  .ef-sico .ico{width:18px;height:18px}
+  .ef-shead h2{font-size:.98rem;white-space:normal}
+  .ef-photo{padding:14px}
+  .ef-actions .ef-btn{flex:1 1 100%}
+  /* 16px stops iOS Safari from zooming the page when a field is focused */
+  body.ef-page .ef-field input,body.ef-page .ef-field select,body.ef-page .ef-field textarea{font-size:1rem}
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page-head"><div><h1>{{ 'Edit item' if editing else 'Add inventory item' }}</h1><p>{{ 'Update the record for this item. To change the quantity use Stock In, Stock Out or Adjustment so the history stays accurate.' if editing else 'Add a new supply to the clinic inventory.' }}</p></div></div>
+<div class="ef-head">
+  <h1>{{ 'Edit Item' if editing else 'Add Item' }}</h1>
+  <p>{{ 'Update the record for this item. To change the quantity use Stock In, Stock Out or Adjustment so the history stays accurate.' if editing else 'Add a new supply to the clinic inventory.' }}</p>
+</div>
 
 <form method="post" enctype="multipart/form-data" novalidate>
   {{ csrf() }}
 
   {# ---------- Basic information ---------- #}
-  <section class="card form-section">
-    <div class="fs-head"><span class="fs-ico">{{ icon('box') }}</span><h2>Basic information</h2><span class="fs-line"></span></div>
-    <div class="fi-grid">
-
-      <div class="fi-col">
-        <div class="field"><label class="lbl" for="item_name">{{ icon('tag') }}Item name <span class="req">*</span></label>
-          <input id="item_name" name="item_name" value="{{ form.item_name }}" placeholder="e.g. Anti-Rabies Vaccine" required></div>
-        <div class="field"><label class="lbl" for="category">{{ icon('grid') }}Category <span class="req">*</span></label>
-          <select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
-        <div class="field"><label class="lbl" for="quantity">{{ icon('plus') }}Quantity</label>
-          <input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
+  <section class="ef-card">
+    <div class="ef-top">
+      <div class="ef-main">
+        <div class="ef-shead"><span class="ef-sico">{{ icon('box') }}</span><h2>Basic Information</h2><span class="ef-rule"></span></div>
+        <div class="ef-grid">
+          <div class="ef-field"><label class="ef-lbl" for="item_name">{{ icon('tag') }}Item name <span class="ef-req">*</span></label>
+            <input id="item_name" name="item_name" value="{{ form.item_name }}" placeholder="e.g. Anti-Rabies Vaccine" required></div>
+          <div class="ef-field"><label class="ef-lbl" for="unit">{{ icon('pill') }}Unit <span class="ef-req">*</span></label>
+            <input id="unit" name="unit" value="{{ form.unit }}" placeholder="e.g. vials, pcs, boxes" required></div>
+          <div class="ef-field"><label class="ef-lbl" for="category">{{ icon('grid') }}Category <span class="ef-req">*</span></label>
+            <select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
+          <div class="ef-field"><label class="ef-lbl" for="min_stock">{{ icon('alert') }}Minimum stock level</label>
+            <input id="min_stock" name="min_stock" type="number" min="0" step="1" value="{{ form.min_stock }}"></div>
+          <div class="ef-field"><label class="ef-lbl" for="quantity">{{ icon('plus') }}Quantity</label>
+            <input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
+          <div class="ef-field"><label class="ef-lbl" for="expiration_date">{{ icon('calendar') }}Expiration date</label>
+            <input id="expiration_date" name="expiration_date" type="date" value="{{ form.expiration_date }}">
+            <small class="ef-help">Leave empty for items that do not expire.</small></div>
+        </div>
       </div>
 
-      <div class="fi-col">
-        <div class="field"><label class="lbl" for="unit">{{ icon('pill') }}Unit <span class="req">*</span></label>
-          <input id="unit" name="unit" value="{{ form.unit }}" placeholder="e.g. vials, pcs, boxes" required></div>
-        <div class="field"><label class="lbl" for="min_stock">{{ icon('alert') }}Minimum stock level</label>
-          <input id="min_stock" name="min_stock" type="number" min="0" step="1" value="{{ form.min_stock }}"></div>
-        <div class="field"><label class="lbl" for="expiration_date">{{ icon('calendar') }}Expiration date</label>
-          <input id="expiration_date" name="expiration_date" type="date" value="{{ form.expiration_date }}"><small>Leave empty for items that do not expire.</small></div>
-      </div>
-
-      <aside class="fi-photo">
-        <label class="lbl" for="image">{{ icon('image') }}Product picture</label>
+      <aside class="ef-photo">
+        <label class="ef-lbl" for="image">{{ icon('image') }}Product picture</label>
         <label class="dropzone" for="image">
-          <span class="pic-box" id="imagePreview">
+          <span class="ef-pic" id="imagePreview">
             {% if form.image_url %}<img src="{{ form.image_url }}" alt="Current picture">
-            {% else %}<span class="ph"><span class="dz-circle">{{ icon('image') }}</span></span>
-            {% endif %}
+            {% else %}<span class="ef-dz-circle">{{ icon('image') }}</span>{% endif %}
           </span>
           {% if not form.image_url %}
-          <span class="dz-txt">Drag and drop an image here<br>or</span>
-          <span class="dz-btn">{{ icon('image') }}Choose File</span>
+          <span class="ef-dz-txt">Drag and drop an image here</span>
+          <span class="ef-dz-or">or</span>
+          <span class="ef-dz-btn">{{ icon('image') }}Choose File</span>
           {% endif %}
-          <span class="dz-note">PNG, JPG, GIF or WEBP, up to 4 MB.{% if editing and form.image_url %} Choosing a new file replaces the current picture.{% endif %}</span>
+          <span class="ef-dz-note">PNG, JPG, GIF or WEBP, up to 4 MB.{% if editing and form.image_url %} Choosing a new file replaces the current picture.{% endif %}</span>
         </label>
         <input id="image" name="image" type="file" class="visually-hidden" accept="image/png,image/jpeg,image/gif,image/webp">
-        <div class="small imgnote" id="imageNote" role="alert"></div>
+        <div class="imgnote" id="imageNote" role="alert"></div>
         {% if editing and form.image_url %}
-        <div class="check"><input type="checkbox" id="remove_image" name="remove_image" value="1"><label for="remove_image">Remove the current picture</label></div>
+        <div class="ef-check"><input type="checkbox" id="remove_image" name="remove_image" value="1"><label for="remove_image">Remove the current picture</label></div>
         {% endif %}
       </aside>
     </div>
-    <div class="field" style="margin-top:16px"><label class="lbl" for="description">{{ icon('file') }}Description</label>
-      <textarea id="description" name="description" style="min-height:80px">{{ form.description }}</textarea></div>
+
+    <div class="ef-field ef-desc"><label class="ef-lbl" for="description">{{ icon('file') }}Description</label>
+      <textarea id="description" name="description" rows="1">{{ form.description }}</textarea></div>
   </section>
 
   {# ---------- Pricing ---------- #}
-  <section class="card form-section">
-    <div class="fs-head"><span class="fs-ico">{{ icon('percent') }}</span><h2>Pricing</h2><span class="fs-line"></span></div>
-    <div class="fi-pair">
-      <div class="field"><label class="lbl" for="unit_cost">{{ icon('tag') }}Unit cost (&#8369;)</label>
-        <input id="unit_cost" name="unit_cost" type="number" inputmode="decimal" min="0" step="0.01" data-money value="{{ form.unit_cost if form.unit_cost is string else '%.2f'|format(form.unit_cost|float) }}"><small>Price of one unit in pesos, e.g. 150.00 (not cents).</small></div>
-      <div class="field"><label class="lbl" for="selling_price">{{ icon('tag') }}Selling price (&#8369;)</label>
-        <input id="selling_price" name="selling_price" type="number" inputmode="decimal" min="0" step="0.01" value="{{ form.selling_price if form.selling_price is string else '%.2f'|format((form.selling_price or 0)|float) }}"><small>What the customer pays at the POS. Leave at 0.00 to keep this item off the cashier screen.</small></div>
+  <section class="ef-card">
+    <div class="ef-shead"><span class="ef-sico">{{ icon('percent') }}</span><h2>Pricing</h2><span class="ef-rule"></span></div>
+    <div class="ef-grid">
+      <div class="ef-field"><label class="ef-lbl" for="unit_cost">{{ icon('tag') }}Unit cost (&#8369;)</label>
+        <input id="unit_cost" name="unit_cost" type="number" inputmode="decimal" min="0" step="0.01" data-money value="{{ form.unit_cost if form.unit_cost is string else '%.2f'|format(form.unit_cost|float) }}">
+        <small class="ef-help">Price of one unit in pesos, e.g. 150.00 (not cents).</small></div>
+      <div class="ef-field"><label class="ef-lbl" for="selling_price">{{ icon('tag') }}Selling price (&#8369;)</label>
+        <input id="selling_price" name="selling_price" type="number" inputmode="decimal" min="0" step="0.01" value="{{ form.selling_price if form.selling_price is string else '%.2f'|format((form.selling_price or 0)|float) }}">
+        <small class="ef-help">What the customer pays at the POS. Leave at 0.00 to keep this item off the cashier screen.</small></div>
+      <div class="ef-field ef-span2"><label class="ef-lbl" for="supplier">{{ icon('user') }}Supplier</label>
+        <input id="supplier" name="supplier" value="{{ form.supplier }}" placeholder="e.g. VetPharma Supply"></div>
     </div>
-    <div class="field" style="margin-top:16px"><label class="lbl" for="supplier">{{ icon('user') }}Supplier</label>
-      <input id="supplier" name="supplier" value="{{ form.supplier }}" placeholder="e.g. VetPharma Supply"></div>
   </section>
 
   {# ---------- Vaccine details (shown only for the Vaccines category) ---------- #}
-  <section class="card form-section" data-vaccine-only {{ 'hidden' if form.category != 'Vaccines' }}>
-    <div class="fs-head"><span class="fs-ico">{{ icon('syringe') }}</span><h2>Vaccine details</h2><span class="fs-line"></span></div>
-    <div class="fi-pair">
-      <div class="field"><label class="lbl" for="vaccine_type">{{ icon('syringe') }}Vaccine type</label>
-        <input id="vaccine_type" name="vaccine_type" list="vtypes" value="{{ form.vaccine_type }}" placeholder="e.g. Rabies"><datalist id="vtypes">{% for v in vaccine_types %}<option value="{{ v }}">{% endfor %}</datalist><small>For vaccines only.</small></div>
-      <div class="field"><label class="lbl" for="manufacturer">{{ icon('pill') }}Manufacturer / brand</label>
+  <section class="ef-card" data-vaccine-only {{ 'hidden' if form.category != 'Vaccines' }}>
+    <div class="ef-shead"><span class="ef-sico">{{ icon('syringe') }}</span><h2>Vaccine Details</h2><span class="ef-rule"></span></div>
+    <div class="ef-grid">
+      <div class="ef-field"><label class="ef-lbl" for="vaccine_type">{{ icon('syringe') }}Vaccine type</label>
+        <input id="vaccine_type" name="vaccine_type" list="vtypes" value="{{ form.vaccine_type }}" placeholder="e.g. Rabies"><datalist id="vtypes">{% for v in vaccine_types %}<option value="{{ v }}">{% endfor %}</datalist>
+        <small class="ef-help">For vaccines only.</small></div>
+      <div class="ef-field"><label class="ef-lbl" for="manufacturer">{{ icon('pill') }}Manufacturer / brand</label>
         <input id="manufacturer" name="manufacturer" value="{{ form.manufacturer }}" placeholder="e.g. Nobivac Rabies"></div>
+      <div class="ef-field ef-span2"><label class="ef-lbl" for="batch_number">{{ icon('file') }}Batch / lot number</label>
+        <input id="batch_number" name="batch_number" value="{{ form.batch_number }}" placeholder="e.g. RB-2026-014">
+        <small class="ef-help">Printed on the vial or box.</small></div>
     </div>
-    <div class="field" style="margin-top:16px"><label class="lbl" for="batch_number">{{ icon('file') }}Batch / lot number</label>
-      <input id="batch_number" name="batch_number" value="{{ form.batch_number }}" placeholder="e.g. RB-2026-014"><small>Printed on the vial or box.</small></div>
   </section>
 
-  <div class="form-actions">
-    <button class="btn" type="submit">{{ icon('save') }}{{ 'Save changes' if editing else 'Add item' }}</button>
-    <a class="btn ghost" href="{{ url_for('inventory') }}">{{ icon('x') }}Cancel</a>
+  <div class="ef-actions">
+    <a class="ef-btn ghost" href="{{ url_for('inventory') }}">Cancel</a>
+    <button class="ef-btn primary" type="submit">{{ icon('save') }}{{ 'Update Item' if editing else 'Add Item' }}</button>
   </div>
 </form>
 {% endblock %}
