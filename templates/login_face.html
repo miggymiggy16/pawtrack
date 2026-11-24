@@ -1,0 +1,44 @@
+{% from '_macros.html' import logo, icon, theme_toggle %}
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><script>(function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>Face Verification | PawTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+</head><body>
+{{ theme_toggle(true) }}
+<div class="auth">
+  <section class="auth-hero">
+    <div class="brand" style="padding-left:0">{{ logo() }}<span><b>PawTrack</b><small>Veterinary Clinic Management System</small></span></div>
+    <h1>Every paw, tracked with care.</h1>
+    <p>Animal records, vaccination reminders, QR identification, clinic inventory and analytics in one place.</p>
+    <div class="pill-row"><span>Animal records</span><span>Vaccinations</span><span>QR tags</span><span>Inventory</span></div>
+  </section>
+  <section class="auth-card">
+    <div class="auth-box">
+      <div class="auth-panel">
+        <h2>Face verification</h2>
+        <p class="muted">Credentials accepted for <b>{{ username }}</b>. Look straight at the camera to finish signing in.</p>
+        <div class="face-camera">
+          <video id="login-face-video" autoplay playsinline muted></video>
+          <div id="login-face-placeholder" class="face-placeholder">Camera is off</div>
+        </div>
+        <div class="face-actions">
+          <button type="button" class="btn ghost" id="login-face-start">Start camera</button>
+          <button type="button" class="btn" id="login-face-scan" disabled>Scan face</button>
+        </div>
+        <div id="login-face-status" class="face-status" role="status" aria-live="polite"></div>
+        <form method="post" action="{{ url_for('login_face_cancel') }}" style="margin-top:12px">
+          {{ csrf() }}<button type="submit" class="btn ghost">Use a different account</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/face.js') }}"></script>
+</body></html>

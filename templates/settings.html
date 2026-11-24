@@ -37,9 +37,22 @@
     <div class="field"><label for="new_password">New password</label><input id="new_password" name="new_password" type="password" autocomplete="new-password" required><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>
     <div class="field"><label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required></div>
     <button class="btn" type="submit">Change password</button></form></section>
+<section class="card" id="id-card">
+  <h2>ID Verification</h2>
+  <p class="muted">Register your government ID so your identity is on file. After entering your password at login, you will be asked to verify your face.</p>
+  <p id="id-status-text" class="small">Status: {% if user.id_verified_at %}<b style="color:var(--ok)">verified</b> on {{ user.id_verified_at }}{% if user.id_number %} &middot; {{ user.id_number }}{% endif %}{% else %}<b style="color:var(--warn)">not verified</b>{% endif %}</p>
+  <form method="post" action="{{ url_for('settings_id') }}" enctype="multipart/form-data">
+    {{ csrf() }}
+    <div class="field"><label for="id_type">ID type</label><select id="id_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}" {{ 'selected' if user.id_type==t }}>{{ t }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="id_image">ID image</label><input id="id_image" name="id_image" type="file" accept="image/*" required><small>A clear, well-lit photo of the front of your ID.</small></div>
+    <div class="field"><label for="id_password">Current password (to confirm)</label><input id="id_password" name="password" type="password" autocomplete="current-password" required></div>
+    <button class="btn" type="submit">Verify my ID</button>
+  </form>
+  {% if user.id_verified_at %}<form method="post" action="{{ url_for('settings_id_remove') }}" style="margin-top:14px" data-confirm="Remove your stored ID verification?">{{ csrf() }}<button class="btn danger" type="submit">Remove my ID verification</button></form>{% endif %}
+</section>
 <section class="card" id="face-card">
   <h2>Face ID</h2>
-  <p class="muted">Register your face so you can log in by scanning instead of typing your password. Only a mathematical face descriptor is saved, never a photo.</p>
+  <p class="muted">Register your face — it is required to finish signing in after your password. Only a mathematical face descriptor is saved, never a photo.</p>
   <p id="face-status-text" class="small">Status: {% if user.face_descriptors %}<b style="color:var(--ok)">registered</b>{% if user.face_enrolled_at %} on {{ user.face_enrolled_at }}{% endif %}{% else %}<b style="color:var(--warn)">not registered</b>{% endif %}</p>
   <div class="face-camera">
     <video id="enroll-face-video" autoplay playsinline muted></video>

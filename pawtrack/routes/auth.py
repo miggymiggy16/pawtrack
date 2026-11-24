@@ -31,22 +31,38 @@ def login():
             elif match.get("role") not in ROLE_LABELS:
                 flash("This account has no valid role. Please contact an administrator.", "error")
             else:
+                # Step 1 of 2FA: credentials confirmed. Now require face verification.
+                session.clear()
+                session.permanent = True
+                session["pending_user_id"] = match["user_id"]
+                session["pending_next"] = safe_next(request.args.get("next"), default=role_home(match))
+                if match.get("face_descriptors"):
+                    return redirect(url_for("login_face"))
+                # No face enrolled yet — let them in once so they can set it up in Settings.
                 session.clear()
                 session.permanent = True
                 session["user_id"] = match["user_id"]
-                # the role stored with the account (never anything the browser sends) picks the dashboard
-                return redirect(safe_next(request.args.get("next"), default=role_home(match)))
+                flash("Set up Face ID and ID verification in Settings to secure your account.", "warning")
+                return redirect(url_for("settings"))
     return render_template("login.html")
 
 
-@app.route("/login/face", methods=["POST"])
+@app.route("/login/face", methods=["GET", "POST"])
 def login_face():
-    """Identify an active account from one camera frame and start its session."""
-    if current_user():
-        return jsonify(ok=True, redirect=role_home())
+    """Step 2 of 2FA: verify the face of the account whose password was accepted."""
+    uid = session.get("pending_user_id")
+    if not uid:
+        return redirect(url_for("login"))
+    user = next((u for u in load("users") if u["user_id"] == uid), None)
+    if not user or not user.get("face_descriptors"):
+        session.pop("pending_user_id", None)
+        return redirect(url_for("login"))
+
+    if request.method == "GET":
+        return render_template("login_face.html", username=user.get("username", ""))
+
     if session.get("face_failures", 0) >= FACE_MAX_FAILURES:
-        return jsonify(ok=False,
-                       error="Too many face attempts. Please log in with your password."), 429
+        return jsonify(ok=False, error="Too many face attempts. Please log in again with your password."), 429
     upload = request.files.get("face_image")
     if not upload:
         return jsonify(ok=False, error="No camera image was received. Please try again."), 400
@@ -55,24 +71,28 @@ def login_face():
     except FaceError as exc:
         return jsonify(ok=False, error=str(exc)), 400
     except Exception:
-        current_app.logger.exception("Face login failed")
-        return jsonify(ok=False,
-                       error="Face recognition failed on the server. Please use your password."), 500
+        current_app.logger.exception("Face verification failed")
+        return jsonify(ok=False, error="Face recognition failed on the server. Please try again."), 500
 
-    enrolled = [u for u in load("users")
-                if u.get("active", True) and u.get("role") in ROLE_LABELS
-                and u.get("face_descriptors")]
-    match, _score = identify(enrolled, probe)
+    match, _score = identify([user], probe)
     if not match:
         session["face_failures"] = session.get("face_failures", 0) + 1
-        return jsonify(ok=False,
-                       error="Face not recognized. Please try again or use your password."), 401
+        return jsonify(ok=False, error="Face not recognized. Please try again."), 401
 
+    nxt = session.pop("pending_next", None)
     session.clear()
     session.permanent = True
     session["user_id"] = match["user_id"]
-    return jsonify(ok=True,
-                   redirect=safe_next(request.args.get("next"), default=role_home(match)))
+    return jsonify(ok=True, redirect=nxt or role_home(match))
+
+
+@app.route("/login/face/cancel", methods=["POST"])
+def login_face_cancel():
+    """Abandon 2FA and return to the password step."""
+    session.pop("pending_user_id", None)
+    session.pop("pending_next", None)
+    session.pop("face_failures", None)
+    return redirect(url_for("login"))
 
 
 @app.route("/logout", methods=["POST"])

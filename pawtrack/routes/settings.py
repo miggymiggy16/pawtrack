@@ -14,7 +14,9 @@ from ..security import (admin_required, current_user, login_required,
                         password_errors)
 from ..services.email import build_message, mail_config, notify
 from ..services.face import MODEL_NAME, FaceError, enroll
+from ..services.identity import ID_TYPES, scan_id
 from ..services.qr import make_qr, qr_path
+from ..services.identity import VERIFICATION_DIR
 from ..storage import edit, get_settings, load
 
 
@@ -132,6 +134,59 @@ def settings_face_remove():
                 user.pop("face_enrolled_at", None)
                 user.pop("face_model", None)
     flash("Your face ID was removed.", "success")
+    return redirect(url_for("settings"))
+
+
+@app.route("/settings/id", methods=["POST"])
+@login_required
+def settings_id():
+    """Register the signed-in user's government ID (OCR + optional face check)."""
+    me = current_user()
+    password = request.form.get("password", "")
+    if not check_password_hash(me["password_hash"], password):
+        flash("Current password is incorrect.", "error")
+        return redirect(url_for("settings"))
+    id_type = request.form.get("id_type", "").strip()
+    if id_type not in ID_TYPES:
+        flash("Please choose a supported ID type.", "error")
+        return redirect(url_for("settings"))
+    upload = request.files.get("id_image")
+    if not upload or not upload.filename:
+        flash("Please choose an ID image to upload.", "error")
+        return redirect(url_for("settings"))
+    data = upload.read()
+    try:
+        fields = scan_id(data, id_type, demo_mode=request.form.get("demo_mode") == "1")
+    except Exception as exc:
+        flash("ID scanning failed: " + str(exc), "error")
+        return redirect(url_for("settings"))
+    import uuid
+    ext = upload.filename.rsplit(".", 1)[-1].lower() if "." in upload.filename else "png"
+    name = "user_" + me["user_id"] + "_" + uuid.uuid4().hex + "." + ext
+    (VERIFICATION_DIR / name).write_bytes(data)
+    with edit("users") as users:
+        for u in users:
+            if u["user_id"] == me["user_id"]:
+                u["id_type"] = id_type
+                u["id_number"] = fields.get("id_number", "")
+                u["id_full_name"] = fields.get("full_name", "")
+                u["id_image"] = "uploads/verifications/" + name
+                u["id_verified_at"] = now_str()
+    flash("Your ID was verified and saved.", "success")
+    return redirect(url_for("settings"))
+
+
+@app.route("/settings/id/remove", methods=["POST"])
+@login_required
+def settings_id_remove():
+    """Remove the signed-in user's stored ID verification."""
+    me = current_user()
+    with edit("users") as users:
+        for u in users:
+            if u["user_id"] == me["user_id"]:
+                for key in ("id_type", "id_number", "id_full_name", "id_image", "id_verified_at"):
+                    u.pop(key, None)
+    flash("Your ID verification was removed.", "success")
     return redirect(url_for("settings"))
 
 

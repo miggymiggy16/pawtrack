@@ -9,7 +9,10 @@
 <!-- ============ MOBILE-ONLY VACCINATION VIEW ============ -->
 <div class="mv-dash">
   <div class="mv-body">
-    <div class="mv-title"><h1>Vaccination<br>Monitoring</h1></div>
+    <div class="mv-title-row">
+      <h1>Vaccination<br>Monitoring</h1>
+      <a class="mv-add" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }}<span>Add</span></a>
+    </div>
 
     <section class="mv-kpis" aria-label="Summary">
       <div class="mv-kpi"><span class="mv-ico c-blue">{{ icon('shield') }}</span><span class="mv-ktext"><span class="mv-l">Total Records</span><span class="mv-n">{{ counts.total }}</span></span></div>
@@ -37,8 +40,6 @@
       <a class="{{ 'active' if not args.status }}" href="{{ url_for('vaccinations', **keep) }}">All Records <span>{{ counts.total }}</span></a>
       {% for s in ['Upcoming','Due Today','Overdue','Completed'] %}<a class="{{ 'active' if args.status==s }}" href="{{ url_for('vaccinations', status=s, **keep) }}">{{ s }}</a>{% endfor %}
     </nav>
-
-    <div class="mv-add-row"><a class="mv-add" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }} Add Vaccination</a></div>
 
     <section class="mv-list-card">
       <div class="mv-list-head"><span class="mv-lh-ico">{{ icon('paw') }}</span><h2>Vaccination Records</h2><span class="mv-lh-count">{{ rows|length }}</span></div>
@@ -174,7 +175,10 @@
   .desk-only{display:none!important}
   .mv-dash{display:block;font-family:Poppins,Arial,sans-serif;color:#12233B;background:#F4F7FD;min-height:calc(100vh - 90px)}
   .mv-body{padding:14px 16px 0}
-  .mv-title h1{font-size:2rem;font-weight:800;line-height:1.05;margin:0 0 18px}
+  .mv-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
+  .mv-title-row h1{font-size:1.9rem;font-weight:800;line-height:1.05;margin:0}
+  .mv-add{display:inline-flex;align-items:center;gap:5px;background:#0B2440;color:#fff;text-decoration:none;font-size:.78rem;font-weight:700;padding:10px 14px;border-radius:20px;flex:none;margin-top:2px}
+  .mv-add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
   .mv-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .mv-kpi{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:16px 14px;box-shadow:0 3px 12px rgba(11,36,64,.05);text-decoration:none;color:inherit;min-height:96px}
   .mv-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
@@ -198,15 +202,11 @@
   .mv-select select,.mv-date input{border:0;outline:0;background:none;width:100%;font-size:.86rem;color:#12233B;appearance:none;font-family:inherit}
   .mv-select{position:relative}
   .mv-select svg{position:absolute;right:14px;transform:rotate(90deg)}
-  .mv-tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:16px 0;padding-bottom:2px}
-  .mv-tabs::-webkit-scrollbar{display:none}
-  .mv-tabs a{flex:none;text-decoration:none;color:#2E5FD0;font-size:.8rem;font-weight:700;padding:10px 16px;border-radius:20px;background:#E7EDF7;white-space:nowrap}
+  .mv-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+  .mv-tabs a{flex:1 1 auto;text-align:center;text-decoration:none;color:#2E5FD0;font-size:.78rem;font-weight:700;padding:10px 12px;border-radius:20px;background:#E7EDF7;white-space:nowrap}
   .mv-tabs a span{background:#1E40AF;color:#fff;font-size:.66rem;padding:1px 7px;border-radius:10px;margin-left:4px}
   .mv-tabs a.active{background:#0B2440;color:#fff}
   .mv-tabs a.active span{background:#fff;color:#0B2440}
-  .mv-add-row{display:flex;justify-content:flex-end;margin:6px 0 16px}
-  .mv-add{display:inline-flex;align-items:center;gap:7px;background:#0B2440;color:#fff;text-decoration:none;font-size:.82rem;font-weight:700;padding:12px 18px;border-radius:22px}
-  .mv-add svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2}
   .mv-list-card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 4px 16px rgba(11,36,64,.06)}
   .mv-list-head{display:flex;align-items:center;gap:10px;padding:16px;background:#EDF2FA}
   .mv-lh-ico{width:32px;height:32px;border-radius:50%;background:#fff;display:grid;place-items:center;color:#1E40AF}
