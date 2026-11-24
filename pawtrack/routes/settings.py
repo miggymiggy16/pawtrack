@@ -20,6 +20,11 @@ from ..services.identity import VERIFICATION_DIR
 from ..storage import edit, get_settings, load
 
 
+def _settings_redirect():
+    """Back to Settings on the tab the submitted form belongs to."""
+    return redirect(url_for("settings", tab=request.form.get("tab")))
+
+
 @app.route("/settings")
 @login_required
 def settings():
@@ -46,7 +51,7 @@ def settings_notifications():
             s["reminder_days"], s["expiry_warning_days"] = days, warn
             s["email_enabled"] = bool(request.form.get("email_enabled"))
         flash("Notification settings saved.", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/clinic", methods=["POST"])
@@ -64,7 +69,7 @@ def settings_clinic():
         with edit("settings") as s:
             s["clinic"], s["public_base_url"] = clinic, base
         flash("Clinic information saved.", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/password", methods=["POST"])
@@ -86,7 +91,7 @@ def settings_password():
                 if u["user_id"] == me["user_id"]:
                     u["password_hash"] = generate_password_hash(new)
         flash("Your password was changed.", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/face", methods=["POST"])
@@ -134,7 +139,7 @@ def settings_face_remove():
                 user.pop("face_enrolled_at", None)
                 user.pop("face_model", None)
     flash("Your face ID was removed.", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/identity/scan", methods=["POST"])
@@ -225,7 +230,7 @@ def settings_identity_remove():
                             "face_descriptors", "face_enrolled_at", "face_model"):
                     u.pop(key, None)
     flash("Your identity verification was removed.", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/test-email", methods=["POST"])
@@ -239,7 +244,7 @@ def settings_test_email():
         ok, err = notify(None, to, "Test Email", "Email configuration test", subject, body,
                          by=current_user()["username"])
         flash(f"Test email sent to {to}." if ok else f"Test email failed: {err}", "success" if ok else "error")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/regenerate-qr", methods=["POST"])
@@ -249,7 +254,7 @@ def settings_regenerate_qr():
     made = sum(1 for a in animals if make_qr(a))
     flash(f"Regenerated {made} of {len(animals)} QR codes." if made or not animals
           else "Could not create QR codes: install the 'qrcode' package.", "success" if made or not animals else "error")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
 
 
 @app.route("/settings/remove-sample", methods=["POST"])
@@ -276,4 +281,4 @@ def settings_remove_sample():
         if qr_path(animal_id).exists():
             qr_path(animal_id).unlink()
     flash(f"Sample data removed ({len(gone)} sample animals and their records).", "success")
-    return redirect(url_for("settings"))
+    return _settings_redirect()
