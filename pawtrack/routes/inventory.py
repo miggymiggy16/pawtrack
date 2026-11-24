@@ -86,12 +86,14 @@ def inventory():
     args = {k: request.args.get(k, "").strip() for k in ("q", "category", "view")}
     items = enriched_inventory()
     readonly = not can("inventory.manage")
-    views = {"low": lambda i: i["stock_status"] == "Low Stock",
+    views = {"in": lambda i: i["stock_status"] == "In Stock",
+             "low": lambda i: i["stock_status"] == "Low Stock",
              "out": lambda i: i["stock_status"] == "Out of Stock",
              "expired": lambda i: i["expiry_status"] == "Expired",
              "expiring": lambda i: i["expiry_status"] == "Expiring Soon"}
     rows = [i for i in items
-            if (not args["q"] or args["q"].lower() in (i["item_name"] + i["item_id"] + i["supplier"]).lower())
+            if (not args["q"] or args["q"].lower() in
+                (i["item_name"] + i["item_id"] + i["supplier"] + i["category"]).lower())
             and (not args["category"] or i["category"] == args["category"])
             and (args["view"] not in views or views[args["view"]](i))]
     return render_template("inventory.html", rows=rows, args=args, categories=CATEGORIES,
