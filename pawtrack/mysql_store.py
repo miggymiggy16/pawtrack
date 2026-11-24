@@ -26,6 +26,7 @@ COLLECTIONS = {
     "inventory_transactions": ("inventory_transactions", "transaction_id",    ["item_id"]),
     "pos_sales":              ("pos_sales",              "sale_id",          ["cashier"]),
     "pos_services":           ("pos_services",           "service_id",       []),
+    "verifications":          ("verifications",          "verification_id", []),
 }
 SETTINGS_TABLE = "settings"
 READS_TABLE = "notification_reads"

@@ -1,0 +1,32 @@
+{% from '_macros.html' import logo, csrf, icon, theme_toggle %}
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><script>/* theme */(function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal Information | PawTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head><body>
+{{ theme_toggle(true) }}
+<div class="container" style="max-width:760px;margin:40px auto">
+  <div class="card p-4">
+    <h2>Personal Information</h2>
+    <p class="muted">Review the information extracted from your ID. Edit if needed, then submit.</p>
+    {% if id_image %}<div style="margin-bottom:12px"><img src="{{ url_for('static', filename=id_image) }}" style="max-width:240px;border-radius:8px"></div>{% endif %}
+    {% if id_face_crop %}<div style="margin-bottom:12px"><img src="{{ url_for('static', filename=id_face_crop) }}" style="max-width:120px;border-radius:8px" alt="ID face"></div>{% endif %}
+    <form method="post" novalidate>
+      {{ csrf() }}
+      <div class="field"><label>Full name</label><input name="full_name" value="{{ fields.full_name or '' }}" required></div>
+      <div class="field"><label>Date of birth</label><input name="date_of_birth" type="date" value="{{ fields.date_of_birth or '' }}"></div>
+      <div class="field"><label>Age</label><input value="{{ fields.age or '' }}" disabled></div>
+      <div class="field"><label>Address</label><textarea name="address" rows="3">{{ fields.address or '' }}</textarea></div>
+      <div class="field"><label>ID number</label><input name="id_number" value="{{ fields.id_number or '' }}"></div>
+      <div class="field"><label>Expiry date</label><input name="expiry_date" type="date" value="{{ fields.expiry_date or '' }}"></div>
+      <div class="field"><label>ID type</label><input value="{{ id_type }}" disabled></div>
+      <button class="btn" type="submit">Submit verification</button>
+      <a class="btn ghost" href="{{ url_for('verify_face') }}">Re-capture face</a>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body></html>

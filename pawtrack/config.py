@@ -67,7 +67,7 @@ DEFAULT_SETTINGS = {
 DEFAULT_FILES = {
     "animals": [], "vaccinations": [], "users": [], "notifications": [],
     "inventory": [], "inventory_transactions": [], "settings": {},
-    "pos_sales": [], "pos_services": [],
+    "pos_sales": [], "pos_services": [], "verifications": [],
     "notification_reads": {},      # {user_id: {notification key: "read at"}}
 }
 

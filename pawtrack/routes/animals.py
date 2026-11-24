@@ -4,7 +4,7 @@ PawTrack - animal registration, profiles and photos
 import secrets
 from datetime import date
 
-from flask import abort, flash, redirect, render_template, request, url_for
+from flask import abort, flash, redirect, render_template, request, session, url_for
 
 from ..config import OWNERSHIP_CHOICES, SEX_CHOICES, SPECIES_CHOICES, UP_TO_DATE
 from ..extensions import app
@@ -107,9 +107,19 @@ def animals_list():
 @app.route("/animals/new", methods=["GET", "POST"])
 @permission_required("animals.create")
 def animal_new():
+    from ..services.identity import get_verification
+    vid = session.get("verification_id")
+    verification = get_verification(vid) if vid else None
     form = {"ownership_status": "Owned", "registration_date": date.today().isoformat()}
+    if verification:
+        form["owner_name"] = verification.get("full_name", "")
+        form["owner_mobile"] = form.get("owner_mobile", "")
     if request.method == "POST":
         form, errors = validate_animal(request.form)
+        if form.get("ownership_status") == "Owned" and not verification:
+            flash("Please verify the pet owner's ID first.", "error")
+            session["verify_next"] = "animals_new"
+            return redirect(url_for("verify_start", next="animals_new"))
         img, ext, img_err = read_product_image(request.files.get("photo"), "Animal photo")
         if img_err:
             errors.append(img_err)
@@ -127,7 +137,8 @@ def animal_new():
             flash(f"{form['animal_name']} was registered with Animal ID {form['animal_id']}." +
                   ("" if made else " QR image could not be created: install the 'qrcode' package."), "success")
             return redirect(url_for("animal_view", animal_id=form["animal_id"]))
-    return render_template("animal_form.html", form=form, editing=False, species=SPECIES_CHOICES)
+    return render_template("animal_form.html", form=form, editing=False, species=SPECIES_CHOICES,
+                          verification=verification)
 
 
 @app.route("/animals/<animal_id>")

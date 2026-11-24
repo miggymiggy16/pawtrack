@@ -1,0 +1,35 @@
+{% from '_macros.html' import logo, csrf, icon, theme_toggle %}
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><script>/* theme */(function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Identity Verification | PawTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head><body>
+{{ theme_toggle(true) }}
+<div class="container" style="max-width:720px;margin:40px auto">
+  <div class="card p-4">
+    <h2>Identity Verification</h2>
+    <p class="muted">Verify a government-issued ID and your face before proceeding.</p>
+    <h5>Supported ID types</h5>
+    <ul>
+      {% for t in id_types %}<li>{{ t }}</li>{% endfor %}
+    </ul>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for cat, msg in messages %}<div class="flash {{ cat }}" style="margin-bottom:12px"><span>{{ msg }}</span></div>{% endfor %}{% endwith %}
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {{ csrf() }}
+      <div class="field"><label for="id_type">ID type</label>
+        <select id="id_type" name="id_type" required>
+          <option value="">-- select --</option>
+          {% for t in id_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label for="id_image">Upload ID image</label>
+        <input id="id_image" name="id_image" type="file" accept="image/*" required></div>
+      <button class="btn" type="submit">Scan ID</button>
+    </form>
+    <p class="small muted" style="margin-top:12px">Use a clear, well-lit photo of your ID. The system will extract your details and detect the face on the ID.</p>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body></html>

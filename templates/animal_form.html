@@ -3,6 +3,16 @@
 {% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
+{% if not editing %}
+<div class="card" style="margin-bottom:16px;padding:12px">
+  {% if verification %}
+    <span class="flash success" style="display:inline-block">Owner ID verified: {{ verification.full_name }}</span>
+  {% else %}
+    <span class="flash warning" style="display:inline-block">Owner not verified yet.</span>
+    <a class="btn ghost" href="{{ url_for('verify_start', next='animals_new') }}" style="margin-left:8px">Verify Owner ID</a>
+  {% endif %}
+</div>
+{% endif %}
 
 <form method="post" enctype="multipart/form-data" novalidate>
   {{ csrf() }}
