@@ -397,10 +397,8 @@ def scan_id(image_bytes, id_type, demo_mode=False):
     text, boxes = run_ocr(image_bytes)
     fields = parse_fields(text)
     fields["id_type"] = id_type
-    if demo_mode:
-        id_face_desc, id_face_crop = None, None
-    else:
-        id_face_desc, id_face_crop = detect_face_on_id(image_bytes)
+    # Always detect the face on the ID — required for face matching in the sequence.
+    id_face_desc, id_face_crop = detect_face_on_id(image_bytes)
     fields["id_face_found"] = bool(id_face_desc)
     fields["demo_mode"] = bool(demo_mode)
     # store crop

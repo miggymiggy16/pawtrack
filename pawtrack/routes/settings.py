@@ -4,7 +4,7 @@ PawTrack - clinic, notification and account settings
 import re
 
 from flask import (current_app, flash, jsonify, redirect, render_template,
-                   request, url_for)
+                   request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..extensions import app
@@ -137,56 +137,94 @@ def settings_face_remove():
     return redirect(url_for("settings"))
 
 
-@app.route("/settings/id", methods=["POST"])
+@app.route("/settings/identity/scan", methods=["POST"])
 @login_required
-def settings_id():
-    """Register the signed-in user's government ID (OCR + optional face check)."""
-    me = current_user()
-    password = request.form.get("password", "")
-    if not check_password_hash(me["password_hash"], password):
-        flash("Current password is incorrect.", "error")
-        return redirect(url_for("settings"))
+def settings_identity_scan():
+    """Step 1-2: scan the uploaded ID and extract fields into a pending session record."""
+    if request.form.get("consent") != "1":
+        return jsonify(ok=False, error="Please consent to ID and facial data processing."), 400
+    if not check_password_hash(current_user()["password_hash"], request.form.get("password", "")):
+        return jsonify(ok=False, error="Current password is incorrect."), 400
     id_type = request.form.get("id_type", "").strip()
     if id_type not in ID_TYPES:
-        flash("Please choose a supported ID type.", "error")
-        return redirect(url_for("settings"))
+        return jsonify(ok=False, error="Please choose a supported ID type."), 400
     upload = request.files.get("id_image")
     if not upload or not upload.filename:
-        flash("Please choose an ID image to upload.", "error")
-        return redirect(url_for("settings"))
+        return jsonify(ok=False, error="Please choose an ID image to upload."), 400
     data = upload.read()
     try:
-        fields = scan_id(data, id_type, demo_mode=request.form.get("demo_mode") == "1")
+        fields = scan_id(data, id_type)
     except Exception as exc:
-        flash("ID scanning failed: " + str(exc), "error")
-        return redirect(url_for("settings"))
+        return jsonify(ok=False, error="ID scanning failed: " + str(exc)), 400
+    if not fields.get("complete"):
+        missing = ", ".join(fields.get("missing", [])) or "face"
+        return jsonify(ok=False, error="ID not accepted: missing " + missing + ". Upload a clearer image."), 400
     import uuid
     ext = upload.filename.rsplit(".", 1)[-1].lower() if "." in upload.filename else "png"
-    name = "user_" + me["user_id"] + "_" + uuid.uuid4().hex + "." + ext
+    name = "user_" + current_user()["user_id"] + "_" + uuid.uuid4().hex + "." + ext
     (VERIFICATION_DIR / name).write_bytes(data)
-    with edit("users") as users:
-        for u in users:
-            if u["user_id"] == me["user_id"]:
-                u["id_type"] = id_type
-                u["id_number"] = fields.get("id_number", "")
-                u["id_full_name"] = fields.get("full_name", "")
-                u["id_image"] = "uploads/verifications/" + name
-                u["id_verified_at"] = now_str()
-    flash("Your ID was verified and saved.", "success")
-    return redirect(url_for("settings"))
+    session["settings_pending_id"] = {
+        "id_type": id_type, "fields": {k: v for k, v in fields.items() if k != "id_face_descriptor"},
+        "id_descriptor": fields.get("id_face_descriptor"),
+        "id_image": "uploads/verifications/" + name,
+    }
+    return jsonify(ok=True, fields=session["settings_pending_id"]["fields"],
+                   id_image=session["settings_pending_id"]["id_image"])
 
 
-@app.route("/settings/id/remove", methods=["POST"])
+@app.route("/settings/identity/face", methods=["POST"])
 @login_required
-def settings_id_remove():
-    """Remove the signed-in user's stored ID verification."""
+def settings_identity_face():
+    """Step 3-4: guided face captures, matched against the ID photo, then save everything."""
+    from ..services.face import embedding, identify
+    from ..services.identity import match_faces
+    pending = session.get("settings_pending_id")
+    if not pending or not pending.get("id_descriptor"):
+        return jsonify(ok=False, error="No scanned ID found. Start the verification again."), 400
+    files = [f for f in request.files.getlist("face_image") if f and f.filename]
+    if not files:
+        return jsonify(ok=False, error="No camera images were received. Please repeat the capture."), 400
+    try:
+        descriptors = [embedding(f.read()) for f in files]
+    except Exception as exc:
+        return jsonify(ok=False, error="Face capture failed: " + str(exc) + " Please repeat."), 400
+    if not descriptors:
+        return jsonify(ok=False, error="No face was detected. Please repeat with better lighting."), 400
+    best_score = max(match_faces(pending["id_descriptor"], d)[1] for d in descriptors)
+    if best_score < 0.45:
+        return jsonify(ok=False, error="Face does not match the ID photo. Please retake the captures."), 400
     me = current_user()
     with edit("users") as users:
         for u in users:
             if u["user_id"] == me["user_id"]:
-                for key in ("id_type", "id_number", "id_full_name", "id_image", "id_verified_at"):
+                u["id_type"] = pending["id_type"]
+                u["id_number"] = pending["fields"].get("id_number", "")
+                u["id_full_name"] = pending["fields"].get("full_name", "")
+                u["id_date_of_birth"] = pending["fields"].get("date_of_birth", "")
+                u["id_address"] = pending["fields"].get("address", "")
+                u["id_expiry_date"] = pending["fields"].get("expiry_date", "")
+                u["id_image"] = pending["id_image"]
+                u["id_verified_at"] = now_str()
+                u["face_descriptors"] = descriptors
+                u["face_enrolled_at"] = now_str()
+                u["face_model"] = MODEL_NAME
+    session.pop("settings_pending_id", None)
+    return jsonify(ok=True, score=round(best_score, 3), message="Identity verification complete.")
+
+
+@app.route("/settings/identity/remove", methods=["POST"])
+@login_required
+def settings_identity_remove():
+    """Remove all stored identity verification (ID + face) for the signed-in user."""
+    me = current_user()
+    with edit("users") as users:
+        for u in users:
+            if u["user_id"] == me["user_id"]:
+                for key in ("id_type", "id_number", "id_full_name", "id_date_of_birth", "id_address",
+                            "id_expiry_date", "id_image", "id_verified_at",
+                            "face_descriptors", "face_enrolled_at", "face_model"):
                     u.pop(key, None)
-    flash("Your ID verification was removed.", "success")
+    flash("Your identity verification was removed.", "success")
     return redirect(url_for("settings"))
 
 

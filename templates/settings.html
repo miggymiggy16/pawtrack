@@ -37,34 +37,62 @@
     <div class="field"><label for="new_password">New password</label><input id="new_password" name="new_password" type="password" autocomplete="new-password" required><small>At least 8 characters, with a letter, a number, and a symbol.</small></div>
     <div class="field"><label for="confirm_password">Confirm new password</label><input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required></div>
     <button class="btn" type="submit">Change password</button></form></section>
-<section class="card" id="id-card">
-  <h2>ID Verification</h2>
-  <p class="muted">Register your government ID so your identity is on file. After entering your password at login, you will be asked to verify your face.</p>
-  <p id="id-status-text" class="small">Status: {% if user.id_verified_at %}<b style="color:var(--ok)">verified</b> on {{ user.id_verified_at }}{% if user.id_number %} &middot; {{ user.id_number }}{% endif %}{% else %}<b style="color:var(--warn)">not verified</b>{% endif %}</p>
-  <form method="post" action="{{ url_for('settings_id') }}" enctype="multipart/form-data">
-    {{ csrf() }}
-    <div class="field"><label for="id_type">ID type</label><select id="id_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}" {{ 'selected' if user.id_type==t }}>{{ t }}</option>{% endfor %}</select></div>
-    <div class="field"><label for="id_image">ID image</label><input id="id_image" name="id_image" type="file" accept="image/*" required><small>A clear, well-lit photo of the front of your ID.</small></div>
-    <div class="field"><label for="id_password">Current password (to confirm)</label><input id="id_password" name="password" type="password" autocomplete="current-password" required></div>
-    <button class="btn" type="submit">Verify my ID</button>
-  </form>
-  {% if user.id_verified_at %}<form method="post" action="{{ url_for('settings_id_remove') }}" style="margin-top:14px" data-confirm="Remove your stored ID verification?">{{ csrf() }}<button class="btn danger" type="submit">Remove my ID verification</button></form>{% endif %}
-</section>
-<section class="card" id="face-card">
-  <h2>Face ID</h2>
-  <p class="muted">Register your face — it is required to finish signing in after your password. Only a mathematical face descriptor is saved, never a photo.</p>
-  <p id="face-status-text" class="small">Status: {% if user.face_descriptors %}<b style="color:var(--ok)">registered</b>{% if user.face_enrolled_at %} on {{ user.face_enrolled_at }}{% endif %}{% else %}<b style="color:var(--warn)">not registered</b>{% endif %}</p>
-  <div class="face-camera">
-    <video id="enroll-face-video" autoplay playsinline muted></video>
-    <div id="enroll-face-placeholder" class="face-placeholder">Camera is off</div>
+<section class="card" id="identity-card" style="grid-column:1/-1">
+  <h2>Identity Verification</h2>
+  <p class="muted">One guided process: upload your ID, scan it, register your face, then match it against the ID photo. Face verification is required to finish signing in after your password. Only a face descriptor (numbers) and ID details are stored — never a face photo.</p>
+  <p id="idv-status" class="small">Status: {% if user.id_verified_at and user.face_descriptors %}<b style="color:var(--ok)">verified</b> on {{ user.id_verified_at }}{% else %}<b style="color:var(--warn)">not yet verified</b>{% endif %}</p>
+
+  {% set verified = user.id_verified_at and user.face_descriptors %}
+  {% if not verified %}
+  <div class="idv-wizard">
+    <div class="idv-step active" data-step="1"><b>1</b> Upload ID</div>
+    <div class="idv-step" data-step="2"><b>2</b> Scan &amp; extract</div>
+    <div class="idv-step" data-step="3"><b>3</b> Face capture</div>
+    <div class="idv-step" data-step="4"><b>4</b> Match</div>
+    <div class="idv-step" data-step="5"><b>5</b> Result</div>
   </div>
-  <div class="face-actions">
-    <button type="button" class="btn ghost" id="enroll-face-start">Start camera</button>
-    <button type="button" class="btn" id="enroll-face-capture" disabled>Capture &amp; register</button>
+
+  <div id="idv-panel-1" class="idv-panel">
+    <form id="idvScanForm" enctype="multipart/form-data">
+      {{ csrf() }}
+      <div class="field"><label>ID type</label><select id="idv_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select><small>Supported: Philippine National ID, Driver's License, Passport, UMID.</small></div>
+      <div class="field"><label>ID image</label><input id="idv_image" name="id_image" type="file" accept="image/*" required><small>Clear, well-lit photo of the front of your ID.</small></div>
+      <div class="field"><label>Current password (to confirm)</label><input id="idv_password" name="password" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label><input type="checkbox" id="idv_consent" name="consent" value="1" required> I consent to ID and facial data processing.</label></div>
+      <button class="btn" type="submit">Scan ID</button>
+    </form>
   </div>
-  <div class="field" style="margin-top:14px"><label for="face_password">Current password (to confirm)</label><input id="face_password" type="password" autocomplete="current-password" placeholder="Enter your password"><small>Needed so someone using an unattended session cannot register their own face.</small></div>
-  <div id="enroll-face-status" class="face-status" role="status" aria-live="polite"></div>
-  {% if user.face_descriptors %}<form method="post" action="{{ url_for('settings_face_remove') }}" style="margin-top:14px" data-confirm="Remove your face ID? You will need to use your password until you register again.">{{ csrf() }}<button class="btn danger" type="submit">Remove my face ID</button></form>{% endif %}
+
+  <div id="idv-panel-2" class="idv-panel" hidden>
+    <h3>Extracted information</h3>
+    <div id="idvFields" class="idv-fields"></div>
+    <p class="small">Review the extracted details. Next you'll register your face and match it to the ID photo.</p>
+    <button type="button" class="btn" id="idvToFace">Continue to face capture</button>
+  </div>
+
+  <div id="idv-panel-3" class="idv-panel" hidden>
+    <h3>Face registration &amp; capture</h3>
+    <ol class="idv-instructions">
+      <li data-i="0">Look straight at the camera.</li>
+      <li data-i="1">Look to the left.</li>
+      <li data-i="2">Look to the right.</li>
+      <li data-i="3">Move closer to the camera.</li>
+      <li data-i="4">Move slightly farther away.</li>
+    </ol>
+    <p class="small">Ensure your entire face is visible and maintain proper lighting.</p>
+    <div class="face-camera"><video id="idvVideo" autoplay playsinline muted></video><div id="idvPlaceholder" class="face-placeholder">Camera is off</div></div>
+    <div class="face-actions"><button type="button" class="btn ghost" id="idvStart">Start camera</button><button type="button" class="btn" id="idvCapture" disabled>Capture pose 1 of 5</button><button type="button" class="btn ghost" id="idvRetake" hidden>Retake captures</button></div>
+  </div>
+
+  <div id="idv-panel-4" class="idv-panel" hidden><h3>Verifying your face against the ID photo...</h3></div>
+  <div id="idv-panel-5" class="idv-panel" hidden><h3 id="idvResultTitle"></h3><p id="idvResultMsg" class="small"></p><button type="button" class="btn ghost" id="idvAgain">Start over</button></div>
+
+  <div id="idvStatus" class="face-status" role="status" aria-live="polite"></div>
+  {% else %}
+  <p>Your identity is verified. Face verification will be required at login.</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('settings_identity_remove') }}" style="margin-top:14px" data-confirm="Remove all identity verification (ID + face)?">{{ csrf() }}<button class="btn danger" type="submit">Remove verification</button></form>
 </section>
 {% if admin %}<section class="card"><h2>Sample data</h2>
   <p class="muted">PawTrack starts with sample animals, vaccinations and inventory so the dashboard has something to show. They are labelled internally and can be removed in one step. Your own records are never touched.</p>
@@ -72,4 +100,86 @@
   {% else %}<p class="small">There is no sample data left.</p>{% endif %}</section>{% endif %}
 </div>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/face.js') }}"></script>{% endblock %}
+{% block scripts %}
+<style>
+.idv-wizard{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+.idv-step{font-size:.72rem;padding:6px 12px;border-radius:16px;background:#eef2f8;color:#8794a8}
+.idv-step b{margin-right:4px}
+.idv-step.active{background:#0B2440;color:#fff;font-weight:700}
+.idv-step.done{background:#DFF6E9;color:#14693F}
+.idv-panel{border-top:1px solid #eef2f8;padding-top:14px}
+.idv-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.idv-fields div{background:#f6f8fc;border-radius:8px;padding:8px 10px;font-size:.82rem}
+.idv-fields span{display:block;color:#8794a8;font-size:.7rem}
+.idv-instructions{margin:0 0 10px;padding-left:20px;color:#44546b;font-size:.85rem;line-height:1.9}
+.idv-instructions li.active{color:#1E40AF;font-weight:800}
+.idv-instructions li.done{color:#1F9D61;text-decoration:line-through}
+</style>
+<script>
+(function(){
+  var form=document.getElementById('idvScanForm'); if(!form) return;
+  var panels=[1,2,3,4,5].map(function(n){return document.getElementById('idv-panel-'+n);});
+  var steps=[].slice.call(document.querySelectorAll('.idv-step'));
+  var status=document.getElementById('idvStatus');
+  var video=document.getElementById('idvVideo'), placeholder=document.getElementById('idvPlaceholder');
+  var startBtn=document.getElementById('idvStart'), capBtn=document.getElementById('idvCapture'), retakeBtn=document.getElementById('idvRetake');
+  var instr=[].slice.call(document.querySelectorAll('.idv-instructions li'));
+  var POSES=['Look straight at the camera.','Look to the left.','Look to the right.','Move closer to the camera.','Move slightly farther away.'];
+  var step=0, blobs=[], stream=null, busy=false;
+  function setStatus(m,k){status.textContent=m||'';status.className='face-status'+(k?' '+k:'');}
+  function show(n){panels.forEach(function(p,i){p.hidden=(i+1)!==n;});steps.forEach(function(s,i){s.classList.toggle('active',i+1===n);s.classList.toggle('done',i+1<n);});}
+  function mark(){
+    instr.forEach(function(li,i){li.classList.toggle('active',i===step);li.classList.toggle('done',i<step);});
+    capBtn.textContent=step<POSES.length?('Capture pose '+(step+1)+' of 5'):'Verify face';
+  }
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    if(!document.getElementById('idv_consent').checked){setStatus('Please consent to ID and facial data processing.','error');return;}
+    setStatus('Scanning ID...','');
+    try{
+      var res=await fetch('{{ url_for("settings_identity_scan") }}',{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+      var d=await res.json();
+      if(!res.ok||!d.ok){setStatus(d.error||'ID scan failed.','error');return;}
+      var f=d.fields||{};
+      document.getElementById('idvFields').innerHTML=['full_name','date_of_birth','id_number','address','expiry_date'].map(function(k){
+        return '<div style="grid-column:'+(k==='address'?'1/-1':'auto')+'"><span>'+k.replace('_',' ')+'</span>'+String(f[k]||'-')+'</div>';
+      }).join('');
+      setStatus('ID scanned successfully.','ok');show(2);
+    }catch(err){setStatus(err.message||'Scan failed','error');}
+  });
+  document.getElementById('idvToFace').addEventListener('click',function(){show(3);mark();});
+  async function startCam(){
+    if(stream)return;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});
+      video.srcObject=stream;await video.play();video.classList.add('live');if(placeholder)placeholder.hidden=true;
+      startBtn.textContent='Stop camera';capBtn.disabled=false;setStatus('Camera ready. Capture each pose.','ok');mark();
+    }catch(err){setStatus(err.message||'Camera error','error');}
+  }
+  function stopCam(){if(stream)stream.getTracks().forEach(function(t){t.stop();});stream=null;video.srcObject=null;video.classList.remove('live');if(placeholder)placeholder.hidden=false;startBtn.textContent='Start camera';capBtn.disabled=true;}
+  startBtn.addEventListener('click',function(){if(stream)stopCam();else startCam();});
+  function capture(){return new Promise(function(res,reject){var w=video.videoWidth||0,h=video.videoHeight||0;if(!w||!h){reject(new Error('Camera not ready.'));return;}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(video,0,0,w,h);c.toBlob(function(b){b?res(b):reject(new Error('Capture failed.'));},'image/jpeg',0.9);});}
+  capBtn.addEventListener('click',async function(){
+    if(busy||!stream)return;busy=true;capBtn.disabled=true;
+    try{
+      if(step<POSES.length){blobs.push(await capture());step++;mark();setStatus('Pose saved. Next: '+(step<POSES.length?POSES[step]:'Verify face.'),'ok');return;}
+      show(4);setStatus('Comparing your face with the ID photo...','');
+      var fd=new FormData();fd.append('csrf_token',document.getElementById('pawCsrf').value);
+      blobs.forEach(function(b,i){fd.append('face_image',b,'pose'+(i+1)+'.jpg');});
+      var res=await fetch('{{ url_for("settings_identity_face") }}',{method:'POST',body:fd,headers:{'Accept':'application/json'}});
+      var d=await res.json();
+      if(!res.ok||!d.ok){show(3);setStatus(d.error||'Face did not match. Retake the captures.','error');retakeBtn.hidden=false;return;}
+      document.getElementById('idvResultTitle').textContent='Verification successful';
+      document.getElementById('idvResultMsg').textContent=d.message+' Match score: '+d.score;
+      var st=document.getElementById('idv-status');
+      if(st) st.innerHTML='Status: <b style="color:var(--ok)">verified</b> just now';
+      setStatus('','ok');show(5);stopCam();
+      setTimeout(function(){ window.location.reload(); }, 2500);
+    }catch(err){setStatus(err.message||'Error','error');retakeBtn.hidden=false;}
+    finally{busy=false;if(stream)capBtn.disabled=false;}
+  });
+  retakeBtn.addEventListener('click',function(){step=0;blobs=[];retakeBtn.hidden=true;mark();setStatus('Retake the captures. Follow the highlighted instructions.','');});
+  document.getElementById('idvAgain').addEventListener('click',function(){window.location.reload();});
+})();
+</script>
+{% endblock %}

@@ -217,15 +217,4 @@ def init_security(app):
                     404: "We couldn't find that page.",
                     413: "That file is too large. Please upload another picture (max 100 MB)."}
         detail = err.description if err.code == 400 else messages[err.code]
-        # Keep identity-verification failures inside the popup instead of the
-        # full error page (which would show the whole system / dashboard link).
-        try:
-            from flask import request
-            if request.path.startswith("/verify"):
-                from flask import flash, render_template as _rt
-                flash(detail, "warning")
-                from pawtrack.services.identity import ID_TYPES
-                return _rt("verify_start.html", id_types=ID_TYPES), err.code
-        except Exception:
-            pass
         return render_template("error.html", code=err.code, message=detail), err.code
