@@ -1,53 +1,290 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import icon %}
 {% block title %}Overview{% endblock %}
+{% block body_class %}sdash{% endblock %}
+
+{% block head %}
+<style>
+/* ===== Staff overview — matches the Sales/Settings panel language; colours come from the theme ===== */
+.sdb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.sdb-head h1{margin:0 0 4px;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.sdb-head p{margin:0;color:var(--muted);font-size:.9rem}
+.sdb-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* KPI strip */
+.sdb-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.sdb-kpi{display:block;padding:16px 20px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);
+  border-radius:14px;color:var(--white);min-width:0}
+.sdb-kpi:hover{color:var(--white);border-color:var(--light)}
+.sdb-kpi.plain:hover{border-left-color:var(--line)}
+.sdb-kpi.ok{border-left-color:var(--ok)}
+.sdb-kpi.info{border-left-color:var(--warn)}
+.sdb-kpi.bad{border-left-color:var(--bad)}
+.sdb-kpi .kl{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:2px}
+.sdb-kpi .kn{display:block;font-size:1.85rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;font-variant-numeric:tabular-nums}
+.sdb-kpi.ok .kn{color:var(--ok)} .sdb-kpi.bad .kn{color:var(--bad)}
+.sdb-kpi .kf{display:block;font-size:.74rem;font-weight:600;color:var(--warn)}
+
+/* two-column body */
+.sdb-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start;margin-bottom:18px}
+.sdb-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.sdb-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.sdb-card.overdue{border-color:rgba(192,57,43,.4)}
+.sdb-ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sdb-ch h2{margin:0;font-size:1.16rem;font-weight:800;color:var(--white)}
+.sdb-count{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:20px;
+  background:rgba(242,107,107,.18);color:var(--bad);font-size:.78rem;font-weight:800}
+.sdb-count.info{background:rgba(245,160,74,.18);color:var(--warn)}
+.sdb-count.ok{background:rgba(76,195,138,.18);color:var(--ok)}
+.sdb-hint{margin-left:auto;font-size:.78rem;color:var(--muted)}
+
+/* overdue / upcoming rows */
+.sdb-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.sdb-row{display:grid;grid-template-columns:26px 40px minmax(0,1fr) auto auto;align-items:center;gap:12px;
+  padding:10px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px}
+.sdb-rank{font-size:.78rem;font-weight:700;color:var(--muted);text-align:center}
+.sdb-av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1rem;
+  background:rgba(148,163,184,.18);color:var(--muted)}
+.sdb-av.sp-dog{background:rgba(185,28,28,.22);color:#FCA5A5}
+.sdb-av.sp-cat{background:rgba(22,163,74,.2);color:#86EFAC}
+.sdb-av.sp-bird{background:rgba(37,99,235,.2);color:#93C5FD}
+:root[data-theme="light"] .sdb-av.sp-dog{background:#FBE3E3;color:#B91C1C}
+:root[data-theme="light"] .sdb-av.sp-cat{background:#DDF3E4;color:#15803D}
+:root[data-theme="light"] .sdb-av.sp-bird{background:#E3EDFF;color:#1D4ED8}
+.sdb-main{min-width:0}
+.sdb-main b{display:block;font-size:.96rem;font-weight:700;line-height:1.3;color:var(--white)}
+.sdb-main small{display:block;font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sdb-when{text-align:right;line-height:1.3}
+.sdb-when b{display:block;font-size:.9rem;font-weight:800;color:var(--bad);white-space:nowrap}
+.sdb-when small{display:block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--bad)}
+.sdb-when.soon b,.sdb-when.soon small{color:var(--warn)}
+.sdb-when.high b{color:var(--bad)}
+.sdb-row .btn{flex:none}
+.sdb-row.simple{grid-template-columns:40px minmax(0,1fr) auto}
+.sdb-row.up{border-color:rgba(245,160,74,.35)}
+.sdb-row.up .sdb-when b{color:var(--warn)}
+.sdb-row.up .sdb-when small{color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600}
+
+/* panel footer */
+.sdb-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sdb-foot.ok{color:var(--ok)}
+.sdb-foot .ico{width:16px;height:16px}
+.sdb-foot a{font-weight:700}
+
+/* vaccine stock */
+.sdb-total{display:flex;align-items:baseline;gap:7px;margin:0 0 14px}
+.sdb-total b{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.sdb-total span{font-size:.85rem;color:var(--muted)}
+.sdb-stock{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sdb-stock li{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:9px 12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:10px}
+.sdb-srow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px}
+.sdb-srow a{font-size:.88rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sdb-srow a:hover{color:var(--light)}
+.sdb-bar{grid-column:1/-1;position:relative;height:6px;border-radius:6px;background:var(--line);overflow:visible}
+.sdb-bar i{display:block;height:100%;border-radius:6px;background:var(--ok)}
+.sdb-bar i.low{background:var(--warn)} .sdb-bar i.out{background:var(--bad)}
+.sdb-bar u{position:absolute;top:-3px;bottom:-3px;left:50%;width:0;border-left:1px dashed var(--muted);opacity:.75}
+.sdb-qty{font-size:.92rem;font-weight:800;color:var(--white);font-variant-numeric:tabular-nums}
+.sdb-tag{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:800;background:rgba(76,195,138,.18);color:var(--ok)}
+.sdb-tag.low{background:rgba(245,160,74,.2);color:var(--warn)}
+.sdb-tag.out{background:rgba(242,107,107,.2);color:var(--bad)}
+.sdb-note{margin:12px 0 0;font-size:.76rem;color:var(--muted)}
+
+/* inventory alerts */
+.sdb-alerts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sdb-alerts li{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:12px;
+  padding:9px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px}
+.sdb-aico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:rgba(242,107,107,.18);color:var(--bad)}
+.sdb-aico.warn{background:rgba(245,160,74,.18);color:var(--warn)}
+.sdb-aico .ico{width:17px;height:17px}
+.sdb-at b{display:block;font-size:.88rem;font-weight:700;color:var(--white);line-height:1.3}
+.sdb-at small{display:block;font-size:.76rem;color:var(--muted)}
+.sdb-empty{display:flex;align-items:center;gap:10px;padding:14px 4px;color:var(--ok);font-size:.86rem;font-weight:600}
+.sdb-empty .ico{width:18px;height:18px}
+
+/* find animal */
+.sdb-find{display:flex;gap:10px;align-items:center}
+.sdb-find input{flex:1;min-width:0}
+.sdb-rec{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.sdb-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:20px;background:var(--surface-2);
+  border:1px solid var(--line);font-size:.8rem;font-weight:600;color:var(--white)}
+.sdb-chip i{font-style:normal;font-weight:800;font-size:.72rem;color:var(--muted)}
+.sdb-chip:hover{border-color:var(--light);color:var(--white)}
+
+@media(max-width:1100px){
+  .sdb-grid{grid-template-columns:minmax(0,1fr)}
+  .sdb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sdb-hint{margin-left:0;width:100%}
+}
+@media(max-width:430px){.sdb-stats{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){
+  .sdb-head h1{font-size:1.7rem}
+  .sdb-actions{width:100%}
+  .sdb-actions .btn{flex:1;justify-content:center}
+  .sdb-row{grid-template-columns:24px 36px minmax(0,1fr) auto;row-gap:6px}
+  .sdb-row .sdb-main{grid-column:3/-1}
+  .sdb-row .sdb-when{grid-column:3;grid-row:2;text-align:left}
+  .sdb-row .btn{grid-column:4;grid-row:2;justify-self:end;align-self:center}
+  .sdb-row.simple .sdb-main{grid-column:2/-1}
+  .sdb-row.simple .btn{grid-column:auto;grid-row:auto}
+  .sdb-card{padding:16px}
+}
+</style>
+{% endblock %}
+
 {% block content %}
-{% macro units(totals) %}{% for u, q in totals.items() %}{{ q }}<small>{{ u }}</small>{% if not loop.last %} {% endif %}{% else %}0{% endfor %}{% endmacro %}
-{% macro task_list(rows, tone) %}<ul class="tasks">{% for r in rows %}<li>
-  <a class="av av-{{ tone }}" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" aria-label="{{ r.animal.animal_name }}">{{ (r.animal.species or '?')[:1]|upper }}</a>
-  <span class="t-main"><a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a><span class="mono-s">{{ r.animal_id }} &middot; {{ r.vaccine_name }}</span></span>
-  <span class="due due-{{ tone }}">{% if r.days < 0 %}{{ -r.days }}d late{% elif r.days == 0 %}Today{% else %}in {{ r.days }}d{% endif %}</span>
-  <a class="btn sm" href="{{ url_for('vaccination_new', animal_id=r.animal_id) }}">Record</a></li>{% endfor %}</ul>{% endmacro %}
-
-
-<div class="page-head"><div><h1>Overview</h1><p class="mono-s">{{ today|fmt_date }}</p></div>
-  <div class="actions"><a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div></div>
+<div class="sdb-head">
+  <div><h1>Overview</h1><p>{{ today|fmt_date }}</p></div>
+  <div class="sdb-actions"><a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div>
+</div>
 {% if problems %}<div class="notice warn" role="alert">Some data could not be loaded ({{ problems|join(', ') }}).</div>{% endif %}
 
-<section class="kpis k4" aria-label="Today">
-  <a class="kpi" href="{{ url_for('animals_list') }}"><span class="kico">{{ icon('paw') }}</span><span class="kl">Registered Animals</span><span class="kpi-n">{{ cards.animals }}</span></a>
-  <a class="kpi ok" href="{{ url_for('vaccinations') }}"><span class="kico">{{ icon('checks') }}</span><span class="kl">Recorded Today</span><span class="kpi-n">{{ cards.today }}</span></a>
-  <a class="kpi info" href="{{ url_for('vaccinations', status='Upcoming') }}"><span class="kico">{{ icon('clock') }}</span><span class="kl">Upcoming</span><span class="kpi-n">{{ cards.due - cards.due_today }}</span>{% if cards.due_today %}<span class="kpi-foot sub-warn">+ {{ cards.due_today }} due today</span>{% endif %}</a>
-  <a class="kpi {{ 'bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="kico">{{ icon('bell') }}</span><span class="kl">Overdue</span><span class="kpi-n {{ 'neg' if cards.overdue }}">{{ cards.overdue }}</span></a>
-</section>
-
-<div class="dash-row r11">
-  <section class="card dcard sec bad"><div class="sh"><span class="kico">{{ icon('alert') }}</span><span class="sh-t"><span class="kl">Overdue</span><span class="sh-n neg">{{ cards.overdue }}</span></span></div>
-    {% if overdue %}{{ task_list(overdue, 'bad') }}{% if overdue_more %}<a class="more" href="{{ url_for('vaccinations', status='Overdue') }}">+{{ overdue_more }} more</a>{% endif %}
-    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All clear</span></p>{% endif %}</section>
-  <section class="card dcard sec info"><div class="sh"><span class="kico">{{ icon('clock') }}</span><span class="sh-t"><span class="kl">Upcoming</span><span class="sh-n">{{ cards.due }}</span>{% if cards.due_today %}<span class="sh-sub">+ {{ cards.due_today }} due today</span>{% endif %}</span></div>
-    {% if upcoming %}{{ task_list(upcoming, 'info') }}{% if upcoming_more %}<a class="more" href="{{ url_for('vaccinations', status='Upcoming') }}">+{{ upcoming_more }} more</a>{% endif %}
-    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>Nothing due</span></p>{% endif %}</section>
+<div class="sdb-stats">
+  <a class="sdb-kpi plain" href="{{ url_for('animals_list') }}"><span class="kl">Registered animals</span><span class="kn">{{ cards.animals }}</span></a>
+  <a class="sdb-kpi ok" href="{{ url_for('vaccinations') }}"><span class="kl">Recorded today</span><span class="kn">{{ cards.today }}</span></a>
+  <a class="sdb-kpi info" href="{{ url_for('vaccinations', status='Upcoming') }}"><span class="kl">Upcoming</span><span class="kn">{{ cards.due - cards.due_today }}</span>{% if cards.due_today %}<span class="kf">+ {{ cards.due_today }} due today</span>{% endif %}</a>
+  <a class="sdb-kpi {{ 'bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="kl">Overdue</span><span class="kn">{{ cards.overdue }}</span></a>
 </div>
 
-<div class="dash-row r11">
-  <section class="card dcard sec {{ 'warn' if stock_alerts }}"><div class="sh"><span class="kico">{{ icon('box') }}</span><span class="sh-t"><span class="kl">Vaccine Stock</span><span class="sh-n sm">{{ units(cards.stock) }}</span>{% if stock_alerts %}<span class="sh-sub">{{ stock_alerts }} need{{ 's' if stock_alerts == 1 else '' }} attention</span>{% endif %}</span><a class="btn sm ghost sh-act" href="{{ url_for('inventory') }}">Open</a></div>
-    {% if stock_rows %}<div class="hbars cardrows">{% for i in stock_rows[:8] %}
-      {% set bad = i.stock_status == 'Out of Stock' or i.expiry_status == 'Expired' %}{% set warn = i.stock_status == 'Low Stock' or i.expiry_status == 'Expiring Soon' %}
-      {% set pct = [ (i.quantity / (([i.min_stock, 1]|max) * 2) * 100), 100 ]|min %}
-      <div class="hrow mini"><a class="hl" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }}</a><span class="htrack"><i class="f-{{ 'bad' if bad else 'warn' if warn else 'ok' }}" style="width:{{ pct }}%"></i><u style="left:50%"></u></span><b class="hv">{{ i.quantity }}</b></div>{% endfor %}</div>
-    {% else %}<p class="empty">No vaccines yet.</p>{% endif %}</section>
-  <section class="card dcard sec {{ 'warn' if feed }}"><div class="sh"><span class="kico">{{ icon('bell') }}</span><span class="sh-t"><span class="kl">Alerts</span><span class="sh-n">{{ feed|length }}</span></span><a class="btn sm ghost sh-act" href="{{ url_for('notifications') }}">All</a></div>
-    {% if feed %}<ul class="alerts">{% for n in feed %}<li class="al-{{ n.severity }}"><span class="kchip {{ n.severity }}">{{ icon(n.icon) }}</span><span class="al-t"><b>{{ n.title }}</b></span><a class="btn sm ghost" href="{{ n.url }}">Open</a></li>{% endfor %}</ul>
-    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All caught up</span></p>{% endif %}</section>
+<div class="sdb-grid">
+  <section class="sdb-card overdue" aria-label="Overdue vaccinations">
+    <div class="sdb-ch">
+      <h2>Overdue</h2><span class="sdb-count">{{ cards.overdue }}</span>
+      <span class="sdb-hint">Most late first. Urgent 14+ days, High 7+ days.</span>
+    </div>
+    {% if overdue %}
+    <ol class="sdb-rows">
+      {% for r in overdue %}
+      {% set late = -r.days %}
+      {% set sev = 'Urgent' if late >= 14 else ('High' if late >= 7 else 'Soon') %}
+      <li class="sdb-row">
+        <span class="sdb-rank">{{ loop.index }}</span>
+        <a class="sdb-av sp-{{ (r.animal.species or 'other')|lower }}" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" aria-label="{{ r.animal.animal_name }}">{{ (r.animal.species or '?')[:1]|upper }}</a>
+        <span class="sdb-main"><a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a><small>{{ r.animal_id }} &middot; {{ r.vaccine_name }}</small></span>
+        <span class="sdb-when {{ 'soon' if sev == 'Soon' }}"><b>{{ late }} day{{ 's' if late != 1 }} late</b><small>{{ sev }}</small></span>
+        <a class="btn sm" href="{{ url_for('vaccination_new', animal_id=r.animal_id) }}">Record</a>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <div class="sdb-empty">{{ icon('checks') }}<span>No overdue vaccinations.</span></div>
+    {% endif %}
+    <div class="sdb-foot{{ ' ok' if not upcoming and not overdue_more }}">
+      {% if overdue_more %}<a href="{{ url_for('vaccinations', status='Overdue') }}">+{{ overdue_more }} more overdue</a>
+      {% elif upcoming %}{{ icon('clock') }}<span>Upcoming: {{ upcoming|length }} vaccination{{ 's' if upcoming|length != 1 }} due &middot; <a href="{{ url_for('vaccinations', status='Upcoming') }}">open list</a></span>
+      {% else %}{{ icon('checks') }}<span>Upcoming: nothing due &middot; no vaccines coming up</span>{% endif %}
+    </div>
+  </section>
+
+  <div class="sdb-side">
+    {% set stock_total = namespace(n=0) %}
+    {% for u, q in cards.stock.items() %}{% set stock_total.n = stock_total.n + q %}{% endfor %}
+    <section class="sdb-card" aria-label="Vaccine stock">
+      <div class="sdb-ch">
+        <h2>Vaccine stock</h2>
+        {% if stock_alerts %}<span class="sdb-count info">{{ stock_alerts }} need{{ 's' if stock_alerts == 1 else '' }} attention</span>{% endif %}
+        <a class="sdb-hint" href="{{ url_for('inventory') }}">Open</a>
+      </div>
+      <p class="sdb-total"><b>{{ stock_total.n }}</b><span>{{ cards.stock.keys()|join(' + ') if cards.stock else 'units' }} in total</span></p>
+      {% if stock_rows %}
+      <ul class="sdb-stock">
+        {% for i in stock_rows[:6] %}
+        {% set bad = i.stock_status == 'Out of Stock' or i.expiry_status == 'Expired' %}
+        {% set warn = i.stock_status == 'Low Stock' or i.expiry_status == 'Expiring Soon' %}
+        {% set pct = [ (i.quantity / (([i.min_stock, 1]|max) * 2) * 100), 100 ]|min %}
+        <li>
+          <div class="sdb-srow">
+            <a href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }}</a>
+            <span class="sdb-qty">{{ i.quantity }}</span>
+            <span class="sdb-tag {{ 'out' if bad else 'low' if warn else '' }}">{{ 'Out' if bad else 'Low' if warn else 'OK' }}</span>
+          </div>
+          <span class="sdb-bar"><i class="{{ 'out' if bad else 'low' if warn else '' }}" style="width:{{ pct }}%"></i><u></u></span>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="sdb-note">Dashed line = minimum level.{% if stock_rows|length > 6 %} Showing 6 of {{ stock_rows|length }} vaccines.{% endif %}</p>
+      {% else %}<div class="sdb-empty">{{ icon('box') }}<span>No vaccines yet.</span></div>{% endif %}
+    </section>
+
+    {% set inv_alerts = feed|selectattr('group', 'equalto', 'inventory')|list %}
+    <section class="sdb-card" aria-label="Inventory alerts">
+      <div class="sdb-ch">
+        <h2>Inventory alerts</h2>{% if inv_alerts %}<span class="sdb-count info">{{ inv_alerts|length }}</span>{% endif %}
+        <span class="sdb-hint">Overdue alerts are in the list on the left</span>
+      </div>
+      {% if inv_alerts %}
+      <ul class="sdb-alerts">
+        {% for n in inv_alerts[:5] %}
+        {% set parts = n.title.split(' — ') %}
+        <li>
+          <span class="sdb-aico {{ 'warn' if n.severity != 'bad' }}">{{ icon(n.icon) }}</span>
+          <span class="sdb-at"><b>{{ parts[0] }}</b><small>{{ parts[1] if parts|length > 1 else n.message }}</small></span>
+          <a class="btn sm ghost" href="{{ n.url }}">Open</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="sdb-empty">{{ icon('checks') }}<span>No inventory alerts.</span></div>
+      {% endif %}
+      {% set counts = namespace(overdue=0) %}
+      {% for n in feed %}{% if n.group in ('overdue', 'due-today') %}{% set counts.overdue = counts.overdue + 1 %}{% endif %}{% endfor %}
+      {% set other = feed|length - counts.overdue - inv_alerts|length %}
+      <p class="sdb-note">Total alerts: {{ feed|length }} ({{ counts.overdue }} overdue, {{ inv_alerts|length }} inventory{% if other > 0 %}, {{ other }} upcoming{% endif %}) &middot; <a href="{{ url_for('notifications') }}">open all</a></p>
+    </section>
+  </div>
 </div>
 
-<div class="dash-row r11">
-  <section class="card dcard sec"><div class="sh"><span class="kico">{{ icon('search') }}</span><span class="sh-t"><span class="kl">Find Animal</span></span></div>
-    <form class="quick-search" method="get" action="{{ url_for('animals_list') }}" role="search"><div class="field"><label class="sr" for="qs">Animal ID or name</label><input id="qs" name="q" placeholder="PT-0001 or name" autocomplete="off"></div><button class="btn" type="submit">{{ icon('search') }}Search</button></form>
-    {% if recent_animals %}<div class="mono-s rec-l">Recent</div><div class="pets-row">{% for a in recent_animals %}<a class="pchip" href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><span class="av">{{ (a.species or '?')[:1]|upper }}</span><span><b>{{ a.animal_name }}</b><small class="mono-s">{{ a.animal_id }}</small></span></a>{% endfor %}</div>{% endif %}</section>
-  <section class="card dcard sec"><div class="sh"><span class="kico">{{ icon('file') }}</span><span class="sh-t"><span class="kl">No Record Yet</span><span class="sh-n">{{ no_record_total }}</span></span></div>
-    {% if no_record %}<ul class="tasks">{% for a in no_record %}<li><span class="av av-mute">{{ (a.species or '?')[:1]|upper }}</span><span class="t-main"><a href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><b>{{ a.animal_name }}</b></a><span class="mono-s">{{ a.animal_id }}</span></span><a class="btn sm ghost" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Record</a></li>{% endfor %}</ul>
-    {% else %}<p class="empty ok-empty">{{ icon('checks') }}<span>All recorded</span></p>{% endif %}</section>
+<div class="sdb-grid">
+  <section class="sdb-card" aria-label="Upcoming vaccinations">
+    <div class="sdb-ch"><h2>Upcoming</h2><span class="sdb-count info">{{ cards.due }}</span>
+      <span class="sdb-hint">{% if cards.due_today %}{{ cards.due_today }} due today. {% endif %}Soonest first.</span></div>
+    {% if upcoming %}
+    <ul class="sdb-rows">
+      {% for r in upcoming %}
+      <li class="sdb-row up">
+        <span class="sdb-rank">{{ loop.index }}</span>
+        <a class="sdb-av sp-{{ (r.animal.species or 'other')|lower }}" href="{{ url_for('animal_view', animal_id=r.animal_id) }}" aria-label="{{ r.animal.animal_name }}">{{ (r.animal.species or '?')[:1]|upper }}</a>
+        <span class="sdb-main"><a href="{{ url_for('animal_view', animal_id=r.animal_id) }}"><b>{{ r.animal.animal_name }}</b></a><small>{{ r.animal_id }} &middot; {{ r.vaccine_name }}</small></span>
+        <span class="sdb-when"><b>{% if r.days == 0 %}Today{% else %}in {{ r.days }}d{% endif %}</b><small>{% if r.status == 'Due Today' %}Due today{% else %}Upcoming{% endif %}</small></span>
+        <a class="btn sm ghost" href="{{ url_for('vaccination_new', animal_id=r.animal_id) }}">Record</a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="sdb-empty">{{ icon('checks') }}<span>Nothing due.</span></div>
+    {% endif %}
+    {% if upcoming_more %}<div class="sdb-foot"><a href="{{ url_for('vaccinations', status='Upcoming') }}">+{{ upcoming_more }} more upcoming</a></div>{% endif %}
+  </section>
+
+  <div class="sdb-side">
+    <section class="sdb-card" aria-label="Find animal">
+      <div class="sdb-ch"><h2>Find animal</h2></div>
+      <form class="sdb-find" method="get" action="{{ url_for('animals_list') }}" role="search">
+        <label class="sr" for="qs">Animal ID or name</label>
+        <input id="qs" name="q" placeholder="PT-0001 or name" autocomplete="off">
+        <button class="btn" type="submit">{{ icon('search') }}Search</button>
+      </form>
+      {% if recent_animals %}<div class="sdb-rec">{% for a in recent_animals %}<a class="sdb-chip" href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><i>{{ (a.species or '?')[:1]|upper }}</i>{{ a.animal_name }}<i>{{ a.animal_id }}</i></a>{% endfor %}</div>{% endif %}
+    </section>
+
+    <section class="sdb-card" aria-label="Animals without a record">
+      <div class="sdb-ch"><h2>No record yet</h2><span class="sdb-count info">{{ no_record_total }}</span></div>
+      {% if no_record %}
+      <ul class="sdb-rows">
+        {% for a in no_record %}
+        <li class="sdb-row simple up">
+          <a class="sdb-av sp-{{ (a.species or 'other')|lower }}" href="{{ url_for('animal_view', animal_id=a.animal_id) }}" aria-label="{{ a.animal_name }}">{{ (a.species or '?')[:1]|upper }}</a>
+          <span class="sdb-main"><a href="{{ url_for('animal_view', animal_id=a.animal_id) }}"><b>{{ a.animal_name }}</b></a><small>{{ a.animal_id }}</small></span>
+          <a class="btn sm ghost" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Record</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="sdb-empty">{{ icon('checks') }}<span>All animals have a record.</span></div>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}
