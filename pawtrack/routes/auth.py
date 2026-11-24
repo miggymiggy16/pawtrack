@@ -86,6 +86,22 @@ def login_face():
     return jsonify(ok=True, redirect=nxt or role_home(match))
 
 
+@app.route("/login/face/bypass", methods=["POST"])
+def login_face_bypass():
+    """DEMO ONLY: skip face verification. Remove before any real deployment."""
+    uid = session.get("pending_user_id")
+    if not uid:
+        return redirect(url_for("login"))
+    user = next((u for u in load("users") if u["user_id"] == uid), None)
+    if not user:
+        return redirect(url_for("login"))
+    nxt = session.pop("pending_next", None)
+    session.clear()
+    session.permanent = True
+    session["user_id"] = user["user_id"]
+    return jsonify(ok=True, redirect=nxt or role_home(user))
+
+
 @app.route("/login/face/cancel", methods=["POST"])
 def login_face_cancel():
     """Abandon 2FA and return to the password step."""
