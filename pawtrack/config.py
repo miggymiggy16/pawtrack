@@ -39,7 +39,7 @@ VACCINE_SUGGESTIONS = ["Anti-Rabies", "5-in-1 (DHPP)", "FVRCP", "Bordetella",
                        "Leptospirosis", "Feline Leukemia (FeLV)", "Deworming"]
 VACCINE_TYPES = ["Rabies", "Combination (DHPP)", "Feline combination (FVRCP)", "Bordetella",
                  "Leptospirosis", "Feline Leukemia (FeLV)", "Other"]
-MAX_IMAGE_BYTES = 4 * 1024 * 1024
+MAX_IMAGE_BYTES = 100 * 1024 * 1024
 MAX_QTY = 1_000_000                    # sanity limit for any stock quantity
 IMAGE_EXTS = {"png", "jpg", "jpeg", "gif", "webp"}
 

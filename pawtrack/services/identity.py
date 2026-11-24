@@ -47,6 +47,24 @@ def _load_face():
     return load_insight()
 
 
+def _silence_fd(func, *args, **kwargs):
+    """Run func while suppressing OS-level stdout/stderr (C-level prints)."""
+    import os
+    devnull = open(os.devnull, "w")
+    old_out = os.dup(1)
+    old_err = os.dup(2)
+    os.dup2(devnull.fileno(), 1)
+    os.dup2(devnull.fileno(), 2)
+    try:
+        return func(*args, **kwargs)
+    finally:
+        os.dup2(old_out, 1)
+        os.dup2(old_err, 2)
+        os.close(old_out)
+        os.close(old_err)
+        devnull.close()
+
+
 def _load_ocr():
     global _ocr_engine, _ocr_error
     if _ocr_engine is not None:
@@ -54,13 +72,29 @@ def _load_ocr():
     with _ocr_lock:
         if _ocr_engine is not None:
             return _ocr_engine
+        import os
+        os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
+        os.environ.setdefault("GLOG_minloglevel", "2")
+        os.environ.setdefault("OMP_NUM_THREADS", "2")
+        os.environ.setdefault("MKL_NUM_THREADS", "2")
+        try:
+            import logging
+            logging.getLogger().setLevel(logging.WARNING)
+            for name in ("ppocr", "paddle", "paddlex", "paddleocr", "paddlepaddle"):
+                logging.getLogger(name).setLevel(logging.WARNING)
+            # disable propagation of noisy child loggers
+            logging.getLogger("paddlex").propagate = False
+        except Exception:
+            pass
         try:
             from paddleocr import PaddleOCR
         except Exception as exc:
             _ocr_error = str(exc)
             raise RuntimeError("PaddleOCR is not installed. Run: pip install paddleocr") from exc
         try:
-            engine = PaddleOCR(use_angle_cls=True, lang="en")
+            engine = PaddleOCR(use_angle_cls=True, lang="en",
+                              use_doc_orientation_classify=False,
+                              use_doc_unwarping=False)
         except Exception as exc:
             _ocr_error = str(exc)
             raise RuntimeError("PaddleOCR could not start: " + str(exc)) from exc
@@ -78,6 +112,12 @@ def ocr_status():
 
 def _decode_image(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    # Keep memory/CPU reasonable: cap the longest side.
+    max_side = 1280
+    w, h = img.size
+    if max(w, h) > max_side:
+        scale = max_side / max(w, h)
+        img = img.resize((int(w * scale), int(h * scale)))
     return img
 
 
@@ -87,43 +127,68 @@ def run_ocr(image_bytes):
     img = _decode_image(image_bytes)
     arr = np.array(img)
     try:
-        result = engine.ocr(arr, cls=True)
-    except Exception:
-        try:
-            result = engine.ocr(arr)
-        except Exception as exc:
-            raise RuntimeError("OCR failed: " + str(exc))
+        result = engine.predict(arr)
+    except Exception as exc:
+        raise RuntimeError("OCR failed: " + str(exc))
     lines = []
     boxes = []
-    if result:
-        for page in result:
-            if not page:
+    # result is a list of OCRResult (dict-like) from predict()
+    pages = result if isinstance(result, (list, tuple)) else [result]
+    for page in pages:
+        if not page:
+            continue
+        texts = None
+        scores = None
+        polys = None
+        if hasattr(page, "get"):
+            texts = page.get("rec_texts")
+            scores = page.get("rec_scores")
+            polys = page.get("rec_polys") or page.get("rec_boxes")
+        if texts is None and hasattr(page, "rec_texts"):
+            texts = page.rec_texts
+            scores = getattr(page, "rec_scores", None)
+            polys = getattr(page, "rec_polys", None) or getattr(page, "rec_boxes", None)
+        if not texts:
+            continue
+        for i, t in enumerate(texts):
+            if not t:
                 continue
-            for item in page:
-                # item: [box, (text, score)] or [box, text]
-                try:
-                    box = item[0]
-                    text_part = item[1]
-                    if isinstance(text_part, (list, tuple)):
-                        text = text_part[0]
-                        score = text_part[1] if len(text_part) > 1 else 1.0
-                    else:
-                        text = text_part
-                        score = 1.0
-                except Exception:
-                    continue
-                if text:
-                    lines.append(str(text).strip())
-                    boxes.append((box, str(text).strip(), float(score)))
+            score = 1.0
+            if scores and i < len(scores):
+                score = float(scores[i])
+            box = None
+            if polys and i < len(polys):
+                box = polys[i]
+            lines.append(str(t).strip())
+            boxes.append((box, str(t).strip(), score))
     full = "\n".join(lines)
     return full, boxes
 
 
 DATE_RE = re.compile(r"\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b")
 ID_NUMBER_RE = re.compile(r"\b([A-Z0-9][A-Z0-9\-]{4,}[A-Z0-9])\b")
+PHILSYS_NUMBER_RE = re.compile(r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b")
+PHILID_CARD_RE = re.compile(r"\b\d{4}[- ]?\d{4}[- ]?\d{4}\b")
 
+
+MONTHS = {"january":1,"february":2,"march":3,"april":4,"may":5,"june":6,
+          "july":7,"august":8,"september":9,"october":10,"november":11,"december":12,
+          "jan":1,"feb":2,"mar":3,"apr":4,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
 
 def _normalize_date(s):
+    # Month-name form: "January 15, 1995" or "15 January 1995"
+    m = re.search(r"([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})", s)
+    if m and m.group(1).lower() in MONTHS:
+        try:
+            return datetime(int(m.group(3)), MONTHS[m.group(1).lower()], int(m.group(2))).date().isoformat()
+        except ValueError:
+            pass
+    m = re.search(r"(\d{1,2})\s+([A-Za-z]+),?\s+(\d{4})", s)
+    if m and m.group(2).lower() in MONTHS:
+        try:
+            return datetime(int(m.group(3)), MONTHS[m.group(2).lower()], int(m.group(1))).date().isoformat()
+        except ValueError:
+            pass
     m = DATE_RE.search(s)
     if not m:
         return ""
@@ -153,9 +218,11 @@ def _age_from_dob(dob_iso):
     return str(age) if age >= 0 else ""
 
 
-NAME_LABELS = ["name", "full name", "given name", "surname", "last name", "first name"]
-ADDRESS_LABELS = ["address", "addr"]
-ID_LABELS = ["id no", "id number", "card no", "license no", "passport no", "umid", "number"]
+NAME_LABELS = ["name", "full name", "given name", "surname", "last name", "first name",
+               "apelyido", "pangalan", "gitnang pangalan"]
+ADDRESS_LABELS = ["address", "addr", "tirahan"]
+ID_LABELS = ["id no", "id number", "card no", "license no", "passport no", "umid", "number",
+             "philsys", "psn", "philid"]
 EXPIRY_LABELS = ["expiry", "expires", "valid until", "valid thru", "expiration"]
 
 
@@ -180,8 +247,14 @@ def parse_fields(text):
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
     full_text = "\n".join(lines)
 
-    # Name: try labeled, else first line of capitalized words
-    name = _find_labeled(lines, NAME_LABELS)
+    # Name: PhilSys-style first/middle/last, or labeled, or first capitalized line
+    first = _find_labeled(lines, ["first name", "pangalan", "given name"])
+    last = _find_labeled(lines, ["last name", "apelyido", "surname"])
+    middle = _find_labeled(lines, ["middle name", "gitnang pangalan"])
+    if first or last:
+        name = " ".join(x for x in (first, middle, last) if x)
+    else:
+        name = _find_labeled(lines, NAME_LABELS)
     if not name:
         for ln in lines:
             if re.match(r"^[A-Z][A-Za-z .,'-]{4,}$", ln) and " " in ln:
@@ -190,23 +263,30 @@ def parse_fields(text):
 
     # DOB
     dob = ""
-    for ln in lines:
+    for i, ln in enumerate(lines):
         if any(k in ln.lower() for k in ("birth", "dob", "born")):
             dob = _normalize_date(ln)
+            if not dob and i + 1 < len(lines):
+                dob = _normalize_date(lines[i + 1])
             if dob:
                 break
     if not dob:
-        # first date that is not expiry
-        for m in DATE_RE.finditer(full_text):
-            cand = _normalize_date(m.group(0))
+        # scan all lines for a month-name or numeric date (prefer earlier birth years)
+        for ln in lines:
+            cand = _normalize_date(ln)
             if cand:
-                # heuristic: birth years before 2010
                 try:
                     if int(cand[:4]) <= 2010:
                         dob = cand
                         break
                 except ValueError:
                     pass
+        if not dob:
+            for ln in lines:
+                cand = _normalize_date(ln)
+                if cand:
+                    dob = cand
+                    break
 
     # Expiry
     expiry = ""
@@ -216,17 +296,43 @@ def parse_fields(text):
             if expiry:
                 break
 
-    # Address
+    # Address (PhilSys: label, then "PHL", then one or more address lines)
     address = _find_labeled(lines, ADDRESS_LABELS)
+    if not address or address.upper() == "PHL" or len(address) < 4:
+        address = ""
+        for i, ln in enumerate(lines):
+            if any(lab in ln.lower() for lab in ADDRESS_LABELS):
+                collected = []
+                for j in range(i + 1, len(lines)):
+                    nxt = lines[j].strip()
+                    if not nxt or any(k in nxt.lower() for k in ("expiry", "valid", "signature", "date of")):
+                        break
+                    if nxt.upper() == "PHL":
+                        continue
+                    collected.append(nxt)
+                if collected:
+                    address = ", ".join(collected)
+                break
     if not address:
-        # look for a line containing common address words
         for ln in lines:
-            if re.search(r"\b(st|street|ave|avenue|rd|road|brgy|barangay|city|province)\b", ln, re.I):
+            if re.search(r"\b(st|street|ave|avenue|rd|road|brgy|barangay|city|province|manila)\b", ln, re.I):
                 address = ln
                 break
 
-    # ID number
+    # ID number: prefer PhilSys number, then generic
     id_number = _find_labeled(lines, ID_LABELS)
+    if not id_number:
+        for ln in lines:
+            m = PHILSYS_NUMBER_RE.search(ln)
+            if m:
+                id_number = m.group(0)
+                break
+    if not id_number:
+        for ln in lines:
+            m = PHILID_CARD_RE.search(ln)
+            if m:
+                id_number = m.group(0)
+                break
     if not id_number:
         for ln in lines:
             m = ID_NUMBER_RE.search(ln)
@@ -266,6 +372,13 @@ def detect_face_on_id(image_bytes):
         from .face import _load_engine
         engine = _load_engine()
         img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
+        if img is None:
+            return None, None
+        # downscale for memory
+        h, w = img.shape[:2]
+        if max(h, w) > 640:
+            scale = 640 / max(h, w)
+            img = cv2.resize(img, (int(w * scale), int(h * scale)))
         faces = [f for f in engine.get(img) if float(f.det_score) >= 0.5]
         if faces:
             f = max(faces, key=lambda x: (x.bbox[2]-x.bbox[0])*(x.bbox[3]-x.bbox[1]))
@@ -283,12 +396,16 @@ def detect_face_on_id(image_bytes):
     return desc, crop
 
 
-def scan_id(image_bytes, id_type):
+def scan_id(image_bytes, id_type, demo_mode=False):
     text, boxes = run_ocr(image_bytes)
     fields = parse_fields(text)
     fields["id_type"] = id_type
-    id_face_desc, id_face_crop = detect_face_on_id(image_bytes)
+    if demo_mode:
+        id_face_desc, id_face_crop = None, None
+    else:
+        id_face_desc, id_face_crop = detect_face_on_id(image_bytes)
     fields["id_face_found"] = bool(id_face_desc)
+    fields["demo_mode"] = bool(demo_mode)
     # store crop
     crop_path = None
     if id_face_crop:
@@ -303,7 +420,10 @@ def scan_id(image_bytes, id_type):
     # completeness check
     required = ["full_name", "date_of_birth", "id_number"]
     missing = [r for r in required if not fields.get(r)]
-    fields["complete"] = (len(missing) == 0) and bool(id_face_desc)
+    if demo_mode:
+        fields["complete"] = (len(missing) == 0)
+    else:
+        fields["complete"] = (len(missing) == 0) and bool(id_face_desc)
     fields["missing"] = missing
     return fields
 

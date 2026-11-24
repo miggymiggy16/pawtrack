@@ -4,7 +4,7 @@ PawTrack - integrated identity verification
 import os
 import uuid
 
-from flask import (flash, jsonify, redirect, render_template, request,
+from flask import (Response, flash, jsonify, redirect, render_template, request,
                    session, url_for)
 from werkzeug.utils import secure_filename
 
@@ -38,12 +38,20 @@ def _save_upload(file_storage):
         return None, "Unsupported image type. Use PNG, JPG, JPEG, GIF or WEBP."
     data = file_storage.read()
     if not data or len(data) > MAX_IMAGE_BYTES:
-        return None, "Image is empty or too large (max 4 MB)."
+        return None, "Image is empty or too large (max 100 MB)."
     name = "id_" + uuid.uuid4().hex + "." + ext
     path = ID_UPLOAD_DIR / name
     with open(path, "wb") as fh:
         fh.write(data)
     return name, None
+
+
+def _close_popup():
+    html = ("<!DOCTYPE html><html><body><script>"
+            "try{window.parent.postMessage('close','*');}catch(e){}"
+            "setTimeout(function(){window.close();},200);"
+            "</script><p>Closing...</p></body></html>")
+    return Response(html, mimetype="text/html")
 
 
 @app.route("/verify", methods=["GET", "POST"])
@@ -53,26 +61,28 @@ def verify_start():
         session["verify_next"] = nxt
     if request.method == "POST":
         id_type = request.form.get("id_type", "").strip()
+        demo_mode = request.form.get("demo_mode") == "1"
         if id_type not in ID_TYPES:
             flash("Please select a supported ID type.", "error")
             return render_template("verify_start.html", id_types=ID_TYPES)
         file = request.files.get("id_image")
         filename, err = _save_upload(file)
         if err:
-            flash(err, "error")
+            flash("Upload not accepted: " + err + " Please upload another picture.", "warning")
             return render_template("verify_start.html", id_types=ID_TYPES)
         image_path = "uploads/verification/" + filename
         full_path = ID_UPLOAD_DIR / filename
         with open(full_path, "rb") as fh:
             image_bytes = fh.read()
         try:
-            fields = scan_id(image_bytes, id_type)
+            fields = scan_id(image_bytes, id_type, demo_mode=demo_mode)
         except Exception as exc:
             flash("ID scanning failed: " + str(exc), "error")
-            return render_template("verify_start.html", id_types=ID_TYPES)
+            return _close_popup()
         # store in session
         session["verify_id_type"] = id_type
         session["verify_image_path"] = image_path
+        session["verify_demo_mode"] = bool(demo_mode)
         session["verify_fields"] = {k: v for k, v in fields.items()
                                     if k not in ("id_face_descriptor",)}
         session["verify_id_face_descriptor"] = fields.get("id_face_descriptor")
@@ -81,9 +91,9 @@ def verify_start():
         session["verify_captured_descriptor"] = None
         if not fields.get("complete"):
             missing = ", ".join(fields.get("missing", [])) or "face"
-            flash("ID scan incomplete: missing " + missing + ". You may retry.", "warning")
-        else:
-            flash("ID scanned successfully. Now capture your face.", "success")
+            flash("ID not accepted: missing " + missing + ".", "error")
+            return _close_popup()
+        flash("ID scanned successfully. Now capture your face.", "success")
         return redirect(url_for("verify_face"))
     return render_template("verify_start.html", id_types=ID_TYPES)
 
@@ -100,7 +110,14 @@ def verify_face():
 def verify_face_post():
     if not session.get("verify_fields"):
         return jsonify(ok=False, error="No ID uploaded yet."), 400
+    demo_mode = bool(session.get("verify_demo_mode"))
     id_desc = session.get("verify_id_face_descriptor")
+    if demo_mode:
+        # Sample/synthetic ID: skip face-on-ID requirement for testing.
+        session["verify_face_matched"] = True
+        session["verify_match_score"] = 1.0
+        session["verify_captured_descriptor"] = None
+        return jsonify(ok=True, matched=True, score=1.0, redirect=url_for("verify_info"))
     if not id_desc:
         return jsonify(ok=False, error="No face was detected on the ID. Please re-upload a clearer ID."), 400
     files = request.files.getlist("face_image")
@@ -154,6 +171,7 @@ def verify_info():
         session["verify_fields"] = fields
         # save verification record
         rec = {
+            "demo_mode": bool(session.get("verify_demo_mode")),
             "id_type": session.get("verify_id_type"),
             "id_image": session.get("verify_image_path"),
             "id_face_crop": session.get("verify_id_face_crop"),
@@ -173,7 +191,7 @@ def verify_info():
         flash("Identity verified successfully.", "success")
         nxt = session.pop("verify_next", None)
         if nxt:
-            return redirect(url_for(nxt) if nxt in ("animals_new",) else nxt)
+            return redirect(url_for(nxt) if nxt in ("animal_new",) else nxt)
         return redirect(url_for("verify_result"))
     return render_template("verify_info.html", fields=fields,
                            id_type=session.get("verify_id_type"),

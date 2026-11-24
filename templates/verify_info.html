@@ -25,6 +25,7 @@
       <div class="field"><label>ID type</label><input value="{{ id_type }}" disabled></div>
       <button class="btn" type="submit">Submit verification</button>
       <a class="btn ghost" href="{{ url_for('verify_face') }}">Re-capture face</a>
+      <button type="button" class="btn ghost" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Back</button>
     </form>
   </div>
 </div>

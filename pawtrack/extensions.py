@@ -31,5 +31,5 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
-    MAX_CONTENT_LENGTH=6 * 1024 * 1024,      # room for product photos (checked again at 4 MB)
+    MAX_CONTENT_LENGTH=100 * 1024 * 1024,    # allow uploads up to 100 MB
 )

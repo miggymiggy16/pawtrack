@@ -27,8 +27,17 @@
     </ul>
     <p class="small muted">Limitation: OCR extraction and facial matching do not guarantee the ID is authentic. This is for demonstration only. Handle facial data and IDs with consent and data-privacy practices.</p>
     <a class="btn" href="{{ url_for('verify_start') }}">Start new verification</a>
-    <a class="btn ghost" href="{{ url_for('animals_new') if 'animals_new' in (request.endpoint or '') else url_for('animals_list') }}">Go to Animals</a>
+    <button type="button" class="btn ghost" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage('close','*');}else{window.location.href='{{ url_for('animals_list') }}';}">Close</button>
   </div>
 </div>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+(function(){
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage('verified', '*');
+    }
+  } catch (e) {}
+})();
+</script>
 </body></html>

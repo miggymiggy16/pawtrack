@@ -179,7 +179,7 @@ def read_product_image(file_storage, label="Product picture"):
     if not raw:
         return None, None, f"The {label.lower()} file is empty."
     if len(raw) > MAX_IMAGE_BYTES:
-        return None, None, f"{label} must be 4 MB or smaller."
+        return None, None, f"{label} must be 100 MB or smaller."
     return process_image_bytes(raw, label)
 
 

@@ -12,6 +12,8 @@ static/qr/*.png
 #   static/uploads/inventory/*
 #   static/uploads/animals/*
 # and keep only the .gitkeep files.
+# Verification uploads contain user IDs/face data - never commit them:
+static/uploads/verification/*
 certs/
 *.key
 *.pem

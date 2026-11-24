@@ -118,8 +118,8 @@ def animal_new():
         form, errors = validate_animal(request.form)
         if form.get("ownership_status") == "Owned" and not verification:
             flash("Please verify the pet owner's ID first.", "error")
-            session["verify_next"] = "animals_new"
-            return redirect(url_for("verify_start", next="animals_new"))
+            session["verify_next"] = "animal_new"
+            return redirect(url_for("verify_start", next="animal_new"))
         img, ext, img_err = read_product_image(request.files.get("photo"), "Animal photo")
         if img_err:
             errors.append(img_err)

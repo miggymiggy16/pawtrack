@@ -24,7 +24,7 @@ MATCH_MARGIN = float(os.getenv("FACE_MATCH_MARGIN", "0.05"))
 MIN_DET_SCORE = float(os.getenv("FACE_MIN_DET_SCORE", "0.50"))
 CONSISTENCY_THRESHOLD = float(os.getenv("FACE_CONSISTENCY_THRESHOLD", "0.50"))
 MAX_SAMPLES = 3
-MAX_IMAGE_BYTES = 6 * 1024 * 1024
+MAX_IMAGE_BYTES = 100 * 1024 * 1024
 
 
 class FaceError(Exception):
@@ -51,15 +51,17 @@ def _load_engine():
             raise FaceError(
                 "Face recognition is not installed on the server. "
                 "Run: pip install -r requirements.txt") from exc
+        import warnings
+        warnings.filterwarnings("ignore")
         try:
             engine = FaceAnalysis(name=MODEL_NAME, providers=["CPUExecutionProvider"])
-            engine.prepare(ctx_id=-1, det_size=(640, 640))
+            engine.prepare(ctx_id=-1, det_size=(320, 320))
+            _engine = engine
+            return _engine
         except Exception as exc:                       # model download / runtime problem
             _engine_error = str(exc)
             raise FaceError(
                 "The face model could not start. Check the server log and try again.") from exc
-        _engine = engine
-        return _engine
 
 
 def engine_status():
