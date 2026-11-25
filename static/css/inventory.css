@@ -465,3 +465,128 @@ body.inv-page .iv-sel select:focus {
     flex:1 1 100%;
   }
 }
+
+/* ===== Item detail popup ===== */
+.iv-open-detail {
+  cursor: pointer;
+}
+.iv-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.iv-modal[hidden] {
+  display: none;
+}
+.iv-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 36, 64, .55);
+}
+.iv-modal-box {
+  position: relative;
+  background: var(--panel, #fff);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  width: min(440px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 24px;
+}
+.iv-modal-x {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: 0;
+  background: none;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--muted, #64748b);
+  cursor: pointer;
+}
+.iv-modal-photo {
+  height: 180px;
+  border-radius: 12px;
+  background: var(--surface-2, #f3f1ec);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.iv-modal-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.iv-ph-none {
+  font-size: 3rem;
+}
+.iv-modal-body h2 {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  color: var(--white, #0f2450);
+}
+.iv-modal-cat {
+  color: var(--muted, #64748b);
+  font-size: .9rem;
+  margin-bottom: 10px;
+}
+.iv-modal-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.iv-modal-facts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 0;
+}
+.iv-modal-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line, #e5e3dd);
+}
+.iv-modal-facts dt {
+  color: var(--muted, #64748b);
+  font-size: .85rem;
+}
+.iv-modal-facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: .85rem;
+  text-align: right;
+}
+
+/* ===== Main stock list: improved compact rows ===== */
+.inv-hint {
+  color: var(--muted, #64748b);
+  font-size: .82rem;
+  margin-left: auto;
+}
+.iv-list-table tbody tr.iv-open-detail {
+  cursor: pointer;
+  transition: background .12s;
+}
+.iv-list-table tbody tr.iv-open-detail:hover {
+  background: rgba(22, 48, 92, .06);
+}
+.iv-list-table tbody tr.iv-open-detail:focus-visible {
+  outline: 2px solid var(--royal, #16305C);
+  outline-offset: -2px;
+}
+.iv-item-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.iv-item-text small {
+  color: var(--muted, #64748b);
+  font-size: .72rem;
+}

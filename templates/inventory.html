@@ -47,68 +47,52 @@
   <a class="iv-btn ghost iv-clear" href="{{ url_for('inventory') }}">Clear Filters</a>
 </form>
 
-{% set in_stock = counts.total - counts.low - counts.out %}
-<div class="iv-stats">
-  <a class="iv-stat s-total" href="{{ url_for('inventory') }}">
-    <span class="iv-sico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></span>
-    <span class="iv-stext"><b>{{ counts.total }}</b><small>Total Items</small></span>
-  </a>
-  <a class="iv-stat s-in" href="{{ url_for('inventory', view='in') }}">
-    <span class="iv-sico">{{ icon('box') }}</span>
-    <span class="iv-stext"><b>{{ in_stock }}</b><small>In Stock</small></span>
-  </a>
-  <a class="iv-stat s-low" href="{{ url_for('inventory', view='low') }}">
-    <span class="iv-sico">{{ icon('alert') }}</span>
-    <span class="iv-stext"><b>{{ counts.low }}</b><small>Low Stock</small></span>
-  </a>
-  <a class="iv-stat s-out" href="{{ url_for('inventory', view='out') }}">
-    <span class="iv-sico"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></span>
-    <span class="iv-stext"><b>{{ counts.out }}</b><small>Out of Stock</small></span>
-  </a>
-</div>
-
 {% if rows %}
-<div class="iv-grid">
-  {% for i in rows %}
-  <article class="iv-card">
-    {% if not readonly %}<a class="iv-dots" href="{{ url_for('inventory_edit', item_id=i.item_id) }}" title="Edit {{ i.item_name }}" aria-label="Edit {{ i.item_name }}">{{ icon('dots') }}</a>{% endif %}
-    <a class="iv-thumb" href="{{ url_for('inventory_view', item_id=i.item_id) }}" aria-label="{{ i.item_name }}">
-      {% if i.image_url %}<img src="{{ i.image_url }}" alt="{{ i.item_name }}" loading="lazy">
-      {% else %}{{ icon('box') }}{% endif %}
-    </a>
-    <div class="iv-info">
-      <a class="iv-name" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }}</a>
-      <div class="iv-cat">{{ i.category }}</div>
-      <div class="iv-pills">
-        <span class="iv-pill sev-{{ i.stock_status|slug }}">{{ i.stock_status }}</span>
-        {% if i.expiry_status and i.expiry_status != 'Valid' %}<span class="iv-pill sev-{{ i.expiry_status|slug }}">{{ i.expiry_status }}</span>{% endif %}
-      </div>
-      <div class="iv-stock">Stock: <b>{{ i.quantity }} {{ i.unit }}</b></div>
-      {% if not readonly %}<div class="iv-price">{{ (i.selling_price or i.unit_cost)|money }}</div>{% endif %}
-      <div class="iv-card-actions">
-        <a class="iv-btn ghost mini" href="{{ url_for('inventory_view', item_id=i.item_id) }}">View Details</a>
-        {% if not readonly %}<a class="iv-btn primary mini" href="{{ url_for('inventory_edit', item_id=i.item_id) }}">{{ icon('pencil') }}Edit</a>{% endif %}
-      </div>
-    </div>
-  </article>
-  {% endfor %}
-</div>
-
 <div class="card inv-allbox">
   <div class="inv-allhead">
     <h2>ALL STOCK <span class="inv-alln">({{ rows|length }})</span></h2>
-    <button type="button" class="btn sm ghost" id="invAllToggle" aria-expanded="false" aria-controls="invAllList">{{ icon('chevron') }}<span>Full list</span></button>
+    <span class="inv-hint">Click an item to view details</span>
   </div>
-  <div class="inv-allwrap" id="invAllList" hidden>
-    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Item</th><th>Category</th><th>Quantity</th><th>Min</th>{% if not readonly %}<th>Unit cost</th><th>Sell price</th><th>Total value</th>{% endif %}<th>Expiration</th><th>Stock</th><th>Expiry</th></tr></thead><tbody>
-    {% for i in rows %}<tr><td>{{ i.item_id }}</td><td><div class="item-cell">{% if i.image_url %}<img class="thumb" src="{{ i.image_url }}" alt="{{ i.item_name }}" loading="lazy">{% else %}<span class="thumb none" title="No picture">{{ icon('box') }}</span>{% endif %}<b>{{ i.item_name }}</b></div></td><td>{{ i.category }}</td><td>{{ i.quantity }} {{ i.unit }}</td><td>{{ i.min_stock }}</td>{% if not readonly %}<td class="nowrap">{{ i.unit_cost|money }}</td><td class="nowrap">{{ i.selling_price|money if i.selling_price else '-' }}</td><td class="nowrap">{{ i.value|money }}</td>{% endif %}
-    <td>{{ i.expiration_date|fmt_date if i.expiration_date else '-' }}</td><td>{{ badge(i.stock_status) }}</td><td>{{ badge(i.expiry_status) }}</td></tr>{% endfor %}
+  <div class="inv-allwrap" id="invAllList">
+    <div class="table-wrap"><table class="iv-list-table"><thead><tr><th>Item</th><th>Category</th><th>Quantity</th>{% if not readonly %}<th>Sell price</th>{% endif %}<th>Expiration</th><th>Stock</th><th>Expiry</th></tr></thead><tbody>
+    {% for i in rows %}
+    {% set detail = {'id': i.item_id, 'name': i.item_name, 'category': i.category, 'image': i.image_url or '',
+                     'stock': i.stock_status, 'expiry': i.expiry_status or '', 'quantity': i.quantity,
+                     'unit': i.unit, 'min': i.min_stock, 'cost': i.unit_cost|money,
+                     'price': (i.selling_price or i.unit_cost)|money,
+                     'value': i.value|money, 'expires': i.expiration_date|fmt_date if i.expiration_date else '-',
+                     'batch': i.get('batch_number') or '-', 'manufacturer': i.get('manufacturer') or '-',
+                     'supplier': i.get('supplier') or '-'} %}
+    <tr class="iv-open-detail" tabindex="0" data-detail='{{ detail|tojson }}'>
+      <td><div class="item-cell">{% if i.image_url %}<img class="thumb" src="{{ i.image_url }}" alt="{{ i.item_name }}" loading="lazy">{% else %}<span class="thumb none" title="No picture">{{ icon('box') }}</span>{% endif %}<span class="iv-item-text"><b>{{ i.item_name }}</b><small>{{ i.item_id }}</small></span></div></td>
+      <td>{{ i.category }}</td>
+      <td class="nowrap"><b>{{ i.quantity }}</b> {{ i.unit }}</td>
+      {% if not readonly %}<td class="nowrap">{{ i.selling_price|money if i.selling_price else '-' }}</td>{% endif %}
+      <td class="nowrap">{{ i.expiration_date|fmt_date if i.expiration_date else '-' }}</td>
+      <td>{{ badge(i.stock_status) }}</td>
+      <td>{{ badge(i.expiry_status) }}</td>
+    </tr>{% endfor %}
     </tbody></table></div>
   </div>
 </div>
 {% else %}
 <div class="iv-empty">{{ icon('box') }}<b>No inventory items match</b>Try a different search term or clear the filters.</div>
 {% endif %}
+
+<!-- Item detail popup (click any item row) -->
+<div class="iv-modal" id="ivModal" hidden>
+  <div class="iv-modal-backdrop" data-modal-close></div>
+  <div class="iv-modal-box" role="dialog" aria-modal="true" aria-label="Item details">
+    <button type="button" class="iv-modal-x" data-modal-close aria-label="Close">&times;</button>
+    <div class="iv-modal-photo" id="ivModalPhoto"></div>
+    <div class="iv-modal-body">
+      <h2 id="ivModalName"></h2>
+      <div class="iv-modal-cat" id="ivModalCat"></div>
+      <div class="iv-modal-pills" id="ivModalPills"></div>
+      <dl class="iv-modal-facts" id="ivModalFacts"></dl>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

@@ -5,4 +5,59 @@
       sel.addEventListener('change', function () { form.submit(); });
     });
   }
+
+  // Item detail popup: click a card to view, X or outside click to close.
+  var modal = document.getElementById('ivModal');
+  if (!modal) return;
+  var photo = document.getElementById('ivModalPhoto');
+  var nameEl = document.getElementById('ivModalName');
+  var catEl = document.getElementById('ivModalCat');
+  var pillsEl = document.getElementById('ivModalPills');
+  var factsEl = document.getElementById('ivModalFacts');
+
+  function open(data) {
+    photo.innerHTML = data.image
+      ? '<img src="' + data.image + '" alt="' + data.name + '">'
+      : '<span class="iv-ph-none">&#128230;</span>';
+    nameEl.textContent = data.name || '';
+    catEl.textContent = data.category || '';
+    pillsEl.innerHTML = '<span class="iv-pill sev-' + String(data.stock || '').toLowerCase().replace(/\s+/g, '-') + '">' + (data.stock || '') + '</span>'
+      + (data.expiry && data.expiry !== 'Valid'
+         ? '<span class="iv-pill sev-' + data.expiry.toLowerCase().replace(/\s+/g, '-') + '">' + data.expiry + '</span>' : '');
+    var rows = [
+      ['Item ID', data.id], ['Quantity', data.quantity + ' ' + (data.unit || '')],
+      ['Minimum stock', data.min], ['Unit cost', data.cost], ['Selling price', data.price],
+      ['Total value', data.value], ['Expiration', data.expires],
+      ['Batch / lot', data.batch], ['Manufacturer', data.manufacturer], ['Supplier', data.supplier]
+    ];
+    factsEl.innerHTML = rows.map(function (r) {
+      return '<div><dt>' + r[0] + '</dt><dd>' + (r[1] || '-') + '</dd></div>';
+    }).join('');
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.iv-open-detail').forEach(function (card) {
+    function show() {
+      try { open(JSON.parse(card.getAttribute('data-detail'))); }
+      catch (e) { /* ignore malformed data */ }
+    }
+    card.addEventListener('click', function (e) {
+      if (e.target.closest('[data-no-modal]')) return;
+      show();
+    });
+    card.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); show(); }
+    });
+  });
+  modal.querySelectorAll('[data-modal-close]').forEach(function (el) {
+    el.addEventListener('click', close);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !modal.hidden) close();
+  });
 })();
