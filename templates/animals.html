@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from '_macros.html' import badge, csrf, initial, icon, photo_upload %}
+{% from '_macros.html' import csrf, initial, icon, photo_upload %}
 {% block title %}Animals{% endblock %}{% block head %}
 <style>
 /* ===== Animals page only: reference master-detail view (list left, profile right) ===== */
@@ -38,7 +38,6 @@
 .an-pager{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:4px}
 /* right: tabs + detail card */
 .an-detail{min-width:0}
-.an-detail[hidden]{display:none}
 .an-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .an-tabs .tab{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);
   background:var(--panel);color:var(--muted);font:600 .85rem var(--font);white-space:nowrap;cursor:pointer}
@@ -102,8 +101,8 @@
 .an-link{font-size:.82rem;font-weight:600;color:#9DBBFF}
 .an-link:hover{color:var(--white)}
 .an-del{border:0;background:none;color:var(--bad);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer;padding:0}
+.an-del:hover{text-decoration:underline}
 /* vaccination pane: this animal's own record */
-.an-pane[hidden]{display:none}
 .an-ptitle{display:flex;align-items:center;gap:10px;font-size:1rem;margin:0 0 16px;padding-right:40px}
 .an-ptitle .ico{width:18px;height:18px;color:var(--light)}
 .an-vsum{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:18px}
@@ -118,8 +117,7 @@
 .an-vtable .an-vact{text-align:right}
 .an-vact a{font-size:.8rem;font-weight:600;color:#9DBBFF}
 .an-vfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px}
-.an-vfoot .an-btn{width:auto;padding:9px 16px}
-.an-del:hover{text-decoration:underline}
+.an-vfoot .an-btn{padding:9px 16px}
 :root[data-theme="light"] .an-row:hover{background:rgba(15,36,80,.04)}
 :root[data-theme="light"] .an-row.selected{background:rgba(46,92,230,.08)}
 :root[data-theme="light"] .an-own{background:rgba(46,92,230,.12);color:#21459A}
@@ -264,11 +262,11 @@
   {# ---------- Right: the selected animal ---------- #}
   <section class="an-detail" aria-label="Selected animal">
     {% for a in rows %}
-    {% set photo = animal_photo_url(a) %}{% set qr = animal_qr_url(a) %}
+    {% set photo = animal_photo_url(a) %}
     <div class="an-panel" data-panel="{{ a.animal_id }}" {{ 'hidden' if a.animal_id != selected }}>
       <nav class="an-tabs" aria-label="Animal sections">
         <button class="tab on" type="button" data-tab="profile" aria-pressed="true">{{ icon('paw') }}Profile</button>
-        <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.vax_count %}<span class="cnt">{{ a.vax_count }}</span>{% endif %}</button>
+        <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.records %}<span class="cnt">{{ a.records|length }}</span>{% endif %}</button>
         <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}#history">{{ icon('clock') }}History</a>
         <a class="tab" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}QR Code</a>
       </nav>
@@ -326,7 +324,7 @@
           <h3 class="an-ptitle">{{ icon('syringe') }}Vaccination record</h3>
           <div class="an-vsum">
             <div><span class="k">Current status</span><span class="an-vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
-            <div><span class="k">Latest vaccination</span><b>{{ a.records[0].vaccine_name if a.records else '-' }}</b>{% if a.records %}<small>{{ a.records[0].date_administered|fmt_date }}</small>{% endif %}</div>
+            <div><span class="k">Latest vaccination</span><b>{{ a.latest.vaccine_name if a.latest else '-' }}</b>{% if a.latest %}<small>{{ a.latest.date_administered|fmt_date }}</small>{% endif %}</div>
             <div><span class="k">Next due</span><b>{{ a.next_due|fmt_date if a.next_due else '-' }}</b></div>
           </div>
           {% if a.records %}
@@ -436,31 +434,26 @@
   function bindRows() {
     const rows = layout.querySelectorAll('.an-row'), panels = layout.querySelectorAll('.an-panel');
     const detail = layout.querySelector('.an-detail');
+    function activateTab(panel, name) {
+      panel.querySelectorAll('[data-tab]').forEach(x => {
+        const on = x.dataset.tab === name;
+        x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on));
+      });
+      panel.querySelectorAll('.an-pane').forEach(p => { p.hidden = p.dataset.pane !== name; });
+    }
     function show(id) {
       panels.forEach(p => p.hidden = p.dataset.panel !== id);
       rows.forEach(r => r.classList.toggle('selected', r.dataset.select === id));
       const shown = Array.from(panels).find(p => p.dataset.panel === id);
-      if (shown) {          // a newly opened animal always starts on its profile
-        shown.querySelectorAll('[data-tab]').forEach(x => {
-          const on = x.dataset.tab === 'profile';
-          x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on));
-        });
-        shown.querySelectorAll('.an-pane').forEach(p => { p.hidden = p.dataset.pane !== 'profile'; });
-      }
+      if (shown) activateTab(shown, 'profile');   // a newly opened animal always starts on its profile
       if (detail) detail.hidden = false;
       if (detail && window.matchMedia('(max-width:1100px)').matches) detail.scrollIntoView({behavior: 'smooth', block: 'start'});
     }
     const close = detail && detail.querySelector('[data-close]');
     if (close) close.addEventListener('click', () => { detail.hidden = true; });
     if (detail) detail.querySelectorAll('[data-tab]').forEach(t => {
-      t.addEventListener('click', () => {          // Vaccination switches to this animal's own records
-        const panel = t.closest('.an-panel');
-        panel.querySelectorAll('[data-tab]').forEach(x => {
-          const on = x === t;
-          x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on));
-        });
-        panel.querySelectorAll('.an-pane').forEach(p => { p.hidden = p.dataset.pane !== t.dataset.tab; });
-      });
+      // Vaccination switches to this animal's own records
+      t.addEventListener('click', () => activateTab(t.closest('.an-panel'), t.dataset.tab));
     });
     rows.forEach(r => {
       r.addEventListener('click', e => { if (!e.target.closest('a')) show(r.dataset.select); });
