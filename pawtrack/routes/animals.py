@@ -1,6 +1,7 @@
 """
 PawTrack - animal registration, profiles and photos
 """
+import re
 import secrets
 from datetime import date
 
@@ -19,6 +20,12 @@ from ..services.vaccinations import animal_vax_info
 from ..storage import edit, issue_animal_id, load, lock
 
 # ---------- animals ----------
+BREED_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")   # letters, spaces, dot, hyphen, apostrophe
+NAME_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")    # letters + spaces for personal names
+AGE_RE = re.compile(r"^\d+(?:\.\d+)?$")              # number only (e.g. 2 or 2.5)
+MOBILE_RE = re.compile(r"^[\d\s\-\+]+$")            # digits, spaces, dash, country code
+
+
 def validate_animal(form, existing=None):
     f = {k: form.get(k, "").strip() for k in
          ("animal_name", "species", "breed", "sex", "age", "color", "description",
@@ -32,14 +39,25 @@ def validate_animal(form, existing=None):
         errors.append("Animal name is required.")
     if not f["species"]:
         errors.append("Species is required.")
+    if f["breed"] and not BREED_RE.match(f["breed"]):
+        errors.append("Breed must contain letters only.")
+    if f["age"] and not AGE_RE.match(f["age"]):
+        errors.append("Age must be a number only (e.g. 2 or 2.5).")
     if f["sex"] not in SEX_CHOICES:
         errors.append("Please choose the animal's sex.")
     if f["ownership_status"] not in OWNERSHIP_CHOICES:
         errors.append("Please choose an ownership status.")
-    if f["owner_email"] and not valid_email(f["owner_email"]):
-        errors.append("Owner email is not a valid email address.")
-    if f["ownership_status"] == "Owned" and not f["owner_name"]:
-        errors.append("Owner name is required for owned animals.")
+    if f["ownership_status"] == "Owned":
+        if not f["owner_name"]:
+            errors.append("Owner name is required for owned animals.")
+        elif not NAME_RE.match(f["owner_name"]):
+            errors.append("Owner name must contain letters only.")
+        if f["owner_mobile"] and not MOBILE_RE.match(f["owner_mobile"]):
+            errors.append("Owner mobile number must contain numbers only.")
+        if not f["owner_email"]:
+            errors.append("Owner email is required for owned animals.")
+        elif not valid_email(f["owner_email"]):
+            errors.append("Owner email is not a valid email address.")
     if f["ownership_status"] == "Stray":          # strays have no owner to store
         f["owner_name"] = f["owner_mobile"] = f["owner_email"] = ""
     if not f["registration_date"]:
