@@ -3,7 +3,7 @@
 {% block title %}Sales (POS){% endblock %}
 {% block body_class %}sales-page{% endblock %}
 
-{% block head %}{% include '_sales_style.html' %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/_sales_style.css') }}">{% endblock %}
 
 {% block content %}
 <div class="sl-head">

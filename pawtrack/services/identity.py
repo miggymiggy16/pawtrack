@@ -6,9 +6,10 @@ Combines Valid ID Verification and Face Recognition into one workflow:
     ID upload -> ID scan (OCR) -> face registration/capture -> face matching
     -> personal information -> final verification result
 
-OCR uses PaddleOCR (open source). Face matching reuses the InsightFace
-descriptors from services.face. Verification records are stored in the
-``verifications`` collection.
+OCR uses Tesseract (open source). Face matching reuses the InsightFace
+descriptors from services.face. Verified ID details are stored on the user
+record by the Settings identity wizard; this module only provides the scan
+and matching primitives.
 """
 import io
 import os
@@ -20,8 +21,6 @@ import numpy as np
 from PIL import Image
 
 from ..config import ANIMAL_PHOTO_DIR, UPLOAD_DIR
-from ..helpers import now_str
-from ..storage import edit, load
 
 ID_TYPES = ["Philippine National ID", "Driver's License", "Passport", "UMID"]
 ID_TYPE_KEYS = {
@@ -436,27 +435,3 @@ def match_faces(id_descriptor, captured_descriptor):
         pass
     return (score >= threshold), float(score)
 
-
-def save_verification(data):
-    import uuid
-    rec = dict(data)
-    rec.setdefault("verification_id", "VER-" + uuid.uuid4().hex[:8].upper())
-    rec.setdefault("created_at", now_str())
-    rec.setdefault("status", "verified" if rec.get("face_matched") else "failed")
-    with edit("verifications") as items:
-        items.append(rec)
-    return rec["verification_id"]
-
-
-def get_verification(vid):
-    for v in load("verifications"):
-        if v.get("verification_id") == vid:
-            return v
-    return None
-
-
-def latest_verified_for_session(session):
-    vid = session.get("verification_id") if session else None
-    if not vid:
-        return None
-    return get_verification(vid)

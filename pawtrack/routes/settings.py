@@ -13,10 +13,9 @@ from ..helpers import (delete_animal_photo, delete_product_image, lan_ip,
 from ..security import (admin_required, current_user, login_required,
                         password_errors)
 from ..services.email import build_message, mail_config, notify
-from ..services.face import MODEL_NAME, FaceError, enroll
-from ..services.identity import ID_TYPES, scan_id
+from ..services.face import MODEL_NAME
+from ..services.identity import ID_TYPES, VERIFICATION_DIR, scan_id
 from ..services.qr import make_qr, qr_path
-from ..services.identity import VERIFICATION_DIR
 from ..storage import edit, get_settings, load
 
 
@@ -91,54 +90,6 @@ def settings_password():
                 if u["user_id"] == me["user_id"]:
                     u["password_hash"] = generate_password_hash(new)
         flash("Your password was changed.", "success")
-    return _settings_redirect()
-
-
-@app.route("/settings/face", methods=["POST"])
-@login_required
-def settings_face():
-    """Register or replace the signed-in user's face from 1-3 camera frames."""
-    me = current_user()
-    password = request.form.get("password", "")
-    if not check_password_hash(me["password_hash"], password):
-        return jsonify(ok=False, error="Current password is incorrect."), 400
-    uploads = [item for item in request.files.getlist("face_image")
-               if item and item.filename]
-    if not uploads:
-        return jsonify(ok=False, error="No camera images were received. Please try again."), 400
-    try:
-        descriptors = enroll([item.read() for item in uploads])
-    except FaceError as exc:
-        return jsonify(ok=False, error=str(exc)), 400
-    except Exception:
-        current_app.logger.exception("Face enrollment failed")
-        return jsonify(ok=False,
-                       error="Face registration failed on the server. Please try again."), 500
-
-    enrolled_at = now_str()
-    with edit("users") as users:
-        for user in users:
-            if user["user_id"] == me["user_id"]:
-                user["face_descriptors"] = descriptors
-                user["face_enrolled_at"] = enrolled_at
-                user["face_model"] = MODEL_NAME
-    return jsonify(ok=True,
-                   message="Face ID registered. You can now log in by scanning your face.",
-                   enrolled_at=enrolled_at, samples=len(descriptors))
-
-
-@app.route("/settings/face/remove", methods=["POST"])
-@login_required
-def settings_face_remove():
-    """Forget the signed-in user's face so it can no longer be used to log in."""
-    me = current_user()
-    with edit("users") as users:
-        for user in users:
-            if user["user_id"] == me["user_id"]:
-                user.pop("face_descriptors", None)
-                user.pop("face_enrolled_at", None)
-                user.pop("face_model", None)
-    flash("Your face ID was removed.", "success")
     return _settings_redirect()
 
 

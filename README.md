@@ -60,11 +60,11 @@ Open **http://127.0.0.1:5000** in your browser.
 `127.0.0.1` means "this computer" - it only works on the device running PawTrack. There are two ways to reach it from a phone:
 
 - **Recommended: the free public HTTPS link** - see *Host it online for free (Tailscale Funnel)* below. It works from any network, needs no certificate warnings, and the camera works.
-- **LAN only:** use the computer's local address, for example `http://192.168.1.15:5000` (find it with `ipconfig`, look for *IPv4 Address*; the Settings page also suggests one). Camera/Face ID needs HTTPS on the LAN, so follow the certificate steps in the next section. Windows Firewall may ask to allow Python on private networks - allow it.
+- **LAN only:** use `http://127.0.0.1:5000` on this computer (the camera works there). For other devices on the LAN, use the Tailscale Funnel HTTPS link below. Windows Firewall may ask to allow Python on private networks - allow it.
 
 For QR codes that work on phones, put the address you will actually use (the Funnel URL or the LAN address) in **Settings > QR base URL**, save, then press **Regenerate all QR codes**.
 
-### Face ID login (camera) and HTTPS
+### Face ID login (camera)
 
 PawTrack can also recognise a signed-in user's face. **Every existing account chooses whether to register** - nothing is automatic. After registering, that user can log in on the Login page with either their **username + password** or the **Face ID** tab (scan only, no username needed). Passwords always keep working as a fallback.
 
@@ -76,17 +76,7 @@ pip install -r requirements.txt
 ```
 The first face request downloads the ~280 MB `buffalo_l` model into `%USERPROFILE%\.insightface\models\buffalo_l` and can take 15-30 seconds. Start PawTrack once while online before relying on it. CPU only; no GPU is required.
 
-**Camera needs HTTPS on other devices.** Browsers only allow camera access (`getUserMedia`) on `http://localhost` or an `https://` address. On the computer running PawTrack, `http://127.0.0.1:5000` is enough. If you use the **Tailscale Funnel** described below, skip the certificate steps entirely - Funnel already provides trusted HTTPS. Otherwise, phones and other PCs on the LAN must use **HTTPS**, so generate a local certificate once:
-```bash
-python scripts/make_cert.py
-```
-This writes `certs/pawtrack.crt` and `certs/pawtrack.key` and prints the addresses it covers (localhost, 127.0.0.1 and this computer's current IPv4/IPv6 addresses). Then make sure `.env` contains:
-```
-PAWTRACK_HTTPS=True
-PAWTRACK_SSL_CERT=certs/pawtrack.crt
-PAWTRACK_SSL_KEY=certs/pawtrack.key
-```
-Restart PawTrack and open **https://<this-computer-ip>:5000** (for example `https://192.168.1.15:5000`). The certificate is self-signed, so each device shows a warning the first time: choose **Advanced > Proceed** (or install `certs/pawtrack.crt` as a trusted root). The camera then works. If the computer's IP changes, run `python scripts/make_cert.py` again. For a certificate that devices trust without a warning, use [mkcert](https://github.com/FiloSottile/mkcert) and put its files at the same two paths.
+**Camera needs HTTPS on other devices.** Browsers only allow camera access (`getUserMedia`) on `http://localhost` or an `https://` address. On the computer running PawTrack, `http://127.0.0.1:5000` is enough. For phones and other PCs, use the **Tailscale Funnel** setup described below - it provides trusted HTTPS with no certificates.
 
 **Tuning (optional).** `.env` also accepts `FACE_MATCH_THRESHOLD` (default `0.45`), `FACE_MATCH_MARGIN` (`0.05`), `FACE_MIN_DET_SCORE` (`0.50`) and `FACE_CONSISTENCY_THRESHOLD` (`0.50`). Lower the threshold to accept more scans (less strict); raise it for stricter matching.
 
@@ -102,7 +92,6 @@ This publishes PawTrack from your own PC on a public **https://** address, with 
 2. In the [Tailscale admin console > DNS](https://login.tailscale.com/admin/dns), enable **MagicDNS** and **HTTPS Certificates**.
 3. Put this in `.env` (the project already ships with these values):
    ```
-   PAWTRACK_HTTPS=False
    PAWTRACK_HOST=127.0.0.1
    PAWTRACK_WSGI=waitress
    PAWTRACK_THREADS=8
@@ -132,8 +121,7 @@ Then stop `python app.py` (or leave it running for local use at `http://127.0.0.
 - Funnel is free on the personal plan but is meant for demos and small use, not a busy clinic. Your PC must stay on and awake.
 - The public address is stable for this machine and survives restarts; nothing needs regenerating.
 - The scanned-QR page (`/animal/<token>`) deliberately stays outside the gate so printed tags still work for clients.
-- Prefer to stay on the LAN? Keep `PAWTRACK_HTTPS=True`, `PAWTRACK_HOST=0.0.0.0` and the `PAWTRACK_SSL_*` lines (see above) and skip the Funnel.
-- Other free tunnels work the same way (`PAWTRACK_HTTPS=False` + waitress + gate): ngrok (`ngrok http 5000`) and Cloudflare Tunnel (`cloudflared tunnel --url http://127.0.0.1:5000`).
+- Other free tunnels work the same way (plain HTTP + waitress + gate): ngrok (`ngrok http 5000`) and Cloudflare Tunnel (`cloudflared tunnel --url http://127.0.0.1:5000`).
 
 **Before exposing it publicly**
 - Replace `SECRET_KEY` in `.env` with a long random value (it signs sessions).

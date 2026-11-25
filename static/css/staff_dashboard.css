@@ -1,0 +1,126 @@
+/* ===== Staff overview — matches the Sales/Settings panel language; colours come from the theme ===== */
+.sdb-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.sdb-head h1{margin:0 0 4px;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--white)}
+.sdb-head p{margin:0;color:var(--muted);font-size:.9rem}
+.sdb-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* KPI strip */
+.sdb-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.sdb-kpi{display:block;padding:16px 20px;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);
+  border-radius:14px;color:var(--white);min-width:0}
+.sdb-kpi:hover{color:var(--white);border-color:var(--light)}
+.sdb-kpi.plain:hover{border-left-color:var(--line)}
+.sdb-kpi.ok{border-left-color:var(--ok)}
+.sdb-kpi.info{border-left-color:var(--warn)}
+.sdb-kpi.bad{border-left-color:var(--bad)}
+.sdb-kpi .kl{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:2px}
+.sdb-kpi .kn{display:block;font-size:1.85rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;font-variant-numeric:tabular-nums}
+.sdb-kpi.ok .kn{color:var(--ok)} .sdb-kpi.bad .kn{color:var(--bad)}
+.sdb-kpi .kf{display:block;font-size:.74rem;font-weight:600;color:var(--warn)}
+
+/* two-column body */
+.sdb-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:18px;align-items:start;margin-bottom:18px}
+.sdb-side{display:flex;flex-direction:column;gap:18px;min-width:0}
+.sdb-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.sdb-card.overdue{border-color:rgba(192,57,43,.4)}
+.sdb-ch{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.sdb-ch h2{margin:0;font-size:1.16rem;font-weight:800;color:var(--white)}
+.sdb-count{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:20px;
+  background:rgba(242,107,107,.18);color:var(--bad);font-size:.78rem;font-weight:800}
+.sdb-count.info{background:rgba(245,160,74,.18);color:var(--warn)}
+.sdb-count.ok{background:rgba(76,195,138,.18);color:var(--ok)}
+.sdb-hint{margin-left:auto;font-size:.78rem;color:var(--muted)}
+
+/* overdue / upcoming rows */
+.sdb-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.sdb-row{display:grid;grid-template-columns:26px 40px minmax(0,1fr) auto auto;align-items:center;gap:12px;
+  padding:10px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:11px}
+.sdb-rank{font-size:.78rem;font-weight:700;color:var(--muted);text-align:center}
+.sdb-av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:1rem;
+  background:rgba(148,163,184,.18);color:var(--muted)}
+.sdb-av.sp-dog{background:rgba(185,28,28,.22);color:#FCA5A5}
+.sdb-av.sp-cat{background:rgba(22,163,74,.2);color:#86EFAC}
+.sdb-av.sp-bird{background:rgba(37,99,235,.2);color:#93C5FD}
+:root[data-theme="light"] .sdb-av.sp-dog{background:#FBE3E3;color:#B91C1C}
+:root[data-theme="light"] .sdb-av.sp-cat{background:#DDF3E4;color:#15803D}
+:root[data-theme="light"] .sdb-av.sp-bird{background:#E3EDFF;color:#1D4ED8}
+.sdb-main{min-width:0}
+.sdb-main b{display:block;font-size:.96rem;font-weight:700;line-height:1.3;color:var(--white)}
+.sdb-main small{display:block;font-size:.76rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sdb-when{text-align:right;line-height:1.3}
+.sdb-when b{display:block;font-size:.9rem;font-weight:800;color:var(--bad);white-space:nowrap}
+.sdb-when small{display:block;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--bad)}
+.sdb-when.soon b,.sdb-when.soon small{color:var(--warn)}
+.sdb-when.high b{color:var(--bad)}
+.sdb-row .btn{flex:none}
+.sdb-row.simple{grid-template-columns:40px minmax(0,1fr) auto}
+.sdb-row.up{border-color:rgba(245,160,74,.35)}
+.sdb-row.up .sdb-when b{color:var(--warn)}
+.sdb-row.up .sdb-when small{color:var(--muted);text-transform:none;letter-spacing:0;font-weight:600}
+
+/* panel footer */
+.sdb-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sdb-foot.ok{color:var(--ok)}
+.sdb-foot .ico{width:16px;height:16px}
+.sdb-foot a{font-weight:700}
+
+/* vaccine stock */
+.sdb-total{display:flex;align-items:baseline;gap:7px;margin:0 0 14px}
+.sdb-total b{font-size:1.7rem;font-weight:800;letter-spacing:-.02em;color:var(--white);line-height:1;font-variant-numeric:tabular-nums}
+.sdb-total span{font-size:.85rem;color:var(--muted)}
+.sdb-stock{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sdb-stock li{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:9px 12px;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:10px}
+.sdb-srow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px}
+.sdb-srow a{font-size:.88rem;font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sdb-srow a:hover{color:var(--light)}
+.sdb-bar{grid-column:1/-1;position:relative;height:6px;border-radius:6px;background:var(--line);overflow:visible}
+.sdb-bar i{display:block;height:100%;border-radius:6px;background:var(--ok)}
+.sdb-bar i.low{background:var(--warn)} .sdb-bar i.out{background:var(--bad)}
+.sdb-bar u{position:absolute;top:-3px;bottom:-3px;left:50%;width:0;border-left:1px dashed var(--muted);opacity:.75}
+.sdb-qty{font-size:.92rem;font-weight:800;color:var(--white);font-variant-numeric:tabular-nums}
+.sdb-tag{padding:2px 9px;border-radius:20px;font-size:.7rem;font-weight:800;background:rgba(76,195,138,.18);color:var(--ok)}
+.sdb-tag.low{background:rgba(245,160,74,.2);color:var(--warn)}
+.sdb-tag.out{background:rgba(242,107,107,.2);color:var(--bad)}
+.sdb-note{margin:12px 0 0;font-size:.76rem;color:var(--muted)}
+
+/* inventory alerts */
+.sdb-alerts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.sdb-alerts li{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:12px;
+  padding:9px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px}
+.sdb-aico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:rgba(242,107,107,.18);color:var(--bad)}
+.sdb-aico.warn{background:rgba(245,160,74,.18);color:var(--warn)}
+.sdb-aico .ico{width:17px;height:17px}
+.sdb-at b{display:block;font-size:.88rem;font-weight:700;color:var(--white);line-height:1.3}
+.sdb-at small{display:block;font-size:.76rem;color:var(--muted)}
+.sdb-empty{display:flex;align-items:center;gap:10px;padding:14px 4px;color:var(--ok);font-size:.86rem;font-weight:600}
+.sdb-empty .ico{width:18px;height:18px}
+
+/* find animal */
+.sdb-find{display:flex;gap:10px;align-items:center}
+.sdb-find input{flex:1;min-width:0}
+.sdb-rec{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.sdb-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:20px;background:var(--surface-2);
+  border:1px solid var(--line);font-size:.8rem;font-weight:600;color:var(--white)}
+.sdb-chip i{font-style:normal;font-weight:800;font-size:.72rem;color:var(--muted)}
+.sdb-chip:hover{border-color:var(--light);color:var(--white)}
+
+@media(max-width:1100px){
+  .sdb-grid{grid-template-columns:minmax(0,1fr)}
+  .sdb-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sdb-hint{margin-left:0;width:100%}
+}
+@media(max-width:430px){.sdb-stats{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:640px){
+  .sdb-head h1{font-size:1.7rem}
+  .sdb-actions{width:100%}
+  .sdb-actions .btn{flex:1;justify-content:center}
+  .sdb-row{grid-template-columns:24px 36px minmax(0,1fr) auto;row-gap:6px}
+  .sdb-row .sdb-main{grid-column:3/-1}
+  .sdb-row .sdb-when{grid-column:3;grid-row:2;text-align:left}
+  .sdb-row .btn{grid-column:4;grid-row:2;justify-self:end;align-self:center}
+  .sdb-row.simple .sdb-main{grid-column:2/-1}
+  .sdb-row.simple .btn{grid-column:auto;grid-row:auto}
+  .sdb-card{padding:16px}
+}

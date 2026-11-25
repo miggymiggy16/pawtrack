@@ -18,8 +18,6 @@
 {% endblock %}
 {% block scripts %}
 {% if r.chart %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-const C = {{ r.chart|tojson }};
-if (pawCharts()) pawChart('reportChart', C.type, C.labels, C.values, C.opts);
-</script>{% endif %}
+<script>window.PAW_REPORT = {{ r.chart|tojson }};</script>
+<script src="{{ url_for('static', filename='js/analytics_report.js') }}"></script>{% endif %}
 {% endblock %}

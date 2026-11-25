@@ -1,0 +1,114 @@
+/* ===== Inventory (reference layout) — content only, scoped to .inv-page ===== */
+.iv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.iv-head h1{margin:0 0 6px;font-size:2rem;color:var(--white);letter-spacing:-.02em}
+.iv-head p{margin:0;color:var(--muted);font-size:.95rem}
+.iv-head-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* buttons */
+.iv-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:10px;
+  border:1px solid transparent;font:700 .88rem var(--font);cursor:pointer;text-decoration:none;white-space:nowrap;
+  transition:background .15s,color .15s,border-color .15s}
+.iv-btn .ico{width:18px;height:18px}
+.iv-btn.primary{background:var(--royal);color:#fff}
+.iv-btn.primary:hover{filter:brightness(1.18);color:#fff}
+.iv-btn.ghost{background:var(--surface);border-color:var(--line);color:var(--white)}
+.iv-btn.ghost:hover{background:var(--surface-2);color:var(--white);border-color:var(--light)}
+.iv-btn.mini{height:34px;padding:0 10px;font-size:.75rem;border-radius:9px}
+
+/* search + filters */
+.iv-filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.iv-search{position:relative;display:flex;align-items:center;flex:1 1 320px;min-width:0;margin:0}
+.iv-search .ico{position:absolute;left:14px;width:18px;height:18px;color:var(--muted);pointer-events:none}
+body.inv-page .iv-search input{width:100%;height:46px;padding:0 16px 0 44px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surface);color:var(--white);font:inherit}
+body.inv-page .iv-search input::placeholder{color:var(--muted)}
+body.inv-page .iv-search input:focus{border-color:var(--royal);outline:3px solid rgba(22,48,92,.2);outline-offset:0}
+.iv-sel{display:inline-flex;margin:0}
+body.inv-page .iv-sel select{height:46px;min-width:172px;padding:0 34px 0 14px;border-radius:10px;border:1px solid var(--line);
+  background-color:var(--surface);color:var(--white);font:600 .86rem var(--font);cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
+body.inv-page .iv-sel select:focus{border-color:var(--royal);outline:3px solid rgba(22,48,92,.2);outline-offset:0}
+.iv-clear{height:46px}
+
+/* summary cards */
+.iv-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:18px}
+.iv-stat{display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:14px;min-height:88px;text-decoration:none;
+  border:1px solid transparent;transition:filter .15s}
+.iv-stat:hover{filter:brightness(.985)}
+.iv-sico{display:grid;place-items:center;width:44px;height:44px;flex:none}
+.iv-sico .ico{width:40px;height:40px;stroke-width:1.7}
+.iv-stext{display:flex;flex-direction:column;line-height:1.15}
+.iv-stext b{font-size:1.55rem;font-weight:800;letter-spacing:-.02em}
+.iv-stext small{font-size:.8rem;font-weight:600;color:#334155;margin-top:2px}
+.iv-stat.s-total{background:#EDF3FF;color:#2563EB}
+.iv-stat.s-total b{color:#1E3A8A}
+.iv-stat.s-in{background:#E9F9F0;color:#16A34A}
+.iv-stat.s-in b{color:#15803D}
+.iv-stat.s-low{background:#FFF4E6;color:#F59E0B}
+.iv-stat.s-low b{color:#C2410C}
+.iv-stat.s-out{background:#FDEAEB;color:#DC2626}
+.iv-stat.s-out b{color:#B91C1C}
+
+/* product cards */
+.iv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
+.iv-card{position:relative;display:flex;align-items:stretch;gap:14px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:16px;transition:border-color .15s,box-shadow .15s}
+.iv-card:hover{border-color:var(--light)}
+.iv-thumb{flex:0 0 104px;align-self:flex-start;width:104px;height:104px;border-radius:10px;background:#fff;
+  display:grid;place-items:center;overflow:hidden;text-decoration:none}
+.iv-thumb img{width:100%;height:100%;object-fit:contain;display:block;padding:6px}
+.iv-thumb .ico{width:38px;height:38px;color:#A8B2C2;stroke-width:1.5}
+.iv-info{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.iv-name{font-size:1rem;font-weight:700;color:var(--white);line-height:1.25;overflow-wrap:anywhere;text-decoration:none;padding-right:16px}
+.iv-name:hover{color:var(--light)}
+.iv-cat{font-size:.8rem;color:var(--muted)}
+.iv-stock{font-size:.85rem;color:var(--muted)}
+.iv-stock b{font-weight:700;color:var(--white)}
+.iv-price{font-size:1.2rem;font-weight:800;color:var(--white);letter-spacing:-.01em;margin-top:2px;font-variant-numeric:tabular-nums}
+.iv-card-actions{display:flex;gap:8px;margin-top:auto;padding-top:6px}
+.iv-card-actions .iv-btn{flex:1}
+.iv-dots{position:absolute;top:10px;right:10px;width:28px;height:28px;display:grid;place-items:center;border-radius:8px;color:var(--muted);text-decoration:none}
+.iv-dots:hover{background:var(--surface-2);color:var(--white)}
+.iv-dots .ico{width:18px;height:18px}
+.iv-dots .ico circle{fill:currentColor;stroke:none}
+
+/* status pills */
+.iv-pills{display:flex;gap:6px;flex-wrap:wrap}
+.iv-pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;font-size:.68rem;
+  font-weight:700;white-space:nowrap}
+.iv-pill::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.iv-pill.sev-in-stock{background:#E7F8EF;color:#127A46}
+.iv-pill.sev-low-stock{background:#FFF3E3;color:#B45309}
+.iv-pill.sev-out-of-stock{background:#FDE8E8;color:#C02424}
+.iv-pill.sev-expiring-soon{background:#FFF3E3;color:#B45309}
+.iv-pill.sev-expired{background:#FDE8E8;color:#C02424}
+
+/* empty state */
+.iv-empty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:56px 20px;text-align:center;color:var(--muted)}
+.iv-empty .ico{width:44px;height:44px;margin-bottom:8px}
+.iv-empty b{display:block;color:var(--white);font-size:1rem;margin-bottom:4px}
+
+/* responsive */
+@media(max-width:1100px){.iv-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){
+  .iv-head h1{font-size:1.6rem}
+  .iv-head-actions{width:100%}
+  .iv-head-actions .iv-btn{flex:1}
+  .iv-stats{gap:12px}
+  .iv-stat{padding:14px;gap:12px;min-height:76px}
+  .iv-sico,.iv-sico .ico{width:34px;height:34px}
+  .iv-stext b{font-size:1.3rem}
+  .iv-grid{grid-template-columns:minmax(0,1fr)}
+  .iv-filters{gap:10px}
+  .iv-search{flex:1 1 100%}
+  .iv-sel{flex:1 1 calc(50% - 5px);min-width:0}
+  body.inv-page .iv-sel select{width:100%;min-width:0}
+  .iv-clear{flex:1 1 100%}
+}
+@media(max-width:420px){
+  .iv-card{gap:12px;padding:14px}
+  .iv-thumb{flex-basis:84px;width:84px;height:84px}
+  .iv-card-actions{flex-wrap:wrap}
+  .iv-card-actions .iv-btn{flex:1 1 100%}
+}
