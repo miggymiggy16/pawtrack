@@ -1,0 +1,66 @@
+/* ===== Animal profile page only (opened from History / Open full profile) ===== */
+.ap-page{display:grid;gap:22px;max-width:1180px}
+.ap-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.ap-who{display:flex;align-items:center;gap:22px;min-width:0}
+.ap-photo{width:128px;height:128px;border-radius:50%;overflow:hidden;flex:none;background:var(--royal);
+  border:3px solid #fff;box-shadow:0 0 0 1px var(--line);display:grid;place-items:center}
+.ap-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ap-photo>span{font-size:2.7rem;font-weight:800;color:#fff}
+.ap-titles{min-width:0}
+.ap-titles h1{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0 0 8px}
+.ap-titles p{margin:0;color:var(--muted);font-size:1rem}
+.ap-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+/* own buttons and the shared photo-upload button share one look */
+.ap-btn,.ap-actions .photo-up .btn{display:inline-flex;align-items:center;gap:9px;padding:11px 18px;border-radius:10px;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--white);
+  font:700 .85rem var(--font);white-space:nowrap;transition:background .15s,border-color .15s,filter .15s}
+.ap-btn .ico,.ap-actions .photo-up .ico{width:17px;height:17px}
+.ap-btn:hover,.ap-actions .photo-up .btn:hover{background:rgba(255,255,255,.07);color:var(--white)}
+.ap-btn.primary{background:#2E5CE6;border-color:#2E5CE6;color:#fff}
+.ap-btn.primary:hover{filter:brightness(1.08)}
+.ap-btn.gold{border-color:rgba(227,181,98,.6);color:var(--light)}
+.ap-btn.gold:hover{background:rgba(227,181,98,.1)}
+.ap-btn.quiet{border-color:transparent;background:transparent;color:var(--muted);padding:11px 4px}
+.ap-btn.quiet:hover{background:transparent;color:var(--white)}
+.ap-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.ap-card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px 26px}
+.ap-h{display:flex;align-items:center;gap:14px;font-size:1.35rem;font-weight:800;letter-spacing:-.01em;
+  margin:0 0 18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.ap-ico{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ap-ico .ico{width:21px;height:21px}
+.ap-ico.blue{background:rgba(76,123,234,.18);color:#9DBBFF}
+.ap-ico.violet{background:rgba(147,112,255,.18);color:#BCA6FF}
+.ap-ico.ok{background:rgba(76,195,138,.16);color:var(--ok)}
+.ap-kv{display:grid;gap:11px;margin:0}
+.ap-kv>div{display:grid;grid-template-columns:140px minmax(0,1fr);gap:16px;align-items:baseline}
+.ap-kv dt{color:var(--muted);font-size:.95rem}
+.ap-kv dd{margin:0;font-size:.95rem;font-weight:600;overflow-wrap:anywhere}
+.ap-stray{display:flex;align-items:center;gap:10px;margin:0;color:var(--muted);font-size:.95rem}
+.ap-stray .ico{width:18px;height:18px;flex:none}
+.ap-mark{display:block;text-align:right;color:rgba(255,255,255,.07);margin-top:10px}
+.ap-mark .ico{width:84px;height:84px;stroke-width:1.2}
+.ap-vgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.ap-k{display:block;font-size:.72rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:10px}
+.ap-vgrid b{display:block;font-size:1.05rem;font-weight:800}
+.ap-vgrid small{display:block;margin-top:3px;color:var(--muted);font-size:.82rem}
+.ap-vgrid .badge{font-size:.85rem;padding:5px 12px}
+.ap-note{margin:14px 0 0;color:var(--muted);font-size:.85rem}
+:root[data-theme="light"] .ap-btn.gold{border-color:#C9A24E;color:#8A6420}
+:root[data-theme="light"] .ap-btn.quiet{color:#5A6B84}
+:root[data-theme="light"] .ap-card{border-color:#E6EBF4;box-shadow:0 8px 22px rgba(15,36,80,.05)}
+:root[data-theme="light"] .ap-ico.blue{background:#E4EDFF;color:#21459A}
+:root[data-theme="light"] .ap-ico.violet{background:#EFEAFE;color:#5B3FC4}
+:root[data-theme="light"] .ap-ico.ok{background:#DFF5E9;color:#15803D}
+:root[data-theme="light"] .ap-mark{color:rgba(15,36,80,.08)}
+@media(max-width:1000px){
+  .ap-grid{grid-template-columns:minmax(0,1fr)}
+  .ap-vgrid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+}
+@media(max-width:640px){
+  .ap-titles h1{font-size:1.9rem}
+  .ap-photo{width:96px;height:96px}
+  .ap-kv>div{grid-template-columns:110px minmax(0,1fr)}
+  .ap-card{padding:20px 18px}
+  .ap-h{font-size:1.15rem}
+}
