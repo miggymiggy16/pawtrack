@@ -93,6 +93,7 @@
 
   {# ---------- Left: search, filters and the animal list ---------- #}
   <aside class="an-list" aria-label="Animal list">
+    <h2 class="an-list-title">Animal Directory</h2>
     <form class="an-search-form" method="get">
       {% if args.ownership %}<input type="hidden" name="ownership" value="{{ args.ownership }}">{% endif %}
       <div class="an-field">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Search animals..." autocomplete="off" aria-label="Search animals"></div>
@@ -116,6 +117,7 @@
       <li class="an-row {{ 'selected' if a.animal_id == selected }}" data-select="{{ a.animal_id }}" tabindex="0" role="button" aria-label="Show {{ a.animal_name }}">
         <span class="an-thumb">{% if photo %}<img src="{{ photo }}" alt="" loading="lazy">{% else %}{{ initial(a) }}{% endif %}</span>
         <span class="an-info"><b>{{ a.animal_name }}</b><small>{{ a.age or 'Age unknown' }} &bull; {{ a.species }}</small></span>
+        <span class="an-row-own {{ 'stray' if a.ownership_status != 'Owned' }}">{{ a.ownership_status }}</span>
         <span class="an-arrow">{{ icon('chevron') }}</span>
       </li>{% endfor %}</ul>
     {% if pages > 1 %}<nav class="an-pager" aria-label="Pages">
@@ -135,13 +137,12 @@
         <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.records %}<span class="cnt">{{ a.records|length }}</span>{% endif %}</button>
         <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('clock') }}History</a>
         <a class="tab" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}QR Code</a>
+        <button class="an-close" type="button" data-close aria-label="Close details" title="Close details">{{ icon('x') }}</button>
       </nav>
 
       <div class="an-card">
-        <button class="an-close" type="button" data-close aria-label="Close details" title="Close details">{{ icon('x') }}</button>
-
         <div class="an-pane" data-pane="profile">
-        <div class="an-top">
+        <div class="an-hero">
           <div class="an-photo">
             {% if photo %}<img src="{{ photo }}" alt="Photo of {{ a.animal_name }}">{% else %}<span class="an-initial">{{ initial(a) }}</span>{% endif %}
             {{ photo_upload(a, url_for('animals_list', **dict(request.args.to_dict(), selected=a.animal_id)), sm=True) }}
@@ -150,7 +151,7 @@
             <div class="an-name"><h2>{{ a.animal_name }}</h2>
               <span class="an-own {{ 'stray' if a.ownership_status != 'Owned' }}">{{ a.ownership_status }}</span>
               <span class="an-vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
-            <p class="an-meta">{{ icon('paw') }}<span>{{ a.species }}{% if a.age %} &bull; {{ a.age }} old{% endif %} &bull; {{ a.animal_id }}</span></p>
+            <p class="an-meta">{{ a.species }}{% if a.age %} &bull; {{ a.age }} old{% endif %} &bull; {{ a.animal_id }}</p>
           </div>
         </div>
 
@@ -158,25 +159,33 @@
           <div><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd></div>
           <div><dt>Color</dt><dd>{{ a.color or '-' }}</dd></div>
           <div><dt>Sex</dt><dd>{{ a.sex }}</dd></div>
-          <div class="an-next"><dt>{{ icon('calendar') }}Next Vaccination</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
+          <div><dt>Next Vaccination</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
         </dl>
 
-        <div class="an-cards">
-          <section class="an-box">
-            <h3>{{ icon('user') }}Owner Information</h3>
-            {% if a.ownership_status == 'Owned' %}
-            <div class="an-owner"><span class="k">Name</span><b>{{ a.owner_name or '-' }}</b></div>
-            <div class="an-owner"><span class="k">Contact</span><b>{{ a.owner_mobile or '-' }}</b></div>
-            {% else %}<p class="an-muted">Stray - no registered owner.</p>{% endif %}
-          </section>
+        <div class="an-cols">
+          <div class="an-col">
+            <section class="an-box">
+              <h3>Owner Information</h3>
+              {% if a.ownership_status == 'Owned' %}
+              <p class="an-owner-name">{{ a.owner_name or '-' }}</p>
+              <p class="an-owner-line">{{ a.owner_mobile or '-' }}</p>
+              {% if a.owner_email %}<p class="an-owner-line muted">{{ a.owner_email }}</p>{% endif %}
+              {% else %}<p class="an-muted">Stray - no registered owner.</p>{% endif %}
+            </section>
+
+            <section class="an-box">
+              <h3>Pet Notes</h3>
+              <p class="an-notes">{{ a.description or 'No notes recorded for this animal yet.' }}</p>
+            </section>
+          </div>
 
           <section class="an-box">
-            <h3>{{ icon('users') }}Quick Actions</h3>
+            <h3>Quick Actions</h3>
             <div class="an-qa">
-              <a class="an-btn primary" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}View QR Code</a>
-              <a class="an-btn blue" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">{{ icon('syringe') }}Add Vaccination</a>
-              <a class="an-btn warn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }}Edit Animal</a>
-              <a class="an-btn ghost" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">{{ icon('file') }}Print ID</a>
+              <a class="an-btn primary" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">View QR Code</a>
+              <a class="an-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add Vaccination</a>
+              <a class="an-btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">Edit Animal</a>
+              <a class="an-btn" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">Print ID</a>
             </div>
             <div class="an-qfoot">
               <a class="an-link" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">Open full profile</a>

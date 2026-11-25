@@ -32,6 +32,11 @@
   flex-direction:column;
   gap:10px;
 }
+.an-list-title {
+  font-size:1.15rem;
+  font-weight:800;
+  margin:0 0 2px;
+}
 .an-search-form {
   display:flex;
   flex-direction:column;
@@ -118,7 +123,7 @@
 }
 .an-row {
   display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
+  grid-template-columns:auto minmax(0,1fr) auto auto;
   gap:12px;
   align-items:center;
   padding:9px 11px;
@@ -168,6 +173,19 @@
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+}
+.an-row-own {
+  font-size:.72rem;
+  font-weight:700;
+  padding:3px 10px;
+  border-radius:999px;
+  background:rgba(31,157,97,.14);
+  color:#4CC38A;
+  white-space:nowrap;
+}
+.an-row-own.stray {
+  background:rgba(201,122,30,.16);
+  color:#F5A04A;
 }
 .an-arrow .ico {
   width:16px;
@@ -231,17 +249,21 @@
 }
 .an-card {
   position:relative;
+}
+.an-pane[data-pane="profile"] {
+  display:grid;
+  gap:20px;
+}
+.an-pane[data-pane="vaccination"] {
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:18px;
   padding:20px 22px;
 }
 .an-close {
-  position:absolute;
-  right:14px;
-  top:14px;
-  width:34px;
-  height:34px;
+  margin-left:auto;
+  width:36px;
+  height:36px;
   border-radius:50%;
   border:1px solid var(--line);
   background:var(--surface-2);
@@ -258,23 +280,37 @@
   width:16px;
   height:16px;
 }
-.an-top {
+.an-hero {
+  position:relative;
   display:flex;
-  gap:20px;
-  align-items:flex-start;
+  align-items:center;
+  gap:24px;
   flex-wrap:wrap;
-  padding-right:46px;
+  padding:22px 26px;
+  border-radius:18px;
+  background:linear-gradient(115deg,#16305C 0%,#0B1E3A 55%,#1B3E74 100%);
+  color:#fff;
+  overflow:hidden;
+}
+.an-hero::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 88% 10%,rgba(255,255,255,.10),transparent 58%);
+  pointer-events:none;
 }
 .an-photo {
   position:relative;
-  width:140px;
-  height:140px;
+  width:132px;
+  height:132px;
   border-radius:16px;
   overflow:hidden;
   flex:none;
-  background:var(--royal);
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.22);
   display:grid;
   place-items:center;
+  z-index:1;
 }
 .an-photo img {
   width:100%;
@@ -314,6 +350,8 @@
   margin:0;
 }
 .an-id {
+  position:relative;
+  z-index:1;
   min-width:0;
   flex:1;
 }
@@ -324,7 +362,8 @@
   flex-wrap:wrap;
 }
 .an-name h2 {
-  font-size:1.8rem;
+  font-size:2rem;
+  color:#fff;
   margin:0;
   letter-spacing:-.02em;
   line-height:1.15;
@@ -364,84 +403,101 @@
   border-color:rgba(245,160,74,.45);
   background:rgba(245,160,74,.1);
 }
-.an-meta {
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:10px 0 0;
-  color:var(--muted);
-  font-size:.95rem;
+/* inside the navy hero the pills are solid, like the reference */
+.an-hero .an-own {
+  background:#1F9D61;
+  color:#fff;
 }
-.an-meta .ico {
-  width:18px;
-  height:18px;
+.an-hero .an-own.stray {
+  background:#C97A1E;
+  color:#fff;
+}
+.an-hero .an-vax {
+  background:rgba(255,255,255,.14);
+  border-color:rgba(255,255,255,.28);
+  color:#fff;
+}
+.an-hero .an-vax.st-vaccinated,.an-hero .an-vax.st-up-to-date {
+  background:#1F9D61;
+  border-color:#1F9D61;
+  color:#fff;
+}
+.an-hero .an-vax.st-overdue {
+  background:#E2564C;
+  border-color:#E2564C;
+  color:#fff;
+}
+.an-hero .an-vax.st-upcoming,.an-hero .an-vax.st-due-today {
+  background:#C97A1E;
+  border-color:#C97A1E;
+  color:#fff;
+}
+.an-meta {
+  margin:10px 0 0;
+  color:rgba(255,255,255,.82);
+  font-size:1rem;
 }
 .an-facts {
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:16px 28px;
-  margin:20px 0 0;
-  padding-top:18px;
-  border-top:1px solid var(--line);
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin:0;
 }
 .an-facts div {
   min-width:0;
+  background:rgba(76,123,234,.12);
+  border-radius:14px;
+  padding:16px 18px;
 }
 .an-facts dt {
   color:var(--muted);
-  font-size:.82rem;
-  font-weight:500;
+  font-size:.85rem;
+  font-weight:600;
 }
 .an-facts dd {
-  margin:4px 0 0;
-  font-weight:700;
-  font-size:1rem;
+  margin:6px 0 0;
+  font-weight:800;
+  font-size:1.02rem;
   overflow-wrap:anywhere;
 }
-.an-next dt {
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.an-next dt .ico {
-  width:16px;
-  height:16px;
-}
-.an-cards {
+.an-cols {
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-  gap:16px;
-  margin-top:20px;
+  grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);
+  gap:20px;
+  align-items:start;
+}
+.an-col {
+  display:grid;
+  gap:20px;
 }
 .an-box {
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:16px 18px;
-  background:rgba(255,255,255,.03);
+  border-radius:18px;
+  padding:22px 24px;
+  background:var(--panel);
 }
 .an-box h3 {
-  display:flex;
-  align-items:center;
-  gap:10px;
+  font-size:1.1rem;
+  font-weight:800;
+  margin:0 0 4px;
+}
+.an-owner-name {
+  font-size:1.35rem;
+  font-weight:800;
+  margin:16px 0 10px;
+}
+.an-owner-line {
+  margin:0 0 4px;
   font-size:.98rem;
-  margin:0 0 14px;
-}
-.an-box h3 .ico {
-  width:18px;
-  height:18px;
-  color:var(--light);
-}
-.an-owner {
-  margin-top:10px;
-}
-.an-owner .k {
-  display:block;
-  color:var(--muted);
-  font-size:.8rem;
-}
-.an-owner b {
-  font-size:.95rem;
   font-weight:700;
+}
+.an-owner-line.muted {
+  color:var(--muted);
+  font-weight:500;
+}
+.an-notes {
+  margin:16px 0 0;
+  font-size:.98rem;
 }
 .an-muted {
   color:var(--muted);
@@ -449,23 +505,29 @@
 }
 .an-qa {
   display:grid;
-  gap:9px;
+  gap:10px;
+  margin-top:16px;
 }
 .an-btn {
   display:flex;
   align-items:center;
   justify-content:center;
   gap:9px;
-  padding:10px 14px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  color:var(--white);
+  padding:13px 16px;
+  border-radius:12px;
+  border:1px solid rgba(76,123,234,.55);
+  background:transparent;
+  color:#9DBBFF;
   font-weight:700;
-  font-size:.85rem;
+  font-size:.95rem;
 }
 .an-btn .ico {
-  width:16px;
-  height:16px;
+  width:17px;
+  height:17px;
+}
+.an-btn:hover {
+  background:rgba(76,123,234,.14);
+  color:var(--white);
 }
 .an-btn.primary {
   background:#2E5CE6;
@@ -475,29 +537,6 @@
 .an-btn.primary:hover {
   filter:brightness(1.08);
   color:#fff;
-}
-.an-btn.blue {
-  border-color:#4C7BEA;
-  color:#9DBBFF;
-}
-.an-btn.blue:hover {
-  background:rgba(76,123,234,.14);
-  color:#fff;
-}
-.an-btn.warn {
-  border-color:var(--warn);
-  color:var(--warn);
-}
-.an-btn.warn:hover {
-  background:rgba(245,160,74,.12);
-  color:var(--warn);
-}
-.an-btn.ghost {
-  color:var(--muted);
-}
-.an-btn.ghost:hover {
-  color:var(--white);
-  background:rgba(255,255,255,.05);
 }
 .an-qfoot {
   display:flex;
@@ -610,6 +649,14 @@
 .an-vfoot .an-btn {
   padding:9px 16px;
 }
+:root[data-theme="light"] .an-row-own {
+  background:#DCF3E6;
+  color:#14693F;
+}
+:root[data-theme="light"] .an-row-own.stray {
+  background:#FBEBD8;
+  color:#9A5406;
+}
 :root[data-theme="light"] .an-row:hover {
   background:rgba(15,36,80,.04);
 }
@@ -620,10 +667,32 @@
   background:rgba(46,92,230,.12);
   color:#21459A;
 }
-:root[data-theme="light"] .an-box {
-  background:#F7F9FD;
+:root[data-theme="light"] .an-hero .an-own {
+  background:#1F9D61;
+  color:#fff;
 }
-:root[data-theme="light"] .an-btn.blue,:root[data-theme="light"] .an-link,:root[data-theme="light"] .an-vact a {
+:root[data-theme="light"] .an-hero .an-own.stray {
+  background:#C97A1E;
+  color:#fff;
+}
+:root[data-theme="light"] .an-box {
+  background:#FFFFFF;
+}
+:root[data-theme="light"] .an-facts div {
+  background:#EAF0FB;
+}
+:root[data-theme="light"] .an-btn {
+  border-color:#2E5CE6;
+  color:#1E40AF;
+}
+:root[data-theme="light"] .an-btn:hover {
+  background:rgba(46,92,230,.08);
+  color:#1E40AF;
+}
+:root[data-theme="light"] .an-btn.primary,:root[data-theme="light"] .an-btn.primary:hover {
+  color:#fff;
+}
+:root[data-theme="light"] .an-link,:root[data-theme="light"] .an-vact a {
   color:#21459A;
 }
 :root[data-theme="light"] .an-chips a.on {
@@ -638,6 +707,14 @@
   .an-list {
     position:static;
     max-height:none;
+  }
+}
+@media(max-width:900px) {
+  .an-facts {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .an-cols {
+    grid-template-columns:minmax(0,1fr);
   }
 }
 @media(max-width:600px) {
