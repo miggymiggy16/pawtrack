@@ -133,7 +133,7 @@
       <nav class="an-tabs" aria-label="Animal sections">
         <button class="tab on" type="button" data-tab="profile" aria-pressed="true">{{ icon('paw') }}Profile</button>
         <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.records %}<span class="cnt">{{ a.records|length }}</span>{% endif %}</button>
-        <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}#history">{{ icon('clock') }}History</a>
+        <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('clock') }}History</a>
         <a class="tab" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}QR Code</a>
       </nav>
 

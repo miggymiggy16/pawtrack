@@ -1,37 +1,76 @@
 {% extends 'base.html' %}
-{% from '_macros.html' import badge, csrf, initial, photo_upload %}
+{% from '_macros.html' import badge, csrf, initial, icon, photo_upload %}
 {% block title %}{{ a.animal_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/animal_profile.css') }}">
+{% endblock %}
 {% block content %}
-<div class="page-head"><div style="display:flex;gap:16px;align-items:center">{% set photo = animal_photo_url(a) %}<span class="pet">{% if photo %}<a class="ring has-photo" style="width:72px;height:72px" href="{{ photo }}" target="_blank" rel="noopener" title="View full photo"><img src="{{ photo }}" alt="Photo of {{ a.animal_name }}"></a>{% else %}<span class="ring" style="width:72px;height:72px">{{ initial(a) }}</span>{% endif %}</span>
-  <div><h1>{{ a.animal_name }}</h1><p>{{ a.animal_id }} &middot; {{ a.species }}{% if a.breed %} &middot; {{ a.breed }}{% endif %}</p></div></div>
-  <div class="actions">
-    <a class="btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">Edit animal</a>
-    {{ photo_upload(a, request.path) }}
-    <a class="btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add vaccination</a>
-    <a class="btn ghost" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">Generate / view QR</a>
-    <a class="btn ghost" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">Print ID</a>
-    <a class="btn ghost" href="{{ url_for('animal_notify', animal_id=a.animal_id) }}">Send email notification</a>
-    <a class="btn ghost" href="#history">View vaccination history</a>
-  </div></div>
-<div class="grid g2">
-  <section class="card"><h2>Animal information</h2><dl class="kv">
-    <dt>Sex</dt><dd>{{ a.sex }}</dd><dt>Age</dt><dd>{{ a.age or '-' }}</dd><dt>Color</dt><dd>{{ a.color or '-' }}</dd>
-    <dt>Description</dt><dd>{{ a.description or '-' }}</dd><dt>Ownership</dt><dd>{{ badge(a.ownership_status) }}</dd>
-    <dt>Registered</dt><dd>{{ a.registration_date|fmt_date }}</dd></dl></section>
-  <section class="card"><h2>Owner information</h2>
-    {% if a.ownership_status == 'Owned' %}<dl class="kv"><dt>Name</dt><dd>{{ a.owner_name }}</dd><dt>Mobile</dt><dd>{{ a.owner_mobile or '-' }}</dd><dt>Email</dt><dd>{{ a.owner_email or '-' }}</dd></dl>
-    {% else %}<p class="muted">This animal is a stray and has no registered owner.</p>{% endif %}</section>
-</div>
-<section class="card"><h2>Vaccination status</h2>
-  <div class="grid g3"><div><p class="muted small">Current status</p>{{ badge(info.status) }}</div>
-  <div><p class="muted small">Latest vaccination</p><b>{% if info.latest %}{{ info.latest.vaccine_name }}</b><br><span class="small muted">{{ info.latest.date_administered|fmt_date }}</span>{% else %}None recorded</b>{% endif %}</div>
-  <div><p class="muted small">Next due date</p><b>{{ info.next_due|fmt_date if info.next_due else '-' }}</b></div></div></section>
-<section class="card" id="history"><h2>Vaccination history</h2>
-  {% if info.records %}<div class="table-wrap"><table><thead><tr><th>ID</th><th>Vaccine</th><th>Administered</th><th>Next due</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>
-    {% for r in info.records %}<tr><td>{{ r.vaccination_id }}</td><td>{{ r.vaccine_name }}</td><td>{{ r.date_administered|fmt_date }}</td><td>{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td><td>{{ badge(r.status) }}</td><td>{{ r.notes or '-' }}</td>
-      <td class="nowrap"><a class="btn sm ghost" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}">Edit</a>
-      {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete this vaccination record?">{{ csrf() }}<button class="btn sm danger" type="submit">Delete</button></form>{% endif %}</td></tr>{% endfor %}
-  </tbody></table></div>
-  <p class="small muted" style="margin-top:10px">Older shots of the same vaccine show "Completed" because a newer record replaced them.</p>
-  {% else %}<p class="empty">No vaccinations recorded yet. <a href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add the first one</a>.</p>{% endif %}</section>
+{% set photo = animal_photo_url(a) %}
+<article class="ap-page">
+  <header class="ap-hero">
+    <div class="ap-who">
+      <div class="ap-photo">{% if photo %}<a href="{{ photo }}" target="_blank" rel="noopener" title="View full photo"><img src="{{ photo }}" alt="Photo of {{ a.animal_name }}"></a>{% else %}<span>{{ initial(a) }}</span>{% endif %}</div>
+      <div class="ap-titles">
+        <h1>{{ a.animal_name }}</h1>
+        <p>{{ a.animal_id }} &middot; {{ a.species }}{% if a.breed %} &middot; {{ a.breed }}{% endif %}</p>
+      </div>
+    </div>
+    <div class="ap-actions">
+      <a class="ap-btn primary" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }}Edit Animal</a>
+      {{ photo_upload(a, request.path) }}
+      <a class="ap-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">{{ icon('syringe') }}Add Vaccination</a>
+      <a class="ap-btn gold" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}Generate / View QR</a>
+      <a class="ap-btn quiet" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">{{ icon('printer') }}Print ID</a>
+      <a class="ap-btn quiet" href="{{ url_for('animal_notify', animal_id=a.animal_id) }}">{{ icon('mail') }}Send notification</a>
+    </div>
+  </header>
+
+  <div class="ap-grid">
+    <section class="ap-card">
+      <h2 class="ap-h"><span class="ap-ico blue">{{ icon('paw') }}</span>Animal Information</h2>
+      <dl class="ap-kv">
+        <div><dt>Sex</dt><dd>{{ a.sex }}</dd></div>
+        <div><dt>Age</dt><dd>{{ a.age or '-' }}</dd></div>
+        <div><dt>Color</dt><dd>{{ a.color or '-' }}</dd></div>
+        <div><dt>Description</dt><dd>{{ a.description or '-' }}</dd></div>
+        <div><dt>Ownership</dt><dd>{{ badge(a.ownership_status) }}</dd></div>
+        <div><dt>Registered</dt><dd>{{ a.registration_date|fmt_date }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="ap-card">
+      <h2 class="ap-h"><span class="ap-ico violet">{{ icon('user') }}</span>Owner Information</h2>
+      {% if a.ownership_status == 'Owned' %}
+      <dl class="ap-kv">
+        <div><dt>Name</dt><dd>{{ a.owner_name or '-' }}</dd></div>
+        <div><dt>Mobile</dt><dd>{{ a.owner_mobile or '-' }}</dd></div>
+        <div><dt>Email</dt><dd>{{ a.owner_email or '-' }}</dd></div>
+      </dl>
+      {% else %}
+      <p class="ap-stray">{{ icon('info') }}This animal is a stray and has no registered owner.</p>
+      <span class="ap-mark" aria-hidden="true">{{ icon('paw') }}</span>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="ap-card">
+    <h2 class="ap-h"><span class="ap-ico ok">{{ icon('shield') }}</span>Vaccination Status</h2>
+    <div class="ap-vgrid">
+      <div><span class="ap-k">Current Status</span>{{ badge(info.status) }}</div>
+      <div><span class="ap-k">Latest Vaccination</span>
+        {% if info.latest %}<b>{{ info.latest.vaccine_name }}</b><small>{{ info.latest.date_administered|fmt_date }}</small>{% else %}<b>None recorded</b>{% endif %}</div>
+      <div><span class="ap-k">Next Due Date</span><b>{{ info.next_due|fmt_date }}</b></div>
+    </div>
+  </section>
+
+  <section class="ap-card" id="history">
+    <h2 class="ap-h"><span class="ap-ico blue">{{ icon('clock') }}</span>Vaccination History</h2>
+    {% if info.records %}<div class="table-wrap"><table><thead><tr><th>ID</th><th>Vaccine</th><th>Administered</th><th>Next due</th><th>Status</th><th>Notes</th><th>Actions</th></tr></thead><tbody>
+      {% for r in info.records %}<tr><td>{{ r.vaccination_id }}</td><td>{{ r.vaccine_name }}</td><td>{{ r.date_administered|fmt_date }}</td><td>{{ r.next_due_date|fmt_date }}</td><td>{{ badge(r.status) }}</td><td>{{ r.notes or '-' }}</td>
+        <td class="nowrap"><a class="btn sm ghost" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}">Edit</a>
+        {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete this vaccination record?">{{ csrf() }}<button class="btn sm danger" type="submit">Delete</button></form>{% endif %}</td></tr>{% endfor %}
+    </tbody></table></div>
+    <p class="ap-note">Older shots of the same vaccine show "Completed" because a newer record replaced them.</p>
+    {% else %}<p class="empty">No vaccinations recorded yet. <a href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add the first one</a>.</p>{% endif %}
+  </section>
+</article>
 {% endblock %}
