@@ -3,7 +3,7 @@
 {% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
-<form method="post" enctype="multipart/form-data" novalidate>
+<form method="post" enctype="multipart/form-data">
   {{ csrf() }}
 
   {# ---------- Basic information ---------- #}
