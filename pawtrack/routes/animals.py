@@ -89,7 +89,8 @@ def animals_list():
             continue
         if args["status"] in ("Vaccinated", "Upcoming", "Due Today", "Overdue", "No Record") and st != args["status"]:
             continue
-        matches.append({**a, "vax_status": st, "next_due": info["next_due"]})
+        matches.append({**a, "vax_status": st, "next_due": info["next_due"],
+                        "vax_count": len(info["records"]), "records": info["records"]})
     tab_counts = {"": len(matches),
                   "Owned": sum(1 for a in matches if a["ownership_status"] == "Owned"),
                   "Stray": sum(1 for a in matches if a["ownership_status"] == "Stray")}
