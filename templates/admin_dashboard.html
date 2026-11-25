@@ -138,6 +138,7 @@
     </div>
     {% if low_items %}<div class="chips restock"><span class="mono-s">Restock</span>{% for i in low_items %}<a class="badge b-low-stock" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }} &middot; {{ i.quantity }}</a>{% endfor %}</div>{% endif %}</section>
 </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

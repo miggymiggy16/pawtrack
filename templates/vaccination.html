@@ -64,8 +64,9 @@
         </div>
       </div>
       {% endfor %}
-    </div>
-    {% endif %}
+      </div>
+      {% endif %}
+    </section>
   </div>
 </div>
 <!-- ============ /MOBILE-ONLY VACCINATION VIEW ============ -->
@@ -117,7 +118,7 @@
                      'vaccine': r.vaccine_name, 'given': r.date_administered|fmt_date,
                      'due': r.next_due_date|fmt_date if r.next_due_date else '-', 'status': r.status} %}
       <tr>
-        <td class="vm-animal vax-open" tabindex="0" data-detail='{{ detail|tojson }}'><span class="vm-av">{{ initial(r.animal) }}</span><span><b>{{ r.animal.animal_name }}</b><br><span class="small muted">{{ r.animal_id }}</span></span></div></td>
+        <td class="vm-animal vax-open" tabindex="0" data-detail='{{ detail|tojson }}'><span class="vm-av">{{ initial(r.animal) }}</span><span><b>{{ r.animal.animal_name }}</b><br><span class="small muted">{{ r.animal_id }}</span></span></td>
         <td>{{ r.vaccine_name }}</td>
         <td class="nowrap">{{ r.date_administered|fmt_date }}</td>
         <td class="nowrap">{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
