@@ -82,6 +82,7 @@
 </form>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/animal_form.js') }}"></script>
 <script>
 (function(){
   var status = document.getElementById('ownership_status');
