@@ -67,7 +67,7 @@
   font-size:.92rem;
 }
 .an-field:focus-within {
-  border-color:#4C7BEA;
+  border-color:#16305C;
 }
 .an-field input:focus {
   outline:0;
@@ -109,8 +109,8 @@
   margin-left:4px;
 }
 .an-chips a.on {
-  background:rgba(76,123,234,.18);
-  border-color:#4C7BEA;
+  background:rgba(22,48,92,.18);
+  border-color:#16305C;
   color:var(--white);
 }
 .an-rows {
@@ -136,8 +136,8 @@
   background:rgba(255,255,255,.04);
 }
 .an-row.selected {
-  background:rgba(76,123,234,.14);
-  border-color:#4C7BEA;
+  background:rgba(22,48,92,.14);
+  border-color:#16305C;
 }
 .an-thumb {
   width:44px;
@@ -237,8 +237,8 @@
   color:var(--white);
 }
 .an-tabs .tab.on {
-  background:#4C7BEA;
-  border-color:#4C7BEA;
+  background:#16305C;
+  border-color:#16305C;
   color:#fff;
 }
 .an-tabs .cnt {
@@ -376,8 +376,8 @@
   border:1px solid transparent;
 }
 .an-own {
-  background:rgba(76,123,234,.22);
-  color:#9DBBFF;
+  background:rgba(22,48,92,.22);
+  color:#BFD0EE;
 }
 .an-own.stray {
   background:rgba(245,160,74,.16);
@@ -445,7 +445,7 @@
 }
 .an-facts div {
   min-width:0;
-  background:rgba(76,123,234,.12);
+  background:rgba(22,48,92,.12);
   border-radius:14px;
   padding:16px 18px;
 }
@@ -515,9 +515,9 @@
   gap:9px;
   padding:13px 16px;
   border-radius:12px;
-  border:1px solid rgba(76,123,234,.55);
+  border:1px solid rgba(22,48,92,.55);
   background:transparent;
-  color:#9DBBFF;
+  color:#BFD0EE;
   font-weight:700;
   font-size:.95rem;
 }
@@ -526,12 +526,12 @@
   height:17px;
 }
 .an-btn:hover {
-  background:rgba(76,123,234,.14);
+  background:rgba(22,48,92,.14);
   color:var(--white);
 }
 .an-btn.primary {
-  background:#2E5CE6;
-  border-color:#2E5CE6;
+  background:#16305C;
+  border-color:#16305C;
   color:#fff;
 }
 .an-btn.primary:hover {
@@ -549,7 +549,7 @@
 .an-link {
   font-size:.82rem;
   font-weight:600;
-  color:#9DBBFF;
+  color:#BFD0EE;
 }
 .an-link:hover {
   color:var(--white);
@@ -636,7 +636,7 @@
 .an-vact a {
   font-size:.8rem;
   font-weight:600;
-  color:#9DBBFF;
+  color:#BFD0EE;
 }
 .an-vfoot {
   display:flex;
@@ -682,7 +682,7 @@
   background:#EAF0FB;
 }
 :root[data-theme="light"] .an-btn {
-  border-color:#2E5CE6;
+  border-color:#16305C;
   color:#1E40AF;
 }
 :root[data-theme="light"] .an-btn:hover {
@@ -697,7 +697,7 @@
 }
 :root[data-theme="light"] .an-chips a.on {
   background:rgba(46,92,230,.1);
-  border-color:#2E5CE6;
+  border-color:#16305C;
   color:#0F2450;
 }
 @media(max-width:1100px) {
