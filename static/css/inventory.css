@@ -508,17 +508,21 @@ body.inv-page .iv-sel select:focus {
   cursor: pointer;
 }
 .iv-modal-photo {
-  height: 180px;
+  min-height: 240px;
   border-radius: 12px;
   background: var(--surface-2, #f3f1ec);
   display: grid;
   place-items: center;
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: 16px;
+  padding: 16px;
 }
 .iv-modal-photo img {
-  width: 100%;
-  height: 100%;
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 .iv-ph-none {
@@ -589,4 +593,21 @@ body.inv-page .iv-sel select:focus {
 .iv-item-text small {
   color: var(--muted, #64748b);
   font-size: .72rem;
+}
+
+/* ===== Inventory list thumbnails: show the whole product image ===== */
+.iv-list-table .item-cell .thumb {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  object-fit: contain;   /* full picture, no cropping */
+  padding: 4px;
+  background: var(--panel, #fff);
+  border: 1px solid var(--line, #e5e3dd);
+  border-radius: 10px;
+}
+.iv-list-table .item-cell .thumb.none {
+  display: grid;
+  place-items: center;
+  padding: 0;
 }
