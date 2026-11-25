@@ -59,21 +59,11 @@
     <span class="h">{{ 'Due now' if s.label == 'Due Today' and s.value else hints.get(s.label, '') }}</span></div>{% endfor %}
 </div>
 
-{# 3. Vaccination coverage #}
-{% set sv = namespace(total=0, done=0, overdue=0) %}
+{# 3. Overdue call-out #}
+{% set sv = namespace(overdue=0) %}
 {% for s in report.summary %}
-  {% if s.label == 'Total Records' %}{% set sv.total = s.value|int %}
-  {% elif s.label == 'Completed' %}{% set sv.done = s.value|int %}
-  {% elif s.label == 'Overdue' %}{% set sv.overdue = s.value|int %}{% endif %}
+  {% if s.label == 'Overdue' %}{% set sv.overdue = s.value|int %}{% endif %}
 {% endfor %}
-{% if kind == 'vaccination' and sv.total %}
-{% set pct = ((sv.done * 100 / sv.total)|round|int) %}
-<div class="rpt-cov"><div class="rpt-covtop"><b>Vaccination coverage</b>
-    <span>{{ sv.done }} of {{ sv.total }} up to date &middot; {{ pct }}%</span></div>
-  <div class="rpt-bar" role="img" aria-label="{{ pct }}% up to date"><i style="width:{{ pct }}%"></i></div></div>
-{% endif %}
-
-{# 4. Overdue call-out #}
 {% if sv.overdue %}
 <div class="rpt-alert no-print">{{ icon('alert') }}
   <div><span class="t">{{ sv.overdue }} vaccination{{ ' is' if sv.overdue == 1 else 's are' }} overdue</span>
