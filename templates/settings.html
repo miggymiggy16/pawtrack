@@ -137,8 +137,8 @@
       <div id="idv-panel-1" class="idv-panel">
         <form id="idvScanForm" enctype="multipart/form-data">
           {{ csrf() }}
-          <div class="st-row"><div class="st-lab"><label for="idv_type">ID type</label><small>Supported: Philippine National ID, Driver's License, Passport, UMID.</small></div>
-            <div class="st-ct"><select id="idv_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in ['Philippine National ID', "Driver's License", 'Passport', 'UMID'] %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select></div></div>
+          <div class="st-row"><div class="st-lab"><label for="idv_type">ID type</label><small>Supported: {{ id_types|join(', ') }}.</small></div>
+            <div class="st-ct"><select id="idv_type" name="id_type" required><option value="">Choose an ID type...</option>{% for t in id_types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}</select></div></div>
           <div class="st-row"><div class="st-lab"><label for="idv_image">ID image</label><small>Clear, well-lit photo of the front of your ID.</small></div>
             <div class="st-ct"><input id="idv_image" name="id_image" type="file" accept="image/*" required></div></div>
           <div class="st-row"><div class="st-lab"><label for="idv_password">Current password</label><small>To confirm it is you.</small></div>

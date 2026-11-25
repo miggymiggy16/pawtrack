@@ -18,8 +18,10 @@ import threading
 
 import numpy as np
 
+from ..config import FACE_MATCH_THRESHOLD
+
 MODEL_NAME = (os.getenv("FACE_MODEL", "buffalo_l") or "buffalo_l").strip()
-MATCH_THRESHOLD = float(os.getenv("FACE_MATCH_THRESHOLD", "0.45"))
+MATCH_THRESHOLD = FACE_MATCH_THRESHOLD
 MATCH_MARGIN = float(os.getenv("FACE_MATCH_MARGIN", "0.05"))
 MIN_DET_SCORE = float(os.getenv("FACE_MIN_DET_SCORE", "0.50"))
 CONSISTENCY_THRESHOLD = float(os.getenv("FACE_CONSISTENCY_THRESHOLD", "0.50"))

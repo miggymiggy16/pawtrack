@@ -43,6 +43,10 @@ MAX_IMAGE_BYTES = 100 * 1024 * 1024
 MAX_QTY = 1_000_000                    # sanity limit for any stock quantity
 IMAGE_EXTS = {"png", "jpg", "jpeg", "gif", "webp"}
 
+# Identity verification (Admin/Staff/Cashier setup in Settings)
+ID_TYPES = ["Philippine National ID", "Driver's License", "Passport", "UMID"]
+FACE_MATCH_THRESHOLD = float(os.getenv("FACE_MATCH_THRESHOLD", "0.45"))
+
 ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,30}$")           # safe for file names & URLs
 USERNAME_RE = re.compile(r"^[A-Za-z0-9_.-]{3,30}$")
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")

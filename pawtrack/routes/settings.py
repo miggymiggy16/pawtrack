@@ -7,6 +7,7 @@ from flask import (current_app, flash, jsonify, redirect, render_template,
                    request, session, url_for)
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from ..config import FACE_MATCH_THRESHOLD
 from ..extensions import app
 from ..helpers import (delete_animal_photo, delete_product_image, lan_ip,
                        now_str, valid_email)
@@ -29,6 +30,7 @@ def _settings_redirect():
 def settings():
     return render_template("settings.html", s=get_settings(), mail=mail_config(), lan=lan_ip(),
                            has_sample=any(x.get("sample") for x in load("animals") + load("inventory")),
+                           id_types=ID_TYPES,
                            port=request.host.split(":")[-1] if ":" in request.host else "5000")
 
 
@@ -147,7 +149,7 @@ def settings_identity_face():
     if not descriptors:
         return jsonify(ok=False, error="No face was detected. Please repeat with better lighting."), 400
     best_score = max(match_faces(pending["id_descriptor"], d)[1] for d in descriptors)
-    if best_score < 0.45:
+    if best_score < FACE_MATCH_THRESHOLD:
         return jsonify(ok=False, error="Face does not match the ID photo. Please retake the captures."), 400
     me = current_user()
     with edit("users") as users:

@@ -5,8 +5,10 @@ from flask import abort, render_template
 
 from ..extensions import app
 from ..security import permission_required
-from ..services.analytics import (ANALYTICS_OPEN_IN_REPORTS, ANALYTICS_REPORTS,
-                                  analytics_data, build_analytics_report)
+from ..services.analytics import analytics_data
+from ..services.analytics_reports import (ANALYTICS_OPEN_IN_REPORTS,
+                                          ANALYTICS_REPORTS,
+                                          build_analytics_report)
 
 
 @app.route("/analytics")
