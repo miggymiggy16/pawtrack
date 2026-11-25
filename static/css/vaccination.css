@@ -418,3 +418,79 @@
     stroke:#E23B4E;
   }
 }
+
+/* ===== Vaccination record popup (centered, not full screen) ===== */
+.vax-open {
+  cursor: pointer;
+}
+.vax-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.vax-modal[hidden] {
+  display: none;
+}
+.vax-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 36, 64, .55);
+}
+.vax-modal-x {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1002;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, .85);
+  border-radius: 50%;
+  background: #0B2440;
+  color: #fff;
+  font-size: 1.7rem;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+  cursor: pointer;
+}
+.vax-modal-x:hover {
+  background: #16305C;
+}
+.vax-modal-box {
+  position: relative;
+  z-index: 1001;
+  background: var(--panel, #fff);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+  width: min(420px, 100%);
+  padding: 24px;
+}
+.vax-modal-box h2 {
+  margin: 0 0 16px;
+  font-size: 1.2rem;
+  color: var(--white, #0f2450);
+}
+.vax-modal-facts {
+  margin: 0;
+}
+.vax-modal-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line, #e5e3dd);
+}
+.vax-modal-facts dt {
+  color: var(--muted, #64748b);
+  font-size: .86rem;
+}
+.vax-modal-facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: .86rem;
+  text-align: right;
+}
