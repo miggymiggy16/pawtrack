@@ -497,15 +497,25 @@ body.inv-page .iv-sel select:focus {
   padding: 24px;
 }
 .iv-modal-x {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  border: 0;
-  background: none;
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1002;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, .85);
+  border-radius: 50%;
+  background: #0B2440;
+  color: #fff;
   font-size: 1.7rem;
   line-height: 1;
-  color: var(--muted, #64748b);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
   cursor: pointer;
+}
+.iv-modal-x:hover {
+  background: #16305C;
 }
 .iv-modal-photo {
   min-height: 240px;
