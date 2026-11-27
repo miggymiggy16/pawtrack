@@ -9,7 +9,7 @@
 {% block content %}
 <div class="sdb-head">
   <div><h1>Overview</h1><p>{{ today|fmt_date }}</p></div>
-  <div class="sdb-actions"><a class="btn" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div>
+  <div class="sdb-actions"><a class="btn" href="{{ url_for('animal_new') }}" data-animal-modal>{{ icon('plus') }}Register animal</a><a class="btn ghost" href="{{ url_for('vaccination_new') }}">{{ icon('shield') }}Record vaccination</a></div>
 </div>
 {% if problems %}<div class="notice warn" role="alert">Some data could not be loaded ({{ problems|join(', ') }}).</div>{% endif %}
 

@@ -1541,6 +1541,34 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
   .af-page #age{width:100%}
 }
 
+/* --- register-animal popup --- */
+#animalModal{position:fixed;inset:0;margin:auto;padding:0;border:0;border-radius:14px;
+  width:min(980px,94vw);max-width:none;
+  height:min(88vh,860px);max-height:none;overflow:hidden;background:var(--panel);color:var(--white)}
+#animalModal::backdrop{background:rgba(6,12,26,.72)}
+#animalModal .pm-head{display:flex;align-items:center;justify-content:flex-end;
+  height:38px;padding:0 10px;border-bottom:1px solid var(--line)}
+#animalModal .pm-close{width:30px;height:30px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:50%;background:transparent;color:inherit;
+  font-size:1.35rem;line-height:1;cursor:pointer;padding:0}
+#animalModal .pm-close:hover{background:rgba(128,128,128,.18)}
+#animalModal iframe{display:block;width:100%;height:calc(100% - 38px);border:0;background:transparent}
+:root[data-theme="light"] #animalModal{background:#fff;color:var(--navy)}
+
+/* Form shown inside the popup: drop the app chrome so it fits. */
+.af-page.af-modal .sidebar,
+.af-page.af-modal .topbar,
+.af-page.af-modal .mobile-head,
+.af-page.af-modal .mobile-nav{display:none}
+.af-page.af-modal .app{display:block}
+.af-page.af-modal .content{display:flex;flex-direction:column;align-items:center;
+  padding:18px 20px 30px;max-width:none;overflow-x:hidden}
+.af-page.af-modal .page-head,
+.af-page.af-modal .form-section{width:100%}
+.af-page.af-modal form{width:100%;max-width:900px;display:flex;flex-direction:column;align-items:center}
+.af-page.af-modal .form-section,
+.af-page.af-modal .form-actions{width:100%}
+
 /* ===== Mobile bottom navigation (swipeable) — every page, <=700px only ===== */
 .mobile-nav,.mobile-head{display:none}
 @media(max-width:700px){

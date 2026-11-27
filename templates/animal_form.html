@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import csrf, icon %}
-{% block body_class %}af-page{% endblock %}
+{% block body_class %}af-page{% if request.args.get('modal') %} af-modal{% endif %}{% endblock %}
 {% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
