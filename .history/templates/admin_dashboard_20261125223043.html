@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import icon, logo, theme_toggle %}
+{% block title %}Overview{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">{% endblock %}
+{% block body_class %}mobile-dash{% endblock %}
+{% block content %}
+
+<!-- ============ MOBILE-ONLY DASHBOARD ============ -->
+
+  <div class="m-body">
+    <div class="m-title-row">
+      <div><h1>Overview</h1><p class="m-hello">Welcome back, {{ (user.full_name or user.username or 'Admin')|title }}!</p></div>
+      <div class="m-date">{{ icon('clock') }}<span>{{ today|fmt_date }}</span></div>
+    </div>
+
+    <section class="m-kpis" aria-label="Summary">
+      <a class="m-kpi" href="{{ url_for('animals_list') }}">
+        <span class="m-kico c-blue">{{ icon('paw') }}</span>
+        <span class="m-kl">Animals</span>
+        <div class="m-kn">{{ cards.animals }}</div>
+        <div class="m-kf up">{{ icon('chart') }} {{ cards.owned }} owned</div>
+      </a>
+      <a class="m-kpi" href="{{ url_for('vaccinations') }}">
+        <span class="m-kico c-violet">{{ icon('syringe') }}</span>
+        <span class="m-kl">Vaccinations</span>
+        <div class="m-kn">{{ cards.vax_period }}</div>
+        <div class="m-kf {{ 'up' if cards.vax_trend is not none and cards.vax_trend >= 0 else 'down' }}">
+          {{ '↑' if cards.vax_trend is not none and cards.vax_trend >= 0 else '↓' }} {{ cards.vax_trend|abs if cards.vax_trend is not none else 0 }}%
+        </div>
+      </a>
+      <div class="m-kpi">
+        <span class="m-kico c-green">{{ icon('shield') }}</span>
+        <span class="m-kl">Coverage</span>
+        <div class="m-kn">{{ cards.coverage }}<small>%</small></div>
+        <div class="m-meter"><i style="width:{{ cards.coverage }}%"></i></div>
+        <div class="m-kf up">↑ {{ cards.vaccinated }} / {{ cards.animals }}</div>
+      </div>
+      <a class="m-kpi {{ 'is-bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}">
+        <span class="m-kico c-red">{{ icon('alert') }}</span>
+        <span class="m-kl">Overdue</span>
+        <div class="m-kn">{{ cards.overdue }}</div>
+        <div class="m-kf {{ 'down' if cards.overdue else 'up' }}">{{ 'needs attention' if cards.overdue else 'all clear' }}</div>
+      </a>
+    </section>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('chart') }} Vaccinations</h2><span class="m-sel">Monthly {{ icon('chevron') }}</span></div>
+      <div class="m-chart"><canvas id="mMonthly"></canvas></div>
+    </section>
+
+    <div class="m-pair">
+      <section class="m-card">
+        <div class="m-card-head"><h2>{{ icon('grid') }} Status</h2></div>
+        <div class="m-chart m-donut"><canvas id="mStatus"></canvas></div>
+        <div class="m-legend" id="mLegend"></div>
+      </section>
+      <section class="m-card">
+        <div class="m-card-head"><h2>{{ icon('paw') }} Coverage by Species</h2></div>
+        {% if species_cov %}<div class="m-bars">{% for name, v in species_cov %}
+          <div class="m-bar-row"><span class="m-bl">{{ name }}</span><span class="m-bt"><i style="width:{{ [v,100]|min }}%"></i></span><b class="m-bv">{{ v|round|int }}%</b></div>{% endfor %}</div>
+        {% else %}<p class="m-empty">No data yet.</p>{% endif %}
+        <a class="m-more" href="{{ url_for('analytics') }}">See more →</a>
+      </section>
+    </div>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('syringe') }} Top Vaccines</h2><a class="m-more" href="{{ url_for('analytics') }}">View all →</a></div>
+      {% if top_vaccines %}{% set mx = top_vaccines[0][1] or 1 %}<div class="m-bars">{% for name, v in top_vaccines %}
+        <div class="m-bar-row"><span class="m-bl">{{ name }}</span><span class="m-bt"><i style="width:{{ v / mx * 100 }}%"></i></span><b class="m-bv">{{ v }}</b></div>{% endfor %}</div>
+      {% else %}<p class="m-empty">No data yet.</p>{% endif %}
+    </section>
+
+    <section class="m-card">
+      <div class="m-card-head"><h2>{{ icon('box') }} Stock Flow</h2><span class="m-sel">{{ period_label }}</span></div>
+      {% set tot = [stats.in_units, stats.out_units, stats.adj_lost, 1]|max %}
+      <div class="m-flow">
+        <div class="m-fl"><span class="m-chip ok">{{ icon('plus') }}</span><span>In</span><b>+{{ stats.in_units }}</b></div>
+        <div class="m-fl"><span class="m-chip">{{ icon('minus') }}</span><span>Used</span><b>-{{ stats.out_units }}</b></div>
+        <div class="m-fl"><span class="m-chip warn">{{ icon('alertc') }}</span><span>Lost</span><b>{{ stats.adj_lost }}</b></div>
+      </div>
+      {% if low_items %}<div class="m-restock"><span>Restock</span><div>{% for i in low_items %}<a href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }} · {{ i.quantity }}</a>{% endfor %}</div></div>{% endif %}
+    </section>
+  </div>
+
+</div>
+<!-- ============ /MOBILE-ONLY DASHBOARD ============ -->
+
+<div class="desk-only">
+{% macro bars(rows, target=None, suffix='') %}<div class="hbars">{% for name, v in rows %}{% set tone = 'bad' if v < 60 else 'warn' if v < 85 else 'ok' %}
+  <div class="hrow"><span class="hl">{{ name }}</span><span class="htrack"><i class="f-{{ tone }}" style="width:{{ [v,100]|min }}%"></i>{% if target %}<u style="left:{{ target }}%"></u>{% endif %}</span><b class="hv">{{ v|round|int }}{{ suffix }}</b></div>{% endfor %}</div>{% endmacro %}
+{% set owned_pct = (cards.owned / cards.animals * 100) if cards.animals else 0 %}
+
+
+<div class="page-head"><div><h1>Overview</h1><p class="mono-s">{{ today|fmt_date }}</p></div>
+  <div class="actions">
+    <form class="period" method="get" action="{{ url_for('admin_dashboard') }}"><label for="days">Period</label>
+      <select id="days" name="days" onchange="this.form.submit()">{% for d, lbl in periods %}<option value="{{ d }}" {{ 'selected' if d == days }}>{{ lbl }}</option>{% endfor %}</select><noscript><button class="btn sm" type="submit">Apply</button></noscript></form>
+    <a class="btn" href="{{ url_for('analytics') }}">{{ icon('chart') }}Analytics</a></div></div>
+{% if problems %}<div class="notice warn" role="alert">Some data could not be loaded ({{ problems|join(', ') }}).</div>{% endif %}
+
+<section class="kpis k4" aria-label="Summary">
+  <a class="kpi" href="{{ url_for('animals_list') }}"><span class="kico">{{ icon('paw') }}</span><span class="kl">Animals</span>
+    <div class="kpi-n">{{ cards.animals }}</div>
+    <div class="seg" title="Owned / stray"><i class="s1" style="width:{{ owned_pct }}%"></i><i class="s2" style="width:{{ 100 - owned_pct if cards.animals else 0 }}%"></i></div>
+    <div class="kpi-foot"><span><em class="dot s1"></em>{{ cards.owned }}</span><span><em class="dot s2"></em>{{ cards.stray }}</span></div></a>
+  <a class="kpi" href="{{ url_for('vaccinations') }}"><span class="kico">{{ icon('shield') }}</span><span class="kl">Vaccinations</span>
+    <div class="kpi-mid"><div class="kpi-n">{{ cards.vax_period }}</div>
+      {% if spark %}<svg class="spark" viewBox="0 0 {{ spark.w }} {{ spark.h }}" aria-hidden="true"><polygon class="sa" points="{{ spark.area }}"/><polyline class="sl" points="{{ spark.line }}"/><circle cx="{{ spark.x }}" cy="{{ spark.y }}" r="3.5"/></svg>{% endif %}</div>
+    <div class="kpi-foot">{% if cards.vax_trend is not none %}<span class="trend {{ 'up' if cards.vax_trend >= 0 else 'down' }}">{{ '▲' if cards.vax_trend >= 0 else '▼' }} {{ cards.vax_trend|abs }}%</span>{% else %}<span class="mono-s">&nbsp;</span>{% endif %}<span class="mono-s">{{ period_label }}</span></div></a>
+  <div class="kpi {{ 'ok' if cards.coverage >= 85 else 'warn' if cards.coverage >= 60 else 'bad' }}"><span class="kico">{{ icon('checks') }}</span><span class="kl">Coverage</span>
+    <div class="kpi-n">{{ cards.coverage }}<small>%</small></div>
+    <div class="meter"><i class="f-{{ 'ok' if cards.coverage >= 85 else 'warn' if cards.coverage >= 60 else 'bad' }}" style="width:{{ cards.coverage }}%"></i><u style="left:90%"></u></div>
+    <div class="kpi-foot"><span class="mono-s">{{ cards.vaccinated }} / {{ cards.animals }}</span><span class="mono-s">Goal 90%</span></div></div>
+  <a class="kpi {{ 'bad' if cards.overdue }}" href="{{ url_for('vaccinations', status='Overdue') }}"><span class="kico bad">{{ icon('bell') }}</span><span class="kl">Overdue</span>
+    <div class="kpi-n {{ 'neg' if cards.overdue }}">{{ cards.overdue }}</div>
+    <div class="meter"><i class="f-bad" style="width:{{ (cards.overdue / cards.animals * 100) if cards.animals else 0 }}%"></i></div>
+    <div class="kpi-foot"><span class="mono-s">{{ 'of ' ~ cards.animals ~ ' animals' if cards.overdue else 'All clear' }}</span></div></a>
+</section>
+
+<div class="dash-row r21">
+  <section class="card dcard"><div class="dhead"><h2>Vaccinations</h2><span class="mono-s">Monthly</span></div><div class="chart-box"><canvas id="cMonthly"></canvas></div></section>
+  <section class="card dcard"><div class="dhead"><h2>Status</h2></div><div class="chart-box"><canvas id="cStatus"></canvas></div></section>
+</div>
+
+<div class="dash-row r3">
+  <section class="card dcard"><div class="dhead"><h2>Coverage by species</h2><span class="mono-s">% · goal 90</span></div>
+    {% if species_cov %}{{ bars(species_cov, 90, '%') }}{% else %}<p class="empty">No data yet.</p>{% endif %}</section>
+  <section class="card dcard"><div class="dhead"><h2>Top vaccines</h2></div>
+    {% if top_vaccines %}{% set mx = top_vaccines[0][1] or 1 %}<div class="hbars">{% for name, v in top_vaccines %}
+      <div class="hrow"><span class="hl">{{ name }}</span><span class="htrack"><i class="f-info" style="width:{{ v / mx * 100 }}%"></i></span><b class="hv">{{ v }}</b></div>{% endfor %}</div>
+    {% else %}<p class="empty">No data yet.</p>{% endif %}</section>
+  <section class="card dcard"><div class="dhead"><h2>Stock flow</h2><span class="mono-s">{{ period_label }}</span></div>
+    {% set tot = [stats.in_units, stats.out_units, stats.adj_lost, 1]|max %}
+    <div class="flow">
+      <div class="fl"><span class="kchip ok">{{ icon('plus') }}</span><span class="mono-l">In</span><b>+{{ stats.in_units }}</b><span class="htrack"><i class="f-ok" style="width:{{ stats.in_units / tot * 100 }}%"></i></span></div>
+      <div class="fl"><span class="kchip">{{ icon('box') }}</span><span class="mono-l">Used</span><b>-{{ stats.out_units }}</b><span class="htrack"><i class="f-info" style="width:{{ stats.out_units / tot * 100 }}%"></i></span></div>
+      <div class="fl"><span class="kchip warn">{{ icon('alertc') }}</span><span class="mono-l">Lost</span><b>{{ stats.adj_lost }}</b><span class="htrack"><i class="f-warn" style="width:{{ stats.adj_lost / tot * 100 }}%"></i></span></div>
+    </div>
+    {% if low_items %}<div class="chips restock"><span class="mono-s">Restock</span>{% for i in low_items %}<a class="badge b-low-stock" href="{{ url_for('inventory_view', item_id=i.item_id) }}">{{ i.item_name }} &middot; {{ i.quantity }}</a>{% endfor %}</div>{% endif %}</section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.PAW_DASH = {labels: {{ charts.labels|tojson }}, vaccinations: {{ charts.vaccinations|tojson }}, status: {{ status_counts|tojson }}};</script>
+<script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,11 @@
+"""PawTrack server entry point. Run with: python app.py"""
+import os
+
+from pawtrack import app
+
+if __name__ == "__main__":
+    host = os.getenv("PAWTRACK_HOST", "0.0.0.0")
+    port = int(os.getenv("PAWTRACK_PORT", "5000"))
+    print(f"[PawTrack] HTTP on http://{host}:{port} (put a tunnel in front for public HTTPS)")
+
+ 

@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, initial, icon, photo_upload %}
+{% block title %}Animals{% endblock %}{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/animals.css') }}">
+{% endblock %}
+{% block content %}
+
+<!-- ============ MOBILE-ONLY ANIMALS VIEW ============ -->
+<div class="ma-dash">
+  <div class="ma-body">
+    <div class="ma-title-row">
+      <h1>Animals</h1>
+      <span class="ma-count-pill">{{ icon('paw') }} {{ total }} Registered</span>
+    </div>
+    <form class="ma-search" method="get">
+      {% if args.ownership %}<input type="hidden" name="ownership" value="{{ args.ownership }}">{% endif %}
+      {{ icon('search') }}<input name="q" value="{{ args.q }}" placeholder="Search animal name or ID...">
+    </form>
+
+    <nav class="ma-tabs" aria-label="Ownership">
+      <a class="{{ 'active' if not args.ownership }}" href="{{ link(ownership='', page=None) }}">All <span>{{ tab_counts[''] }}</span></a>
+      <a class="{{ 'active' if args.ownership=='Owned' }}" href="{{ link(ownership='Owned', page=None) }}">Owned <span>{{ tab_counts['Owned'] }}</span></a>
+      <a class="{{ 'active' if args.ownership=='Stray' }}" href="{{ link(ownership='Stray', page=None) }}">Stray <span>{{ tab_counts['Stray'] }}</span></a>
+    </nav>
+
+    {% for a in rows %}
+    {% if a.animal_id == selected %}
+    {% set photo = animal_photo_url(a) %}
+    {% set qr = animal_qr_url(a) %}
+    <section class="ma-card">
+      <div class="ma-hero {{ '' if photo else 'nophoto' }}">
+        {% if photo %}<img src="{{ photo }}" alt="Photo of {{ a.animal_name }}">{% else %}<span class="ma-initial">{{ initial(a) }}</span>{% endif %}
+        <div class="ma-hero-text"><h2>{{ a.animal_name }}</h2><span>{{ a.age or 'Age unknown' }}</span></div>
+        {% if qr %}<a class="ma-qr" href="{{ url_for('qr_download', animal_id=a.animal_id) }}" title="Download QR">{{ icon('qr') }}<img src="{{ qr }}" alt="QR for {{ a.animal_name }}"></a>{% endif %}
+      </div>
+
+      <div class="ma-tags"><span class="ma-tag own">{{ a.ownership_status }}</span><span class="ma-tag vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
+
+      <dl class="ma-facts">
+        <div><dt>Animal ID</dt><dd>{{ a.animal_id }}</dd></div>
+        <div><dt>Species</dt><dd>{{ a.species }}</dd></div>
+        <div><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd></div>
+        <div><dt>Sex</dt><dd>{{ a.sex }}</dd></div>
+        <div><dt>Colour</dt><dd>{{ a.color or '-' }}</dd></div>
+        <div><dt>Next vaccination due</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
+      </dl>
+
+      <div class="ma-owner">
+        <span class="ma-owner-label">Owner</span>
+        {% if a.ownership_status == 'Owned' %}
+        <a href="{{ url_for('animal_view', animal_id=a.animal_id) }}" class="ma-owner-row"><span class="ma-ownavatar">{{ (a.owner_name or '?')[0]|upper }}</span><span><b>{{ a.owner_name }}</b>{% if a.owner_mobile %}<small>{{ a.owner_mobile }}</small>{% endif %}</span>{{ icon('chevron') }}</a>
+        {% else %}<p class="ma-muted">Stray - no registered owner</p>{% endif %}
+      </div>
+
+      <div class="ma-actions">
+        <a class="ma-btn primary" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('users') }} View Profile</a>
+        <a class="ma-btn ghost" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }} Edit</a>
+      </div>
+      <div class="ma-actions sub">
+        {{ photo_upload(a, url_for('animals_list', **dict(request.args.to_dict(), selected=a.animal_id)), sm=True) }}
+        <a class="ma-btn ghost" href="{{ url_for('vaccinations', animal_id=a.animal_id) }}">{{ icon('syringe') }} Vaccinations</a>
+        <a class="ma-btn ghost" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">{{ icon('file') }} Print ID</a>
+      </div>
+    </section>
+    {% endif %}
+    {% endfor %}
+
+    {% if rows|length > 1 %}
+    <section class
+      <div class="ma-others-head"><h2>Other Registered Animals</h2><a href="{{ url_for('animals_list') }}">View All →</a></div>
+      <div class="ma-others-list">
+        {% for a in rows if a.animal_id != selected %}
+        <a class="ma-other" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">
+          {% set photo = animal_photo_url(a) %}
+          <span class="ma-othumb">{% if photo %}<img src="{{ photo }}" alt="">{% else %}{{ initial(a) }}{% endif %}</span>
+          <span class="ma-oinfo"><b>{{ a.animal_name }}</b><small>{{ a.animal_id }} &bull; {{ a.species }}{% if a.age %} &bull; {{ a.age }}{% endif %}</small></span>
+          <span class="ma-badge b-{{ a.vax_status|slug }}">{{ a.vax_status }}</span>
+          {{ icon('chevron') }}
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+<!-- ============ /MOBILE-ONLY ANIMALS VIEW ============ -->
+
+<div class="desk-only">
+<div class="page-head an-head"><div><h1>Animals</h1><p>Showing {{ rows|length }} of {{ matched }} matching animals ({{ total }} registered).</p></div>
+  <a class="btn an-new" href="{{ url_for('animal_new') }}">{{ icon('plus') }}Register Animal</a></div>
+
+<div class="an-layout">
+
+  {# ---------- Left: search, filters and the animal list ---------- #}
+  <aside class="an-list" aria-label="Animal list">
+    <h2 class="an-list-title">Animal Directory</h2>
+    <form class="an-search-form" method="get">
+      {% if args.ownership %}<input type="hidden" name="ownership" value="{{ args.ownership }}">{% endif %}
+      <div class="an-field">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Search animals..." autocomplete="off" aria-label="Search animals"></div>
+      <div class="an-filters">
+        <select id="species" name="species" aria-label="Species"><option value="">All species</option>{% for s in species %}<option {{ 'selected' if args.species==s }}>{{ s }}</option>{% endfor %}</select>
+        <select id="status" name="status" aria-label="Vaccination status"><option value="">Any status</option>
+          <option value="vaccinated" {{ 'selected' if args.status=='vaccinated' }}>Vaccinated</option>
+          <option value="unvaccinated" {{ 'selected' if args.status=='unvaccinated' }}>Not vaccinated</option>
+          {% for s in ['Upcoming','Due Today','Overdue','No Record'] %}<option {{ 'selected' if args.status==s }}>{{ s }}</option>{% endfor %}</select>
+      </div>
+    </form>
+
+    <nav class="an-chips" aria-label="Ownership">
+      <a class="{{ 'on' if not args.ownership }}" href="{{ link(ownership='', page=None) }}">All <span>{{ tab_counts[''] }}</span></a>
+      <a class="{{ 'on' if args.ownership=='Owned' }}" href="{{ link(ownership='Owned', page=None) }}">Owned <span>{{ tab_counts['Owned'] }}</span></a>
+      <a class="{{ 'on' if args.ownership=='Stray' }}" href="{{ link(ownership='Stray', page=None) }}">Stray <span>{{ tab_counts['Stray'] }}</span></a>
+    </nav>
+
+    {% if rows %}
+    <ul class="an-rows">{% for a in rows %}{% set photo = animal_photo_url(a) %}
+      <li class="an-row {{ 'selected' if a.animal_id == selected }}" data-select="{{ a.animal_id }}" tabindex="0" role="button" aria-label="Show {{ a.animal_name }}">
+        <span class="an-thumb">{% if photo %}<img src="{{ photo }}" alt="" loading="lazy">{% else %}{{ initial(a) }}{% endif %}</span>
+        <span class="an-info"><b>{{ a.animal_name }}</b><small>{{ a.age or 'Age unknown' }} &bull; {{ a.species }}</small></span>
+        <span class="an-row-own {{ 'stray' if a.ownership_status != 'Owned' }}">{{ a.ownership_status }}</span>
+        <span class="an-arrow">{{ icon('chevron') }}</span>
+      </li>{% endfor %}</ul>
+    {% if pages > 1 %}<nav class="an-pager" aria-label="Pages">
+      {% if page > 1 %}<a class="btn sm ghost" href="{{ link(page=page-1) }}">Previous</a>{% endif %}
+      <span class="muted small">Page {{ page }} of {{ pages }}</span>
+      {% if page < pages %}<a class="btn sm ghost" href="{{ link(page=page+1) }}">Next</a>{% endif %}</nav>{% endif %}
+    {% else %}<p class="an-empty">{{ 'No animals match your filters.' if total else 'No animals registered yet.' }}</p>{% endif %}
+  </aside>
+
+  {# ---------- Right: the selected animal ---------- #}
+  <section class="an-detail" aria-label="Selected animal">
+    {% for a in rows %}
+    {% set photo = animal_photo_url(a) %}
+    <div class="an-panel" data-panel="{{ a.animal_id }}" {{ 'hidden' if a.animal_id != selected }}>
+      <nav class="an-tabs" aria-label="Animal sections">
+        <button class="tab on" type="button" data-tab="profile" aria-pressed="true">{{ icon('paw') }}Profile</button>
+        <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.records %}<span class="cnt">{{ a.records|length }}</span>{% endif %}</button>
+        <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('clock') }}History</a>
+        <a class="tab" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}QR Code</a>
+        <button class="an-close" type="button" data-close aria-label="Close details" title="Close details">{{ icon('x') }}</button>
+      </nav>
+
+      <div class="an-card">
+        <div class="an-pane" data-pane="profile">
+        <div class="an-hero">
+          <div class="an-photo">
+            {% if photo %}<img src="{{ photo }}" alt="Photo of {{ a.animal_name }}">{% else %}<span class="an-initial">{{ initial(a) }}</span>{% endif %}
+            {{ photo_upload(a, url_for('animals_list', **dict(request.args.to_dict(), selected=a.animal_id)), sm=True) }}
+          </div>
+          <div class="an-id">
+            <div class="an-name"><h2>{{ a.animal_name }}</h2>
+              <span class="an-own {{ 'stray' if a.ownership_status != 'Owned' }}">{{ a.ownership_status }}</span>
+              <span class="an-vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
+            <p class="an-meta">{{ a.species }}{% if a.age %} &bull; {{ a.age }} old{% endif %} &bull; {{ a.animal_id }}</p>
+          </div>
+        </div>
+
+        <dl class="an-facts">
+          <div><dt>Breed</dt><dd>{{ a.breed or '-' }}</dd></div>
+          <div><dt>Color</dt><dd>{{ a.color or '-' }}</dd></div>
+          <div><dt>Sex</dt><dd>{{ a.sex }}</dd></div>
+          <div><dt>Next Vaccination</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
+        </dl>
+
+        <div class="an-cols">
+          <div class="an-col">
+            <section class="an-box">
+              <h3>Owner Information</h3>
+              {% if a.ownership_status == 'Owned' %}
+              <p class="an-owner-name">{{ a.owner_name or '-' }}</p>
+              <p class="an-owner-line">{{ a.owner_mobile or '-' }}</p>
+              {% if a.owner_email %}<p class="an-owner-line muted">{{ a.owner_email }}</p>{% endif %}
+              {% else %}<p class="an-muted">Stray - no registered owner.</p>{% endif %}
+            </section>
+
+            <section class="an-box">
+              <h3>Pet Notes</h3>
+              <p class="an-notes">{{ a.description or 'No notes recorded for this animal yet.' }}</p>
+            </section>
+          </div>
+
+          <section class="an-box">
+            <h3>Quick Actions</h3>
+            <div class="an-qa">
+              <a class="an-btn primary" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">View QR Code</a>
+              <a class="an-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add Vaccination</a>
+              <a class="an-btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">Edit Animal</a>
+              <a class="an-btn" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">Print ID</a>
+            </div>
+            <div class="an-qfoot">
+              <a class="an-link" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">Open full profile</a>
+              {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('animal_delete', animal_id=a.animal_id) }}" data-confirm="Delete {{ a.animal_name }} and all vaccination records? This cannot be undone.">{{ csrf() }}<button class="an-del" type="submit">Delete</button></form>{% endif %}
+            </div>
+          </section>
+        </div>
+        </div>{# /profile pane #}
+
+        <div class="an-pane" data-pane="vaccination" hidden>
+          <h3 class="an-ptitle">{{ icon('syringe') }}Vaccination record</h3>
+          <div class="an-vsum">
+            <div><span class="k">Current status</span><span class="an-vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></div>
+            <div><span class="k">Latest vaccination</span><b>{{ a.latest.vaccine_name if a.latest else '-' }}</b>{% if a.latest %}<small>{{ a.latest.date_administered|fmt_date }}</small>{% endif %}</div>
+            <div><span class="k">Next due</span><b>{{ a.next_due|fmt_date if a.next_due else '-' }}</b></div>
+          </div>
+          {% if a.records %}
+          <div class="an-vscroll"><table class="an-vtable">
+            <thead><tr><th>Vaccine</th><th>Administered</th><th>Next due</th><th>Status</th><th class="an-vact">Action</th></tr></thead>
+            <tbody>{% for r in a.records %}<tr>
+              <td><b>{{ r.vaccine_name }}</b></td>
+              <td>{{ r.date_administered|fmt_date }}</td>
+              <td>{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
+              <td><span class="an-vax st-{{ r.status|slug }}">{{ r.status }}</span></td>
+              <td class="an-vact"><a href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}">Edit</a></td>
+            </tr>{% endfor %}</tbody>
+          </table></div>
+          {% else %}<p class="an-muted">No vaccinations recorded for this animal yet.</p>{% endif %}
+          <div class="an-vfoot">
+            <a class="an-btn blue" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">{{ icon('syringe') }}Add Vaccination</a>
+            <a class="an-link" href="{{ url_for('animal_view', animal_id=a.animal_id) }}#history">Open full record</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}<div class="an-card"><p class="an-empty">No animal selected.</p></div>{% endfor %}
+  </section>
+</div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/animals.js') }}"></script>
+{% endblock %}

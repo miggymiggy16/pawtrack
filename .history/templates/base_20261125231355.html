@@ -1,0 +1,145 @@
+{% from '_macros.html' import icon, logo, csrf, theme_toggle %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>/* theme: apply saved choice before first paint (default = light, the reference design) */
+(function(){var t='light';try{var s=localStorage.getItem('pawtrack-theme');if(s==='light'||s==='dark')t=s;}catch(e){}document.documentElement.setAttribute('data-theme',t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Dashboard{% endblock %} | Light Animal Clinic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+{% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% set ep = request.endpoint or '' %}{% set role_home_url = role_home() %}
+<!-- Clean mobile header — shown on every page at <=700px -->
+<header class="mobile-head">
+  <a class="mobile-brand" href="{{ role_home_url }}">{{ logo() }}<b>{{ clinic.name }}</b></a>
+  <div class="mobile-head-actions">
+    {% if can('notifications.view') %}{% set nb = unread_count() %}
+    <a href="{{ url_for('notifications') }}" class="mobile-hbtn" aria-label="Notifications">{{ icon('bell') }}{% if nb %}<span class="mobile-hbadge">{{ nb }}</span>{% endif %}</a>
+    {% endif %}
+    {{ theme_toggle() }}
+    <details class="mobile-profile">
+      <summary class="mobile-avatar" aria-label="Profile menu">{{ (user.username or '?')[0]|upper }}</summary>
+      <div class="mobile-pm-pop">
+        <div class="mobile-pm-head">
+          <div>{{ user.full_name or user.username }}</div>
+          <small>{{ role_label }}</small>
+        </div>
+        {% if can('users.manage') %}<a href="{{ url_for('users') }}">{{ icon('users') }}<span>Users</span></a>{% endif %}
+        <a href="{{ url_for('settings') }}">{{ icon('settings' if can('settings.manage') else 'user') }}<span>{{ 'Settings' if can('settings.manage') else 'Profile' }}</span></a>
+        <form method="post" action="{{ url_for('logout') }}">{{ csrf() }}<button type="submit" title="Log out">{{ icon('logout') }}<span>Logout</span></button></form>
+      </div>
+    </details>
+  </div>
+</header>
+<div class="app">
+  <input type="hidden" id="pawCsrf" value="{{ csrf_token() }}">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+    <a class="brand" href="{{ role_home_url }}" title="Light Animal Clinic">{{ logo() }}<span><b>Light Animal Clinic</b></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      {% if can('pos.use') %}<a href="{{ url_for('pos_screen') }}" title="Point of Sale" class="{{ 'active' if ep == 'pos_screen' }}">{{ icon('cart') }}<span>POS</span></a>
+      <a href="{{ url_for('pos_my_sales') }}" title="My Sales" class="{{ 'active' if ep in ('pos_my_sales', 'sale_receipt') }}">{{ icon('receipt') }}<span>My Sales</span></a>
+      {% else %}<a href="{{ role_home_url }}" title="Dashboard" class="{{ 'active' if ep in ('dashboard','admin_dashboard','staff_dashboard') }}">{{ icon('home') }}<span>Dashboard</span></a>{% endif %}
+      {% if can('animals.view') %}<a href="{{ url_for('animals_list') }}" title="Animals" class="{{ 'active' if ep.startswith('animal') }}">{{ icon('paw') }}<span>Animals</span></a>{% endif %}
+      {% if can('vaccinations.view') %}<a href="{{ url_for('vaccinations') }}" title="Vaccinations" class="{{ 'active' if ep.startswith('vaccination') }}">{{ icon('shield') }}<span>Vaccines</span></a>{% endif %}
+      {% if can('inventory.view') %}<a href="{{ url_for('inventory') }}" title="{{ 'Inventory' if can('inventory.manage') else 'Stock' }}" class="{{ 'active' if ep.startswith('inventory') }}">{{ icon('box') }}<span>{{ 'Inventory' if can('inventory.manage') else 'Stock' }}</span></a>{% endif %}
+      {% if can('pos.data') %}<a href="{{ url_for('sales_list') }}" title="Sales (POS)" class="{{ 'active' if ep in ('sales_list', 'sale_receipt') }}">{{ icon('receipt') }}<span>Sales</span></a>{% endif %}
+      {% if can('analytics.view') %}<a href="{{ url_for('analytics') }}" title="Analytics" class="{{ 'active' if ep.startswith('analytics') }}">{{ icon('chart') }}<span>Analytics</span></a>{% endif %}
+      {% if can('reports.view') %}<a href="{{ url_for('reports') }}" title="Reports" class="{{ 'active' if ep.startswith('report') }}">{{ icon('file') }}<span>Reports</span></a>{% endif %}
+      {% if can('activity.view') %}<a href="{{ url_for('activity_log') }}" title="Activity Logs" class="{{ 'active' if ep=='activity_log' }}">{{ icon('checks') }}<span>Activity</span></a>{% endif %}
+    </nav>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <div class="tb-left">
+        <button class="menu=" id="menuBtn" aria-label="Open menu">{{ icon('menu') }}</button>
+        <div class="tb-title">{% block topbar_title %}{{ clinic.name }}{% endblock %}</div>
+        {% block topbar_after %}{% endblock %}
+      </div>
+      <div class="tb-right">
+        {% block topbar_search %}{% endblock %}
+        <div class="tb-clock" aria-label="Current time">{{ icon('clock') }}<span id="tbClock">&nbsp;</span></div>
+        {{ theme_toggle() }}
+        {% if can('notifications.view') %}{% set nb = unread_count() %}
+        <div class="notif-wrap">
+          <button class="bell" type="button" id="notifBtn" aria-expanded="false" aria-controls="notifPanel" aria-label="Notifications{% if nb %}, {{ nb }} unread{% endif %}" title="Notifications">{{ icon('bell') }}{% if nb %}<span class="bell-n">{{ nb }}</span>{% endif %}</button>
+          <div class="notif-panel" id="notifPanel" hidden>
+            {% set feed = notification_feed() %}
+            {% if feed %}
+              {% for x in feed[:8] %}
+              <button type="button" class="notif-item{{ ' notif-unread' if x.unread }}" data-notif-key="{{ x.key }}" data-notif-url="{{ x.url or '' }}" data-notif-unread="{{ 1 if x.unread else 0 }}">
+                <span class="nt-ico">{{ icon(x.icon) }}</span>
+                <div class="notif-body">
+                  <div class="notif-title">{{ x.title }}</div>
+                  <div class="notif-meta">{{ x.meta }}</div>
+                </div>
+                {% if x.unread %}<span class="nt-dot"></span>{% endif %}
+              </button>
+              {% endfor %}
+            {% else %}
+              <div class="notif-empty">No notifications yet.</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        <details class="profile-menu">
+          <summary class="user-btn" aria-expanded="false">
+            <span class="avatar">{{ (user.username or '?')[0]|upper }}</span>
+            <span class="who-name">{{ user.full_name or user.username }}</span>
+          </summary>
+          <div class="pm-pop">
+            <div class="pm-head">
+              <div>{{ user.full_name or user.username }}</div>
+              <small>{{ role_label }}</small>
+            </div>
+            {% if can('users.manage') %}<a href="{{ url_for('users') }}">{{ icon('users') }}<span>Users</span></a>{% endif %}
+            <a href="{{ url_for('settings') }}">{{ icon('settings' if can('settings.manage') else 'user') }}<span>{{ 'Settings' if can('settings.manage') else 'Profile' }}</span></a>
+            <form method="post" action="{{ url_for('logout') }}">{{ csrf() }}<button type="submit" title="Log out">{{ icon('logout') }}<span>Logout</span></button></form>
+          </div>
+        </details>
+      </div>
+    </header>
+    <main class="content">
+      {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+      <div class="flashes" role="status">{% for cat, msg in messages %}<div class="flash {{ cat }}"><span>{{ msg }}</span><button type="button" aria-label="Dismiss">&times;</button></div>{% endfor %}</div>
+      {% endif %}{% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+    <div class="footer">Light Animal Clinic &middot; {{ clinic.name }}{% if clinic.phone %} &middot; {{ clinic.phone }}{% endif %}</div>
+  </div>
+</div>
+<!-- Mobile bottom navigation (swipeable) — shown on every page at <=700px -->
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <div class="mobile-nav-scroll">
+    {% if can('pos.use') %}
+      <a href="{{ url_for('pos_screen') }}" class="{{ 'active' if ep == 'pos_screen' }}">{{ icon('cart') }}<span>POS</span></a>
+      <a href="{{ url_for('pos_my_sales') }}" class="{{ 'active' if ep in ('pos_my_sales','sale_receipt') }}">{{ icon('receipt') }}<span>My Sales</span></a>
+    {% else %}
+      <a href="{{ role_home_url }}" class="{{ 'active' if ep in ('dashboard','admin_dashboard','staff_dashboard') }}">{{ icon('home') }}<span>Dashboard</span></a>
+    {% endif %}
+    {% if can('animals.view') %}<a href="{{ url_for('animals_list') }}" class="{{ 'active' if ep.startswith('animal') }}">{{ icon('paw') }}<span>Animals</span></a>{% endif %}
+    {% if can('vaccinations.view') %}<a href="{{ url_for('vaccinations') }}" class="{{ 'active' if ep.startswith('vaccination') }}">{{ icon('shield') }}<span>Vaccines</span></a>{% endif %}
+    {% if can('inventory.view') %}<a href="{{ url_for('inventory') }}" class="{{ 'active' if ep.startswith('inventory') }}">{{ icon('box') }}<span>{{ 'Inventory' if can('inventory.manage') else 'Stock' }}</span></a>{% endif %}
+    {% if can('pos.data') %}<a href="{{ url_for('sales_list') }}" class="{{ 'active' if ep in ('sales_list','sale_receipt') }}">{{ icon('receipt') }}<span>Sales</span></a>{% endif %}
+    {% if can('analytics.view') %}<a href="{{ url_for('analytics') }}" class="{{ 'active' if ep.startswith('analytics') }}">{{ icon('chart') }}<span>Analytics</span></a>{% endif %}
+    {% if can('reports.view') %}<a href="{{ url_for('reports') }}" class="{{ 'active' if ep.startswith('report') }}">{{ icon('file') }}<span>Reports</span></a>{% endif %}
+    {% if can('activity.view') %}<a href="{{ url_for('activity_log') }}" class="{{ 'active' if ep=='activity_log' }}">{{ icon('checks') }}<span>Activity</span></a>{% endif %}
+    {% if can('users.manage') %}<a href="{{ url_for('users') }}" class="{{ 'active' if ep=='users' }}">{{ icon('users') }}<span>Users</span></a>{% endif %}
+    <a href="{{ url_for('settings') }}" class="{{ 'active' if ep=='settings' }}">{{ icon('settings' if can('settings.manage') else 'user') }}<span>{{ 'Settings' if can('settings.manage') else 'Profile' }}</span></a>
+  </div>
+</nav>
+
+<dialog id="confirmDialog"><h3>Please confirm</h3><p data-msg></p>
+  <div class="actions"><button type="button" class="btn ghost" data-no>Cancel</button><button type="button" class="btn danger" data-yes>Yes, continue</button></div></dialog>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

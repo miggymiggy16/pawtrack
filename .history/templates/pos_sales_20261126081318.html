@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import badge, icon %}
+{% block title %}My sales{% endblock %}
+{% block body_class %}my-sales-page{% endblock %}
+
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pos_sales.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pos_sales.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/_sales_style.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="sl-head">
+  <div>
+    <h1>My Sales</h1>
+    <p>Your own sales only. Reprint any receipt from here.</p>
+  </div>
+  <div class="sl-head-actions"><a class="btn" href="{{ url_for('pos_screen') }}">{{ icon('cart') }}Back to POS</a></div>
+</div>
+
+<form class="card sl-filters" method="get">
+  <div class="sl-field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
+  <div class="sl-field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
+  <div class="sl-field"><label class="sr" for="q">Search sales</label>
+    <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer or item"></div></div>
+  <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('pos_my_sales') }}">Today</a></div>
+</form>
+
+<div class="sl-stats">
+  <div class="sl-stat s-blue"><span class="sl-ico">{{ icon('cart') }}</span>
+    <span class="sl-txt"><span class="sl-l">Sales</span><span class="sl-v">{{ summary.count }}</span><span class="sl-f">transactions</span></span></div>
+  <div class="sl-stat s-purple"><span class="sl-ico">{{ icon('chart') }}</span>
+    <span class="sl-txt"><span class="sl-l">Total Sales</span><span class="sl-v">{{ summary.total|money }}</span></span></div>
+  <div class="sl-stat s-green"><span class="sl-ico">{{ icon('box') }}</span>
+    <span class="sl-txt"><span class="sl-l">Items Sold</span><span class="sl-v">{{ summary.units }}</span></span></div>
+  <div class="sl-stat s-red"><span class="sl-ico">{{ icon('percent') }}</span>
+    <span class="sl-txt"><span class="sl-l">Voided</span><span class="sl-v">{{ summary.voided }}</span><span class="sl-f">sales voided</span></span></div>
+</div>
+
+{% set pay_colors = ['#3B82F6', '#8B5CF6', '#22C55E', '#F59E0B', '#EF4444', '#14B8A6'] %}
+{% set pay_total = namespace(sum=0) %}
+{% for m, v in summary.by_payment %}{% set pay_total.sum = pay_total.sum + v %}{% endfor %}
+
+<div class="sl-mid">
+  <section class="sl-panel">
+    <div class="sl-ph">{{ icon('card') }}<h2>By Payment Method</h2></div>
+    <div class="sl-pay">
+      {% if summary.by_payment %}
+      {% set ring = namespace(acc=0, stops='') %}
+      {% for m, v in summary.by_payment %}
+        {% set ring.stops = ring.stops ~ ('' if loop.first else ', ') ~ pay_colors[loop.index0 % 6] ~ ' ' ~ ring.acc|round(2) ~ '%' %}
+        {% set ring.acc = ring.acc + (v / pay_total.sum * 100) %}
+      {% endfor %}
+      <div class="sl-donut" style="background-color:{{ pay_colors[0] }};background-image:conic-gradient({{ ring.stops }})"><span>{{ summary.total|money }}</span></div>
+      <ul class="sl-legend">
+        {% for m, v in summary.by_payment %}
+        <li><i style="background:{{ pay_colors[loop.index0 % 6] }}"></i><span>{{ m }}</span>
+          <b>{{ v|money }} <small>({{ (v / pay_total.sum * 100)|round|int }}%)</small></b></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="sl-donut empty"><span>No Sales</span></div>
+      <ul class="sl-legend">
+        {% for m in payments %}
+        <li><i style="background:{{ pay_colors[loop.index0 % 6] }}"></i><span>{{ m }}</span><b>{{ 0|money }} <small>(0%)</small></b></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="sl-panel">
+    <div class="sl-ph sl-star">{{ icon('star') }}<h2>Top Items</h2></div>
+    {% if summary.top_items %}
+    <ul class="sl-tops">
+      {% for t in summary.top_items %}
+      <li><span class="sl-top-n">{{ t.name }}<small>{{ t.qty }} sold</small></span><b>{{ t.revenue|money }}</b></li>
+      {% endfor %}
+    
+
+<section class="sl-panel sl-recent">
+  <div class="sl-ph">{{ icon('clock') }}<h2>My Recent Sales</h2></div>
+  {% if rows %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date &amp; Time</th><th>Receipt #</th><th>Customer / Pet</th><th>Items</th><th>Total Amount</th><th>Payment Method</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for s in rows %}
+    <tr>
+      <td class="nowrap">{{ s.datetime|fmt_dt }}</td>
+      <td class="mono-ref">{{ s.sale_id }}</td>
+      <td>{{ s.customer_name or '-' }}{% if s.animal_id %}<div class="mono-s">{{ s.animal_name }} &middot; {{ s.animal_id }}</div>{% endif %}</td>
+      <td>{% for ln in s['items'][:2] %}{{ ln.qty }} &times; {{ ln.name }}{% if not loop.last %}, {% endif %}{% endfor %}{% if s['items']|length > 2 %} <span class="muted">+{{ s['items']|length - 2 }} more</span>{% endif %}</td>
+      <td class="nowrap">{{ s.total|money }}</td>
+      <td>{{ s.payment_method }}</td>
+      <td>{{ badge('Voided' if s.status == 'Voided' else 'Completed') }}</td>
+      <td><a class="btn sm ghost" href="{{ url_for('sale_receipt', sale_id=s.sale_id) }}">{{ icon('receipt') }}Receipt</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% if total > rows|length %}<p class="dnote">Showing the latest {{ rows|length }} of {{ total }}. Narrow the dates to see the rest.</p>{% endif %}
+  {% else %}
+  <div class="sl-empty"><span class="sl-eico">{{ icon('receipt') }}</span>
+    <div><b>No sales in this period</b><small>Sales you ring up at the POS will appear here.</small></div></div>
+  {% endif %}
+</section>
+{% endblock %}

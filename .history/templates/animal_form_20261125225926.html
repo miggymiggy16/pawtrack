@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import csrf, icon %}
+{% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
+<form method="post" enctype="multipart/form-data">
+  {{ csrf() }}
+
+  {# ---------- Basic information ---------- #}
+  <section class="card form-section">
+    <div class="fs-head"><span class="fs-ico">{{ icon('info') }}</span><h2>Basic information</h2><span class="fs-line"></span></div>
+    <div class="fi-grid">
+
+      <div class="fi-col">
+        <div class="field"><label class="lbl" for="animal_id_view">{{ icon('paw') }}Animal ID</label>
+          <input id="animal_id_view" value="{{ form.animal_id if editing else 'Generated automatically when you save' }}" readonly tabindex="-1" aria-readonly="true">
+          {% if editing %}<small>The ID cannot be changed because the QR code uses it.</small>{% else %}<small>A unique ID (PT-0001, PT-0002 ...) is assigned for you.</small>{% endif %}</div>
+        <div class="field"><label class="lbl" for="species">{{ icon('paw') }}Species <span class="req">*</span></label>
+          <select id="species" name="species" required><option value="">Choose...</option>{% for s in species %}<option {{ 'selected' if form.species==s }}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="field"><label class="lbl" for="sex">{{ icon('sex') }}Sex <span class="req">*</span></label>
+          <select id="sex" name="sex" required><option value="">Choose...</option>{% for s in ['Male','Female','Unknown'] %}<option {{ 'selected' if form.sex==s }}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="field"><label class="lbl" for="color">{{ icon('droplet') }}Color</label>
+          <input id="color" name="color" value="{{ form.color }}" placeholder="e.g. Brown"></div>
+      </div>
+
+      <div class="fi-col">
+        <div class="field"><label class="lbl" for="animal_name">{{ icon('paw') }}Animal name <span class="req">*</span></label>
+          <input id="animal_name" name="animal_name" value="{{ form.animal_name }}" placeholder="e.g. Bella" required></div>
+        <div class="field"><label class="lbl" for="breed">{{ icon('bone') }}Breed</label>
+          <input id="breed" name="breed" value="{{ form.breed }}" placeholder="e.g. Golden Retriever" pattern="[A-Za-z .'\-]+" title="Letters only (spaces, dot, hyphen allowed)"></div>
+        <div class="field"><label class="lbl" for="age">{{ icon('calendar') }}Age</label>
+          <input id="age" name="age" value="{{ form.age }}" placeholder="e.g. 2" inputmode="numeric" pattern="\d+(\.\d+)?" title="Numbers only (e.g. 2 or 2.5)"></div>
+        <div class="field"><label class="lbl" for="registration_date">{{ icon('calendar') }}Registration date</label>
+          <input id="registration_date" name="registration_date" type="date" value="{{ form.registration_date }}"></div>
+      </div>
+
+      <aside class="fi-photo">
+        <label class="lbl" for="photo">{{ icon('image') }}Animal photo</label>
+        <label class="dropzone" for="photo">
+          <span class="pic-box" id="imagePreview">
+            {% if form.photo_url %}<img src="{{ form.photo_url }}" alt="Current photo">
+            {% else %}<span class="ph"><span class="dz-circle">{{ icon('image') }}</span></span>
+            {% endif %}
+          </span>
+          {% if not form.photo_url %}
+          <span class="dz-txt">e<br>or</span>
+          <span class="dz-btn">{{ icon('image') }}Choose File</span>
+          {% endif %}
+          <span class="dz-note">PNG, JPG, GIF or WEBP, up to 4 MB</span>
+        </label>
+        <input id="photo" name="photo" type="file" class="visually-hidden" accept="image/png,image/jpeg,image/gif,image/webp">
+        <div class="small imgnote" id="imageNote" role="alert"></div>
+        {% if editing and form.photo_url %}
+        <div class="check"><input type="checkbox" id="remove_photo" name="remove_photo" value="1"><label for="remove_photo">Remove the current photo</label></div>
+        {% endif %}
+      </aside>
+    </div>
+  </section>
+
+  {# ---------- Ownership information ---------- #}
+  <section class="card form-section">
+    <div class="fs-head"><span class="fs-ico">{{ icon('user') }}</span><h2>Ownership information</h2><span class="fs-line"></span></div>
+    <div class="field"><label class="lbl" for="ownership_status">{{ icon('shield') }}Ownership status <span class="req">*</span></label>
+      <select id="ownership_status" name="ownership_status" required>{% for o in ['Owned','Stray'] %}<option {{ 'selected' if form.ownership_status==o }}>{{ o }}</option>{% endfor %}</select>
+      <small>Stray animals have no owner details; those fields are ignored.</small></div>
+    <div class="fi-pair">
+      <div class="field"><label class="lbl" for="owner_name">{{ icon('user') }}Owner name</label>
+        <input id="owner_name" name="owner_name" value="{{ form.owner_name }}" placeholder="e.g. Juan Dela Cruz" pattern="[A-Za-z .'\-]+" title="Letters only"></div>
+      <div class="field"><label class="lbl" for="owner_mobile">{{ icon('phone') }}Owner mobile number</label>
+        <input id="owner_mobile" name="owner_mobile" value="{{ form.owner_mobile }}" placeholder="e.g. 09171234567" inputmode="numeric" pattern="[\d\s\-+]+" title="Numbers only"></div>
+    </div>
+    <div class="field"><label class="lbl" for="owner_email">{{ icon('mail') }}Owner email <span class="req">*</span></label>
+      <input id="owner_email" name="owner_email" type="email" value="{{ form.owner_email }}" placeholder="e.g. juan@email.com" required><small>Required for owned animals &mdash; used to send vaccination reminders.</small></div>
+    <div class="field"><label class="lbl" for="description">{{ icon('file') }}Description</label>
+      <textarea id="description" name="description">{{ form.description }}</textarea></div>
+  </section>
+
+  <div class="form-actions">
+    <button class="btn" type="submit">{{ icon('save') }}{{ 'Save changes' if editing else 'Register animal' }}</button>
+    <a class="btn ghost" href="{{ url_for('animal_cancel_register') if not editing else url_for('animal_view', animal_id=form.animal_id) }}">{{ icon('x') }}Cancel</a>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+  var status = document.getElementById('ownership_status');
+  var email = document.getElementById('owner_email');
+  var name = document.getElementById('owner_name');
+  var mobile = document.getElementById('owner_mobile');
+  function toggle(){
+    if(!status || !email) return;
+    var owned = status.value === 'Owned';
+    email.required = owned;
+    if(name) name.required = owned;
+  }
+  if(status) status.addEventListener('change', toggle);
+  toggle();
+})();
+</script>
+{% endblock %}

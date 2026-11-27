@@ -1620,3 +1620,114 @@ html.fm-open{overflow:hidden}
 }
 @media(max-width:400px){.fm-body{padding:14px 12px calc(18px + env(safe-area-inset-bottom))}
   .fm-head{padding:10px 12px}.fm-head h2{font-size:.95rem}}
+
+/* ======================================================================
+   FLOATING APP SHELL (2026)
+   The whole system sits inside a frosted, rounded "window" that floats over
+   a soft sky photo, with the navy rail floating inside it. Desktop only:
+   phones keep the flat layouts above (reset at the bottom of this block).
+   ====================================================================== */
+:root{
+  --shell-gap:18px;
+  --shell-radius:26px;
+  --shell-bg:rgba(10,16,27,.66);
+  --shell-line:rgba(255,255,255,.10);
+  --shell-shadow:0 40px 90px -36px rgba(0,0,0,.9);
+  --rail-bg:linear-gradient(180deg,#142A47 0%,#07121F 100%);
+  --topbar-bg:rgba(12,17,27,.72);
+  --panel:rgba(24,29,38,.78);
+}
+:root[data-theme="light"]{
+  --shell-bg:rgba(246,251,255,.55);
+  --shell-line:rgba(255,255,255,.70);
+  --shell-shadow:0 42px 90px -34px rgba(15,52,102,.45);
+  --rail-bg:linear-gradient(180deg,#143763 0%,#0A2140 100%);
+  --topbar-bg:rgba(255,255,255,.68);
+  --panel:rgba(255,255,255,.86);
+  --panel-line:rgba(255,255,255,.85);
+}
+
+/* soft sky photo behind the window */
+body{
+  background-color:#D8E9F9;
+  background-image:linear-gradient(180deg,rgba(240,248,255,.15),rgba(203,230,252,.32)),url("../img/app-bg.jpg");
+  background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;
+}
+:root[data-theme="dark"] body{
+  background-color:#050B16;
+  background-image:linear-gradient(180deg,rgba(4,10,22,.86),rgba(5,18,40,.9)),url("../img/app-bg.jpg");
+}
+
+/* the window itself */
+.app{
+  position:relative;z-index:1;
+  margin:var(--shell-gap);
+  height:calc(100vh - var(--shell-gap) * 2);
+  min-height:0;
+  grid-template-rows:minmax(0,1fr);
+  border-radius:var(--shell-radius);
+  background:var(--shell-bg);
+  border:1px solid var(--shell-line);
+  box-shadow:var(--shell-shadow);
+  overflow:hidden;
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+}
+.main{margin-left:calc(var(--rail-w) + 28px);height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
+.main::-webkit-scrollbar{width:10px}
+.main::-webkit-scrollbar-thumb{background:rgba(15,36,80,.18);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+:root[data-theme="dark"] .main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);background-clip:content-box}
+.pos-page .app{height:calc(100vh - var(--shell-gap) * 2);min-height:0}
+.pos-page .main{height:100%;overflow:hidden}
+
+/* the rail floats inside the window */
+.sidebar{top:10px;left:10px;height:calc(100% - 20px);border:1px solid rgba(255,255,255,.10);border-radius:20px;
+  background:var(--rail-bg);box-shadow:0 24px 44px -26px rgba(4,15,34,.9);overflow:hidden}
+:root[data-theme="light"] .sidebar{background:var(--rail-bg);border-color:rgba(255,255,255,.12)}
+
+/* top bar: frosted strip that stops at the window edge */
+.topbar{top:0;background:var(--topbar-bg);border-bottom:1px solid var(--shell-line);border-radius:0 var(--shell-radius) 0 0;
+  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
+:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:var(--shell-line)}
+
+/* glass panels */
+:root[data-theme="light"] .card,:root[data-theme="light"] .stat,:root[data-theme="light"] .band,
+:root[data-theme="light"] .an-list,:root[data-theme="light"] .an-box,:root[data-theme="light"] .an-pane[data-pane="vaccination"],
+:root[data-theme="light"] .an-tabs .tab,:root[data-theme="light"] .report-group,:root[data-theme="light"] .nt-card,
+:root[data-theme="light"] .dstat,:root[data-theme="light"] .vm-card,:root[data-theme="light"] .kpi{
+  background:var(--panel);border-color:var(--panel-line);box-shadow:0 20px 46px -34px rgba(15,52,102,.55)
+}
+:root[data-theme="dark"] .card,:root[data-theme="dark"] .stat,:root[data-theme="dark"] .an-list,
+:root[data-theme="dark"] .an-box,:root[data-theme="dark"] .report-group,:root[data-theme="dark"] .nt-card{
+  box-shadow:0 24px 50px -40px #000
+}
+
+/* the animal hero follows the light glass style in the light theme */
+:root[data-theme="light"] .an-hero{background:linear-gradient(120deg,rgba(255,255,255,.96),rgba(232,242,255,.86));
+  border:1px solid rgba(255,255,255,.9);color:var(--white);box-shadow:0 24px 52px -36px rgba(15,52,102,.6)}
+:root[data-theme="light"] .an-hero::after{background:radial-gradient(circle at 88% 10%,rgba(22,48,92,.06),transparent 58%)}
+:root[data-theme="light"] .an-name h2{color:var(--white)}
+:root[data-theme="light"] .an-meta{color:var(--muted)}
+:root[data-theme="light"] .an-photo{background:#EAF1FB;border-color:#fff}
+:root[data-theme="light"] .an-hero .an-vax{background:rgba(15,36,80,.06);border-color:rgba(15,36,80,.16);color:#5A6B84}
+:root[data-theme="light"] .an-hero .an-vax.st-vaccinated,:root[data-theme="light"] .an-hero .an-vax.st-up-to-date{background:#E3F6EC;border-color:#BFE6D2;color:#14693F}
+:root[data-theme="light"] .an-hero .an-vax.st-overdue{background:#FDEBEB;border-color:#F3C6C6;color:#B03030}
+:root[data-theme="light"] .an-hero .an-vax.st-upcoming,:root[data-theme="light"] .an-hero .an-vax.st-due-today{background:#FDF1E3;border-color:#F2D6B4;color:#8F5406}
+
+/* phones: keep the flat, full-width layouts */
+@media(max-width:900px){
+  :root{--shell-gap:0px}
+  body,
+  :root[data-theme="light"] body{background:#F2F6FC;background-image:none}
+  :root[data-theme="dark"] body{background:#0A0A0A;background-image:none}
+  .app,.pos-page .app{margin:0;height:auto;min-height:100vh;grid-template-rows:auto;border:0;border-radius:0;
+    background:var(--surface);box-shadow:none;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .main,.pos-page .main{margin-left:0;height:auto;overflow:visible}
+  .sidebar{top:0;left:0;height:100vh;border-radius:0 18px 18px 0;border-left:0}
+  .topbar{top:0;border-radius:0}
+}
+@media print{
+  body,:root[data-theme="dark"] body,:root[data-theme="light"] body{background:#fff!important;background-image:none!important}
+  .app,.pos-page .app{height:auto;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:#fff;backdrop-filter:none;overflow:visible}
+  .main{height:auto;overflow:visible;margin-left:0}
+}

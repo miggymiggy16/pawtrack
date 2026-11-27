@@ -16,7 +16,6 @@ from ..services.analytics_reports import (ANALYTICS_OPEN_IN_REPORTS,
 def analytics():
     return render_template("analytics.html", d=analytics_data())
 
-
 @app.route("/analytics/report/<key>")
 @permission_required("analytics.view")
 def analytics_report(key):
