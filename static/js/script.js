@@ -148,9 +148,12 @@ function pawRedrawCharts() {
 
 /* ---------- Searchable animal picker (Add / Edit vaccination) ----------
    Enhances <select data-animal-search>. The original <select> stays in the form as the
-   single source of truth, so the saved vaccination always uses the chosen Animal ID. */
-(function () {
-  document.querySelectorAll('select[data-animal-search]').forEach(sel => {
+   single source of truth, so the saved vaccination always uses the chosen Animal ID.
+   The popup form loader calls pawInitAnimalPicker() again on the markup it injects. */
+function pawInitAnimalPicker(root) {
+  (root || document).querySelectorAll('select[data-animal-search]').forEach(sel => {
+    if (sel.dataset.pawCombo) return;                 // already enhanced
+    sel.dataset.pawCombo = '1';
     const animals = Array.from(sel.options).filter(o => o.value).map(o => ({
       id: o.value, name: o.dataset.name || '', species: o.dataset.species || '',
       breed: o.dataset.breed || '', owner: o.dataset.owner || ''
@@ -221,7 +224,7 @@ function pawRedrawCharts() {
     input.addEventListener('keydown', e => {
       if (e.key === 'ArrowDown') { e.preventDefault(); list.hidden ? open(input.value) : highlight(active + 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(active - 1); }
-      else if (e.key === 'Escape') close();
+      else if (e.key === 'Escape') { if (!list.hidden) e.preventDefault(); close(); }   // list first, popup second
       else if (e.key === 'Enter') {
         if (!list.hidden && shown[active]) { e.preventDefault(); choose(shown[active]); }
         else if (!sel.value) {
@@ -238,13 +241,16 @@ function pawRedrawCharts() {
     input.addEventListener('blur', () => setTimeout(close, 120));
     if (sel.form) sel.form.addEventListener('submit', e => {
       if (required && !sel.value) {
-        e.preventDefault(); err.textContent = 'Please pick an animal from the list before saving.'; err.hidden = false; input.focus(); open(input.value);
+        e.preventDefault(); e.stopImmediatePropagation();   // keep the popup from submitting
+        err.textContent = 'Please pick an animal from the list before saving.'; err.hidden = false; input.focus(); open(input.value);
       }
     });
     const start = animals.find(a => a.id === sel.value);
     if (start) choose(start);
   });
-})();
+}
+window.pawInitAnimalPicker = pawInitAnimalPicker;
+pawInitAnimalPicker();
 
 /* ---------- Inventory form helpers: peso formatting + picture preview ---------- */
 (function () {

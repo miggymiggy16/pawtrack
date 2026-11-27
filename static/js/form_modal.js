@@ -80,7 +80,8 @@
     clearScripts();
     body.innerHTML = content.innerHTML;
     runScripts(doc);
-    bind(pageUrl);
+    if (window.pawInitAnimalPicker) window.pawInitAnimalPicker(body);   // searchable animal picker in the popup
+    bind(pageUrl);                                                    // after the picker, so its checks run first
     body.scrollTop = 0;
   }
 
