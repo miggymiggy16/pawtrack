@@ -1141,3 +1141,98 @@
     color:#14693F;
   }
 }
+/* the search field is a bare input inside its own pill, in both themes */
+:root[data-theme] .ma-search input,
+:root[data-theme] .ma-search input:focus {
+  background:transparent;
+  border:0;
+  outline:0;
+  box-shadow:none;
+}
+/* ===== Mobile view in the dark theme: follows the app, stays readable ===== */
+:root[data-theme="dark"] .ma-dash {
+  color:#E8EEF7;
+  background:transparent;
+}
+:root[data-theme="dark"] .ma-title-row h1 {
+  border-bottom-color:rgba(255,255,255,.32);
+}
+:root[data-theme="dark"] .ma-count-pill {
+  background:rgba(255,255,255,.10);
+  color:#DCE7F8;
+}
+/* one glass surface for the search pill, the idle tabs and the secondary buttons */
+:root[data-theme="dark"] .ma-search,
+:root[data-theme="dark"] .ma-tabs a,
+:root[data-theme="dark"] .ma-btn {
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:none;
+}
+:root[data-theme="dark"] .ma-tabs a,
+:root[data-theme="dark"] .ma-btn {
+  color:#fff;
+}
+:root[data-theme="dark"] .ma-search svg {
+  stroke:#C3D2E8;
+}
+:root[data-theme="dark"] .ma-search input {
+  color:#fff;
+}
+:root[data-theme="dark"] .ma-search input::placeholder {
+  color:rgba(255,255,255,.55);
+}
+:root[data-theme="dark"] .ma-tabs a span {
+  color:rgba(255,255,255,.60);
+}
+:root[data-theme="dark"] .ma-card,
+:root[data-theme="dark"] .ma-other {
+  background:rgba(24,29,38,.86);
+  box-shadow:0 12px 30px -22px #000;
+  color:#F2F6FC;
+}
+:root[data-theme="dark"] .ma-facts>div {
+  border-bottom-color:rgba(255,255,255,.09);
+}
+:root[data-theme="dark"] .ma-facts dt,
+:root[data-theme="dark"] .ma-owner-label,
+:root[data-theme="dark"] .ma-muted,
+:root[data-theme="dark"] .ma-oinfo small,
+:root[data-theme="dark"] .ma-owner-row small {
+  color:rgba(255,255,255,.55);
+}
+:root[data-theme="dark"] .ma-facts dd,
+:root[data-theme="dark"] .ma-owner-row {
+  color:#F2F6FC;
+}
+:root[data-theme="dark"] .ma-ownavatar {
+  background:rgba(255,255,255,.14);
+  color:#fff;
+}
+:root[data-theme="dark"] .ma-owner-row svg,
+:root[data-theme="dark"] .ma-other>svg {
+  stroke:#C3D2E8;
+}
+:root[data-theme="dark"] .ma-othumb {
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+:root[data-theme="dark"] .ma-others-head a {
+  color:#BFD0EE;
+}
+:root[data-theme="dark"] .ma-tag {
+  border-color:rgba(243,200,106,.60);
+  color:#F3C86A;
+}
+:root[data-theme="dark"] .ma-tag.vax,
+:root[data-theme="dark"] .ma-badge {
+  border-color:rgba(255,138,138,.60);
+  color:#FF8A8A;
+}
+:root[data-theme="dark"] .ma-tag.vax.st-vaccinated,
+:root[data-theme="dark"] .ma-tag.vax.st-up-to-date,
+:root[data-theme="dark"] .ma-badge.b-vaccinated,
+:root[data-theme="dark"] .ma-badge.b-up-to-date {
+  border-color:rgba(111,224,168,.60);
+  color:#6FE0A8;
+}

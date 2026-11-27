@@ -401,7 +401,7 @@
     flex-direction:column;
     gap:6px;
   }
-  .mv-item-acts a,.mv-item-acts button {
+  .mv-item-acts button {
     color:#8794A8;
     background:none;
     border:0;
@@ -411,11 +411,8 @@
     width:17px;
     height:17px;
     fill:none;
-    stroke:currentColor;
-    stroke-width:2;
-  }
-  .mv-item-acts button svg {
     stroke:#E23B4E;
+    stroke-width:2;
   }
 }
 

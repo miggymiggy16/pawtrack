@@ -1843,12 +1843,6 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 /* phones: same neutral treatment for the mobile action bars */
 @media(max-width:700px){
   :root[data-theme] body .ma-btn.primary{background:var(--btn-bg);border-color:var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)}
-  /* the mobile Animals card stays light in both themes, so its search field must too */
-  :root[data-theme] body .ma-search{background:#fff;border:0;box-shadow:0 3px 12px rgba(11,36,64,.06)}
-  :root[data-theme] body .ma-search svg{stroke:#8794A8}
-  :root[data-theme] body .ma-search input{background:transparent;border:0;color:#12233B;box-shadow:none;padding:0}
-  :root[data-theme] body .ma-search input::placeholder{color:#9AA6B2}
-  :root[data-theme] body .ma-search input:focus{outline:0;border-color:transparent;box-shadow:none}
 }
 /* dark rail: active item is a neutral highlight, not a colour fill */
 :root[data-theme="dark"] .nav a.active{background:rgba(255,255,255,.12);color:#fff}

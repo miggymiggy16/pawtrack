@@ -59,7 +59,6 @@
           <span>{{ badge(r.status) }}</span>
         </div>
         <div class="mv-item-acts">
-          <a href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" title="Edit">{{ icon('edit') }}</a>
           {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button type="submit" title="Delete">{{ icon('trash') }}</button></form>{% endif %}
         </div>
       </div>
@@ -124,7 +123,6 @@
         <td class="nowrap">{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
         <td>{{ badge(r.status) }}</td>
         <td class="right nowrap"><div class="vm-actions">
-          <a class="vm-act" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" title="Edit record" aria-label="Edit record {{ r.vaccination_id }}">{{ icon('edit') }}</a>
           {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button class="vm-act danger" type="submit" title="Delete record" aria-label="Delete record {{ r.vaccination_id }}">{{ icon('trash') }}</button></form>{% endif %}
         </div></td>
       </tr>
