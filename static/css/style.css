@@ -1509,6 +1509,31 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 :root[data-theme="light"] .dz-circle{background:#EDEAE3;color:#16305C}
 :root[data-theme="light"] .dropzone.drag{border-color:#16305C;background:#EDECE8}
 
+/* --- register / edit animal: fields sized to what they hold --- */
+.af-page .fi-grid input:not([type=file]),
+.af-page .fi-grid select,
+.af-page .fi-pair input,
+.af-page .form-section > .field > input,
+.af-page .form-section > .field > select{width:auto;max-width:100%}
+.af-page #animal_id_view{width:100%}
+.af-page #species,.af-page #sex,.af-page #ownership_status{width:180px}
+.af-page #color{width:150px}
+.af-page #animal_name{width:200px}
+.af-page #breed{width:210px}
+.af-page #age{width:95px}
+.af-page #registration_date{width:165px}
+.af-page #owner_name{width:215px}
+.af-page #owner_mobile{width:170px}
+.af-page #owner_email{width:250px}
+.af-page #description{width:100%}
+@media(max-width:720px){
+  .af-page .fi-grid input:not([type=file]),
+  .af-page .fi-grid select,
+  .af-page .fi-pair input,
+  .af-page .form-section > .field > input,
+  .af-page .form-section > .field > select{width:100%}
+}
+
 /* ===== Mobile bottom navigation (swipeable) — every page, <=700px only ===== */
 .mobile-nav,.mobile-head{display:none}
 @media(max-width:700px){
