@@ -66,7 +66,7 @@
     {% endfor %}
 
     {% if rows|length > 1 %}
-    <section class="ma-others">
+    <section class
       <div class="ma-others-head"><h2>Other Registered Animals</h2><a href="{{ url_for('animals_list') }}">View All →</a></div>
       <div class="ma-others-list">
         {% for a in rows if a.animal_id != selected %}
@@ -87,7 +87,7 @@
 
 <div class="desk-only">
 <div class="page-head an-head"><div><h1>Animals</h1><p>Showing {{ rows|length }} of {{ matched }} matching animals ({{ total }} registered).</p></div>
-  <a class="btn an-new" href="{{ url_for('animal_new') }}" data-animal-modal>{{ icon('plus') }}Register Animal</a></div>
+  <a class="btn an-new" href="{{ url_for('animal_new') }}" data-modal-form data-modal-title="Register animal">{{ icon('plus') }}Register Animal</a></div>
 
 <div class="an-layout">
 
@@ -183,7 +183,7 @@
             <h3>Quick Actions</h3>
             <div class="an-qa">
               <a class="an-btn primary" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">View QR Code</a>
-              <a class="an-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">Add Vaccination</a>
+              <a class="an-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Add vaccination">Add Vaccination</a>
               <a class="an-btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">Edit Animal</a>
               <a class="an-btn" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">Print ID</a>
             </div>
@@ -215,7 +215,7 @@
           </table></div>
           {% else %}<p class="an-muted">No vaccinations recorded for this animal yet.</p>{% endif %}
           <div class="an-vfoot">
-            <a class="an-btn blue" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}">{{ icon('syringe') }}Add Vaccination</a>
+            <a class="an-btn blue" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Add vaccination">{{ icon('syringe') }}Add Vaccination</a>
             <a class="an-link" href="{{ url_for('animal_view', animal_id=a.animal_id) }}#history">Open full record</a>
           </div>
         </div>

@@ -20,6 +20,6 @@
     <div class="field full"><label for="notes">Notes</label><textarea id="notes" name="notes">{{ form.notes }}</textarea></div>
   </div>
   <div class="check"><input type="checkbox" id="email_owner" name="email_owner" value="1"><label for="email_owner">Email the owner about this update (records the result in Notifications)</label></div>
-  <div class="actions"><button class="btn" type="submit">{{ 'Save changes' if editing else 'Save vaccination' }}</button><a class="btn ghost" href="{{ url_for('vaccinations') }}">Cancel</a></div>
+  <div class="actions"><button class="btn" type="submit">{{ 'Save changes' if editing else 'Save vaccination' }}</button><a class="btn ghost" href="{{ url_for('vaccinations') }}" data-fm-close>Cancel</a></div>
 </form>
 {% endblock %}

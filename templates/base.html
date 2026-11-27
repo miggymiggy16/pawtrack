@@ -138,12 +138,15 @@
 
 <dialog id="confirmDialog"><h3>Please confirm</h3><p data-msg></p>
   <div class="actions"><button type="button" class="btn ghost" data-no>Cancel</button><button type="button" class="btn danger" data-yes>Yes, continue</button></div></dialog>
-<dialog id="animalModal" class="paw-modal">
-  <div class="pm-head"><button type="button" class="pm-close" data-animal-modal-close aria-label="Close">&times;</button></div>
-  <iframe id="animalModalFrame" title="Register animal"></iframe>
+
+<!-- Centered popup used for forms (register animal, add vaccination) -->
+<dialog class="fm-dialog" id="formModal" aria-label="Form">
+  <div class="fm-head"><h2 data-fm-title>Form</h2><button type="button" class="fm-x" data-fm-close aria-label="Close">&times;</button></div>
+  <div class="fm-body" data-fm-body></div>
 </dialog>
 <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='js/form_modal.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

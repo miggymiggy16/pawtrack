@@ -1541,34 +1541,6 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
   .af-page #age{width:100%}
 }
 
-/* --- register-animal popup --- */
-#animalModal{position:fixed;inset:0;margin:auto;padding:0;border:0;border-radius:14px;
-  width:min(980px,94vw);max-width:none;
-  height:min(88vh,860px);max-height:none;overflow:hidden;background:var(--panel);color:var(--white)}
-#animalModal::backdrop{background:rgba(6,12,26,.72)}
-#animalModal .pm-head{display:flex;align-items:center;justify-content:flex-end;
-  height:38px;padding:0 10px;border-bottom:1px solid var(--line)}
-#animalModal .pm-close{width:30px;height:30px;display:grid;place-items:center;
-  border:1px solid var(--line);border-radius:50%;background:transparent;color:inherit;
-  font-size:1.35rem;line-height:1;cursor:pointer;padding:0}
-#animalModal .pm-close:hover{background:rgba(128,128,128,.18)}
-#animalModal iframe{display:block;width:100%;height:calc(100% - 38px);border:0;background:transparent}
-:root[data-theme="light"] #animalModal{background:#fff;color:var(--navy)}
-
-/* Form shown inside the popup: drop the app chrome so it fits. */
-.af-page.af-modal .sidebar,
-.af-page.af-modal .topbar,
-.af-page.af-modal .mobile-head,
-.af-page.af-modal .mobile-nav{display:none}
-.af-page.af-modal .app{display:block}
-.af-page.af-modal .content{display:flex;flex-direction:column;align-items:center;
-  padding:18px 20px 30px;max-width:none;overflow-x:hidden}
-.af-page.af-modal .page-head,
-.af-page.af-modal .form-section{width:100%}
-.af-page.af-modal form{width:100%;max-width:900px;display:flex;flex-direction:column;align-items:center}
-.af-page.af-modal .form-section,
-.af-page.af-modal .form-actions{width:100%}
-
 /* ===== Mobile bottom navigation (swipeable) — every page, <=700px only ===== */
 .mobile-nav,.mobile-head{display:none}
 @media(max-width:700px){
@@ -1609,3 +1581,42 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
   .content{padding-bottom:96px!important}
   .footer{display:none!important}
 }
+
+/* ===== Centered form popup (Register Animal, Add Vaccination) ===== */
+html.fm-open{overflow:hidden}
+.fm-dialog{width:min(1000px,calc(100vw - 32px));max-width:min(1000px,calc(100vw - 32px));max-height:calc(100vh - 48px);margin:auto;padding:0;
+  border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);
+  box-shadow:0 30px 80px rgba(6,14,30,.45);overflow:hidden}
+.fm-dialog:not([open]){display:none}
+.fm-dialog[open]{display:flex;flex-direction:column}
+.fm-dialog::backdrop{background:rgba(8,20,40,.55)}
+.fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
+.fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white)}
+.fm-x{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:1.35rem;line-height:1}
+.fm-x:hover{background:rgba(127,127,127,.14);color:var(--white)}
+.fm-body{padding:20px 22px 24px;overflow:auto;flex:1 1 auto}
+.fm-body .page-head{display:none}
+.fm-body .form-section{margin-bottom:18px}
+.fm-body .form-section:last-of-type{margin-bottom:22px}
+.fm-body .form-actions,.fm-body .actions{margin:0;padding-top:2px}
+.fm-body .card{margin-bottom:16px}
+.fm-loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:60px 0;color:var(--muted);font-weight:600}
+.fm-spin{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);border-top-color:#2E5CE6;animation:fmspin .8s linear infinite}
+@keyframes fmspin{to{transform:rotate(360deg)}}
+@media(max-width:700px){
+  .fm-dialog{width:calc(100vw - 16px);max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);
+    max-height:calc(100dvh - 16px);border-radius:14px}
+  .fm-head{padding:12px 16px}
+  .fm-head h2{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fm-x{width:40px;height:40px;font-size:1.5rem}
+  .fm-body{padding:16px 14px calc(20px + env(safe-area-inset-bottom))}
+  .fm-body .form-section,.fm-body .card{padding:14px}
+  .fm-body .fs-head{gap:10px;margin-bottom:14px;padding-bottom:12px}
+  .fm-body .form-actions,.fm-body .actions{flex-direction:column;gap:10px;margin:0 0 8px}
+  .fm-body .form-actions .btn,.fm-body .actions .btn{width:100%;justify-content:center}
+  .fm-body .fi-grid,.fm-body .form-grid{grid-template-columns:1fr}
+  .fm-body .fi-photo{grid-column:auto}
+}
+@media(max-width:400px){.fm-body{padding:14px 12px calc(18px + env(safe-area-inset-bottom))}
+  .fm-head{padding:10px 12px}.fm-head h2{font-size:.95rem}}

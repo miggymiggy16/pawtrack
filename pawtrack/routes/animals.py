@@ -157,7 +157,7 @@ def animal_new():
             made = make_qr(form)
             flash(f"{form['animal_name']} was registered with Animal ID {form['animal_id']}." +
                   ("" if made else " QR image could not be created: install the 'qrcode' package."), "success")
-            return redirect(url_for("animal_view", animal_id=form["animal_id"]))
+            return redirect(safe_next(request.form.get("next"), url_for("animal_view", animal_id=form["animal_id"])))
     return render_template("animal_form.html", form=form, editing=False, species=SPECIES_CHOICES,
                            today=date.today().isoformat())
 

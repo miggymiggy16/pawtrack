@@ -9,7 +9,8 @@ from flask import abort, flash, redirect, render_template, request, url_for
 from ..config import VACCINE_SUGGESTIONS
 from ..extensions import app
 from ..helpers import now_str, parse_date, valid_email, year_has_at_most_4_digits
-from ..security import (admin_required, current_user, permission_required)
+from ..security import (admin_required, current_user, permission_required,
+                        safe_next)
 from ..services.email import build_message, notify
 from ..services.inventory import adjust_vaccine_stock, enriched_inventory
 from ..services.vaccinations import all_vax_rows
@@ -150,7 +151,8 @@ def vaccination_new():
                 if existing:                             # same form sent twice: do NOT record or deduct again
                     flash(f"This vaccination was already recorded as {existing['vaccination_id']}. "
                           "Nothing was deducted a second time.", "warning")
-                    return redirect(url_for("animal_view", animal_id=existing["animal_id"]))
+                    return redirect(safe_next(request.form.get("next"),
+                                              url_for("animal_view", animal_id=existing["animal_id"])))
                 new_id = next_id("VAC", load("vaccinations"), "vaccination_id")
                 new_stock = vaccination_stock_of(form)
                 err = adjust_vaccine_stock(("", 0), new_stock, {**form, "vaccination_id": new_id}, user)
@@ -169,7 +171,8 @@ def vaccination_new():
                         msg += f" {new_stock[1]} unit(s) deducted from vaccine stock."
                     flash(msg, "success")
                     maybe_email_update(form)
-                    return redirect(url_for("animal_view", animal_id=form["animal_id"]))
+                    return redirect(safe_next(request.form.get("next"),
+                                              url_for("animal_view", animal_id=form["animal_id"])))
     else:
         form["form_token"] = secrets.token_hex(8)
     return render_template("vaccination_form.html", form=form, animals=animals, editing=False,

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import csrf, icon %}
-{% block body_class %}af-page{% if request.args.get('modal') %} af-modal{% endif %}{% endblock %}
+{% block body_class %}af-page{% endblock %}
 {% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
@@ -78,7 +78,7 @@
 
   <div class="form-actions">
     <button class="btn" type="submit">{{ icon('save') }}{{ 'Save changes' if editing else 'Register animal' }}</button>
-    <a class="btn ghost" href="{{ url_for('animal_cancel_register') if not editing else url_for('animal_view', animal_id=form.animal_id) }}">{{ icon('x') }}Cancel</a>
+    <a class="btn ghost" href="{{ url_for('animal_cancel_register') if not editing else url_for('animal_view', animal_id=form.animal_id) }}" data-fm-close>{{ icon('x') }}Cancel</a>
   </div>
 </form>
 {% endblock %}

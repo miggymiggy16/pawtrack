@@ -12,7 +12,7 @@
   <div class="mv-body">
     <div class="mv-title-row">
       <h1>Vaccination<br>Monitoring</h1>
-      <a class="mv-add" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }}<span>Add</span></a>
+      <a class="mv-add" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}" data-modal-form data-modal-title="Add vaccination">{{ icon('plus') }}<span>Add</span></a>
     </div>
 
     <section class="mv-kpis" aria-label="Summary">
@@ -74,7 +74,7 @@
 <div class="desk-only">
 <div class="page-head vm-head">
   <div><h1>Vaccination Monitoring</h1><p>Monitor vaccination records and schedules.</p></div>
-  <a class="btn" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}">{{ icon('plus') }}Add vaccination</a>
+  <a class="btn" href="{{ url_for('vaccination_new', animal_id=args.animal_id or None) }}" data-modal-form data-modal-title="Add vaccination">{{ icon('plus') }}Add vaccination</a>
 </div>
 
 <section class="vm-stats" aria-label="Vaccination summary">
