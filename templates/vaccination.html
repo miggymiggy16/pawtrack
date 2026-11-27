@@ -5,7 +5,7 @@
 {% block content %}
 {# keep the other filters when a status chip is clicked #}
 {% set keep = {} %}{% for k, v in args.items() if v and k != 'status' %}{% set _ = keep.update({k: v}) %}{% endfor %}
-{% set adv = args.vaccine or args.due_from or args.due_to %}
+{% set adv = args.due_from or args.due_to %}
 
 <!-- ============ MOBILE-ONLY VACCINATION VIEW ============ -->
 <div class="mv-dash">
@@ -88,10 +88,9 @@
   {% if args.status %}<input type="hidden" name="status" value="{{ args.status }}">{% endif %}
   <div class="vm-search-row">
     <div class="vm-search">{{ icon('search') }}<input type="search" name="q" value="{{ args.q }}" placeholder="Search animal or vaccine..." aria-label="Search by animal ID, animal name or vaccine name" autocomplete="off"></div>
-    <button class="vm-filter-btn" type="button" id="vmFilterBtn" aria-expanded="{{ 'true' if adv else 'false' }}" aria-controls="vmFilters">{{ icon('filter') }}<span>Filters</span></button>
+    <button class="vm-filter-btn" type="button" id="vmFilterBtn" aria-expanded="{{ 'true' if adv else 'false' }}" aria-controls="vmFilters" aria-label="Due date filters" title="Due date filters">{{ icon('calendar') }}</button>
   </div>
   <div class="vm-filters {{ 'open' if adv }}" id="vmFilters">
-    <div class="field"><label for="vmv">Vaccine</label><select id="vmv" name="vaccine"><option value="">All vaccines</option>{% for v in vaccine_options %}<option value="{{ v }}" {{ 'selected' if args.vaccine|lower == v|lower }}>{{ v }}</option>{% endfor %}</select></div>
     <div class="field"><label for="vmf">Due from</label><input type="date" id="vmf" name="due_from" data-allow-future value="{{ args.due_from }}"></div>
     <div class="field"><label for="vmt">Due to</label><input type="date" id="vmt" name="due_to" data-allow-future value="{{ args.due_to }}"></div>
     <div class="vm-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('vaccinations') }}">Clear</a></div>

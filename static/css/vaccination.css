@@ -419,3 +419,18 @@
     stroke-width:2;
   }
 }
+
+/* the mobile search text is a bare input inside the pill, so the theme-wide input
+   border, radius and padding must not draw a second box inside it */
+:root[data-theme] .mv-search input,
+:root[data-theme] .mv-search input:focus {
+  background:transparent;
+  border:0;
+  border-radius:0;
+  outline:0;
+  box-shadow:none;
+  padding:0;
+  margin:0;
+  color:var(--white);
+  font-size:.9rem;
+}

@@ -347,18 +347,21 @@ dialog .actions{justify-content:flex-end;margin-top:18px}
 .vm-stat.bad .vm-ico{color:var(--bad);border-color:rgba(242,107,107,.55);background:rgba(242,107,107,.12)}
 .vm-note{margin:0 0 18px}
 
-.vm-toolbar{margin-bottom:12px}
+.vm-toolbar{margin-bottom:12px;position:relative}
 .vm-search-row{display:flex;gap:10px;align-items:stretch}
-.vm-search{position:relative;flex:1;min-width:0}
+.vm-search{position:relative;flex:0 1 380px;max-width:380px;min-width:0}
 .vm-search .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);width:18px;height:18px;pointer-events:none}
 .vm-search input{padding:11px 14px 11px 42px;height:100%}
-.vm-filter-btn{display:none;align-items:center;gap:8px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--light);background:transparent;color:var(--light);font:600 .9rem var(--font);cursor:pointer;min-height:44px}
+.vm-filter-btn{display:inline-flex;align-items:center;justify-content:center;width:46px;padding:0;border-radius:var(--radius-sm);border:1px solid var(--light);background:transparent;color:var(--light);cursor:pointer;min-height:44px;flex:none}
 .vm-filter-btn:hover{background:rgba(163,160,149,.12);color:#fff}
-.vm-filter-btn .ico{width:18px;height:18px}
-.vm-filters{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:end;margin-top:12px}
+.vm-filter-btn[aria-expanded="true"]{background:rgba(163,160,149,.14);box-shadow:inset 0 0 0 1px currentColor}
+.vm-filter-btn .ico{width:19px;height:19px}
+/* due-date filters drop down from the small calendar button */
+.vm-filters{display:none;position:absolute;left:0;top:calc(100% + 8px);z-index:60;width:min(460px,100%);grid-template-columns:1fr 1fr;gap:12px;align-items:end;padding:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 48px -24px rgba(0,0,0,.55)}
+.vm-filters.open{display:grid}
 .vm-filters .field{margin:0;min-width:0}
 .vm-filters label{font-size:.78rem;color:var(--muted)}
-.vm-btns{display:flex;gap:10px}
+.vm-btns{display:flex;gap:10px;grid-column:1/-1}
 .vm-btns .btn{justify-content:center}
 
 .vm-chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
@@ -397,8 +400,6 @@ dialog .actions{justify-content:flex-end;margin-top:18px}
 
 @media(max-width:1100px){
   .vm-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .vm-filters{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .vm-btns{grid-column:1/-1}
 }
 @media(max-width:700px){
   .vm-head .btn{width:100%;justify-content:center}
@@ -406,10 +407,6 @@ dialog .actions{justify-content:flex-end;margin-top:18px}
   .vm-stat{padding:12px 14px;gap:10px}
   .vm-ico{width:38px;height:38px;border-radius:var(--radius-sm)} .vm-ico .ico{width:19px;height:19px}
   .vm-stat .n{font-size:1.5rem}
-  .vm-filter-btn{display:inline-flex}
-  .vm-filters{display:none;grid-template-columns:1fr 1fr}
-  .vm-filters.open{display:grid}
-  .vm-filters .field:first-child{grid-column:1/-1}
   .vm-btns .btn{flex:1;min-height:44px}
   .vm-chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin-right:-16px;padding-right:16px;scrollbar-width:none}
   .vm-chip{white-space:nowrap;flex:none}
@@ -1592,9 +1589,6 @@ html.fm-open{overflow:hidden}
 .fm-dialog::backdrop{background:rgba(8,20,40,.55)}
 .fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
 .fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white)}
-.fm-x{margin-left:auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
-  background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;font-size:1.35rem;line-height:1}
-.fm-x:hover{background:rgba(127,127,127,.14);color:var(--white)}
 .fm-body{padding:20px 22px 24px;overflow:auto;flex:1 1 auto}
 .fm-body .page-head{display:none}
 .fm-body .form-section{margin-bottom:18px}
@@ -1609,7 +1603,6 @@ html.fm-open{overflow:hidden}
     max-height:calc(100dvh - 16px);border-radius:14px}
   .fm-head{padding:12px 16px}
   .fm-head h2{font-size:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fm-x{width:40px;height:40px;font-size:1.5rem}
   .fm-body{padding:16px 14px calc(20px + env(safe-area-inset-bottom))}
   .fm-body .form-section,.fm-body .card{padding:14px}
   .fm-body .fs-head{gap:10px;margin-bottom:14px;padding-bottom:12px}
