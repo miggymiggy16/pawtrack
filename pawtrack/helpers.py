@@ -30,6 +30,14 @@ def parse_date(value):
         return None
 
 
+def year_has_at_most_4_digits(value):
+    """True when a date's year has at most 4 digits (e.g. 2026, not 12026)."""
+    if not value:
+        return True
+    year = str(value).strip().split("-")[0]
+    return not (year.isdigit() and len(year) > 4)
+
+
 def days_until(date_str):
     d = parse_date(date_str)
     return (d - date.today()).days if d else None

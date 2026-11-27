@@ -3,6 +3,22 @@
   const menu = document.getElementById('menuBtn'), side = document.getElementById('sidebar');
   if (menu && side) menu.addEventListener('click', () => side.classList.toggle('open'));
 
+  // No future dates on record/history fields. Fields whose whole purpose is a
+  // future date (next due date, expiry, due-date filters) opt out with data-allow-future.
+  // Every date field also rejects years longer than 4 digits.
+  (function () {
+    const now = new Date();
+    const today = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+      .toISOString().slice(0, 10);
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      if (!input.hasAttribute('data-allow-future') && !input.max) input.max = today;
+      input.addEventListener('input', () => {
+        const year = (input.value || '').split('-')[0];
+        input.setCustomValidity(year.length > 4 ? 'Year must have at most 4 digits.' : '');
+      });
+    });
+  })();
+
   // Confirmation dialog for any <form data-confirm="message">
   const dlg = document.getElementById('confirmDialog');
   document.querySelectorAll('form[data-confirm]').forEach(form => {

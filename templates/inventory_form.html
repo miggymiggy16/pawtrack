@@ -32,7 +32,7 @@
           <div class="ef-field"><label class="ef-lbl" for="quantity">{{ icon('plus') }}Quantity</label>
             <input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
           <div class="ef-field"><label class="ef-lbl" for="expiration_date">{{ icon('calendar') }}Expiration date</label>
-            <input id="expiration_date" name="expiration_date" type="date" value="{{ form.expiration_date }}">
+            <input id="expiration_date" name="expiration_date" type="date" data-allow-future value="{{ form.expiration_date }}">
             <small class="ef-help">Leave empty for items that do not expire.</small></div>
         </div>
       </div>

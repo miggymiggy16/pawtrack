@@ -19,3 +19,5 @@ certs/
 *.pem
 Thumbs.db
 pawtrack.log
+pawtrack.out.log
+pawtrack.err.log

@@ -11,7 +11,7 @@ from ..config import OWNERSHIP_CHOICES, SEX_CHOICES, SPECIES_CHOICES, UP_TO_DATE
 from ..extensions import app
 from ..helpers import (animal_photo_url, delete_animal_photo, now_str,
                        parse_date, read_product_image, store_animal_photo,
-                       valid_email)
+                       valid_email, year_has_at_most_4_digits)
 from ..security import (admin_required, current_user, permission_required,
                         safe_next)
 from ..services.inventory import adjust_vaccine_stock
@@ -22,7 +22,7 @@ from ..storage import edit, issue_animal_id, load, lock
 # ---------- animals ----------
 BREED_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")   # letters, spaces, dot, hyphen, apostrophe
 NAME_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")    # letters + spaces for personal names
-AGE_RE = re.compile(r"^\d+(?:\.\d+)?$")              # number only (e.g. 2 or 2.5)
+AGE_RE = re.compile(r"^\d{1,2}(?:\.\d)?$")           # number only, at most 2 digits (e.g. 2 or 12.5)
 MOBILE_RE = re.compile(r"^[\d\s\-\+]+$")            # digits, spaces, dash, country code
 
 
@@ -42,7 +42,7 @@ def validate_animal(form, existing=None):
     if f["breed"] and not BREED_RE.match(f["breed"]):
         errors.append("Breed must contain letters only.")
     if f["age"] and not AGE_RE.match(f["age"]):
-        errors.append("Age must be a number only (e.g. 2 or 2.5).")
+        errors.append("Age must be a number only, at most 2 digits (e.g. 2 or 12.5).")
     if f["sex"] not in SEX_CHOICES:
         errors.append("Please choose the animal's sex.")
     if f["ownership_status"] not in OWNERSHIP_CHOICES:
@@ -62,8 +62,12 @@ def validate_animal(form, existing=None):
         f["owner_name"] = f["owner_mobile"] = f["owner_email"] = ""
     if not f["registration_date"]:
         f["registration_date"] = date.today().isoformat()
+    elif not year_has_at_most_4_digits(f["registration_date"]):
+        errors.append("Registration date year must have at most 4 digits.")
     elif not parse_date(f["registration_date"]):
         errors.append("Registration date is not a valid date.")
+    elif parse_date(f["registration_date"]) > date.today():
+        errors.append("Registration date cannot be in the future.")
     return f, errors
 
 
@@ -154,7 +158,8 @@ def animal_new():
             flash(f"{form['animal_name']} was registered with Animal ID {form['animal_id']}." +
                   ("" if made else " QR image could not be created: install the 'qrcode' package."), "success")
             return redirect(url_for("animal_view", animal_id=form["animal_id"]))
-    return render_template("animal_form.html", form=form, editing=False, species=SPECIES_CHOICES)
+    return render_template("animal_form.html", form=form, editing=False, species=SPECIES_CHOICES,
+                           today=date.today().isoformat())
 
 
 @app.route("/animals/<animal_id>")
@@ -194,7 +199,8 @@ def animal_edit(animal_id):
             flash("Animal record updated.", "success")
             return redirect(url_for("animal_view", animal_id=animal_id))
     form["photo_url"] = animal_photo_url(animal)
-    return render_template("animal_form.html", form=form, editing=True, species=SPECIES_CHOICES)
+    return render_template("animal_form.html", form=form, editing=True, species=SPECIES_CHOICES,
+                           today=date.today().isoformat())
 
 
 @app.route("/animals/<animal_id>/photo", methods=["POST"])

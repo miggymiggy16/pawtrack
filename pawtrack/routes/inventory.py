@@ -9,7 +9,7 @@ from ..config import CATEGORIES, MAX_QTY, VACCINE_TYPES
 from ..extensions import app
 from ..helpers import (delete_product_image, item_image_url, now_str,
                        parse_date, parse_money, read_product_image,
-                       store_product_image)
+                       store_product_image, year_has_at_most_4_digits)
 from ..security import admin_required, can, current_user, permission_required
 from ..services.inventory import add_transaction, enriched_inventory, inventory_counts
 from ..storage import edit, load, next_id
@@ -68,7 +68,9 @@ def validate_item(form, editing=False):
     except ValueError:
         errors.append("Selling price must be an amount in pesos with at most 2 decimals, for example 175.00.")
         f["selling_price"] = form.get("selling_price", "")
-    if f["expiration_date"] and not parse_date(f["expiration_date"]):
+    if f["expiration_date"] and not year_has_at_most_4_digits(f["expiration_date"]):
+        errors.append("Expiration date year must have at most 4 digits.")
+    elif f["expiration_date"] and not parse_date(f["expiration_date"]):
         errors.append("Expiration date is not a valid date.")
     return f, errors
 

@@ -8,7 +8,7 @@ from flask import abort, flash, redirect, render_template, request, url_for
 
 from ..config import VACCINE_SUGGESTIONS
 from ..extensions import app
-from ..helpers import now_str, parse_date, valid_email
+from ..helpers import now_str, parse_date, valid_email, year_has_at_most_4_digits
 from ..security import (admin_required, current_user, permission_required)
 from ..services.email import build_message, notify
 from ..services.inventory import adjust_vaccine_stock, enriched_inventory
@@ -63,6 +63,10 @@ def validate_vaccination(form):
         errors.append("Please choose a registered animal.")
     if not f["vaccine_name"]:
         errors.append("Vaccine name is required.")
+    if not year_has_at_most_4_digits(f["date_administered"]):
+        errors.append("Date administered year must have at most 4 digits.")
+    if not year_has_at_most_4_digits(f["next_due_date"]):
+        errors.append("Next due date year must have at most 4 digits.")
     given, due = parse_date(f["date_administered"]), parse_date(f["next_due_date"])
     if not given:
         errors.append("Date administered is required and must be a valid date.")

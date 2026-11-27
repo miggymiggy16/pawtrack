@@ -33,8 +33,8 @@
       {% if args.q %}<input type="hidden" name="q" value="{{ args.q }}">{% endif %}
       {% if args.status %}<input type="hidden" name="status" value="{{ args.status }}">{% endif %}
       <div class="mv-field"><label>Vaccine</label><div class="mv-select">{{ icon('chevron') }}<select name="vaccine"><option value="">All Vaccines</option>{% for v in vaccine_options %}<option value="{{ v }}" {{ 'selected' if args.vaccine|lower == v|lower }}>{{ v }}</option>{% endfor %}</select></div></div>
-      <div class="mv-field"><label>Due From</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_from" value="{{ args.due_from }}" placeholder="mm/dd/yyyy"></div></div>
-      <div class="mv-field"><label>Due To</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_to" value="{{ args.due_to }}" placeholder="mm/dd/yyyy"></div></div>
+      <div class="mv-field"><label>Due From</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_from" data-allow-future value="{{ args.due_from }}" placeholder="mm/dd/yyyy"></div></div>
+      <div class="mv-field"><label>Due To</label><div class="mv-date">{{ icon('calendar') }}<input type="date" name="due_to" data-allow-future value="{{ args.due_to }}" placeholder="mm/dd/yyyy"></div></div>
     </form>
 
     <nav class="mv-tabs" aria-label="Filter by status">
@@ -94,8 +94,8 @@
   </div>
   <div class="vm-filters {{ 'open' if adv }}" id="vmFilters">
     <div class="field"><label for="vmv">Vaccine</label><select id="vmv" name="vaccine"><option value="">All vaccines</option>{% for v in vaccine_options %}<option value="{{ v }}" {{ 'selected' if args.vaccine|lower == v|lower }}>{{ v }}</option>{% endfor %}</select></div>
-    <div class="field"><label for="vmf">Due from</label><input type="date" id="vmf" name="due_from" value="{{ args.due_from }}"></div>
-    <div class="field"><label for="vmt">Due to</label><input type="date" id="vmt" name="due_to" value="{{ args.due_to }}"></div>
+    <div class="field"><label for="vmf">Due from</label><input type="date" id="vmf" name="due_from" data-allow-future value="{{ args.due_from }}"></div>
+    <div class="field"><label for="vmt">Due to</label><input type="date" id="vmt" name="due_to" data-allow-future value="{{ args.due_to }}"></div>
     <div class="vm-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('vaccinations') }}">Clear</a></div>
   </div>
 </form>

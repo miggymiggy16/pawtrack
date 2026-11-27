@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import csrf, icon %}
+{% block body_class %}af-page{% endblock %}
 {% block title %}{{ 'Edit' if editing else 'Register' }} animal{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>{{ 'Edit animal' if editing else 'Register animal' }}</h1><p>{{ 'Update the record for this animal.' if editing else 'Add a new pet to the system.' }}</p></div></div>
@@ -29,9 +30,9 @@
         <div class="field"><label class="lbl" for="breed">{{ icon('bone') }}Breed</label>
           <input id="breed" name="breed" value="{{ form.breed }}" placeholder="e.g. Golden Retriever" pattern="[A-Za-z .'\-]+" title="Letters only (spaces, dot, hyphen allowed)"></div>
         <div class="field"><label class="lbl" for="age">{{ icon('calendar') }}Age</label>
-          <input id="age" name="age" value="{{ form.age }}" placeholder="e.g. 2" inputmode="numeric" pattern="\d+(\.\d+)?" title="Numbers only (e.g. 2 or 2.5)"></div>
+          <input id="age" name="age" value="{{ form.age }}" placeholder="e.g. 2" inputmode="numeric" pattern="\d{1,2}(\.\d)?" maxlength="4" title="Numbers only, maximum 2 digits (e.g. 2 or 12.5)"></div>
         <div class="field"><label class="lbl" for="registration_date">{{ icon('calendar') }}Registration date</label>
-          <input id="registration_date" name="registration_date" type="date" value="{{ form.registration_date }}"></div>
+          <input id="registration_date" name="registration_date" type="date" max="{{ today }}" value="{{ form.registration_date }}"></div>
       </div>
 
       <aside class="fi-photo">

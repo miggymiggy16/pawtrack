@@ -4,7 +4,7 @@
 
   var RULES = [
     { id: 'breed',         strip: /[^A-Za-z .'\-]/g, hint: 'Breed: letters only (spaces, dot, hyphen, apostrophe allowed).' },
-    { id: 'age',           strip: /[^0-9.]/g,          hint: 'Age: numbers only (e.g. 2 or 2.5).' },
+    { id: 'age',           strip: /[^0-9.]/g,          hint: 'Age: numbers only, maximum 2 digits (e.g. 2 or 12.5).' },
     { id: 'owner_name',    strip: /[^A-Za-z .'\-]/g, hint: 'Owner name: letters only.' },
     { id: 'owner_mobile',  strip: /[^0-9 +\-]/g,      hint: 'Owner mobile number: numbers only.' }
   ];
@@ -39,10 +39,11 @@
       var before = input.value;
       var after = before.replace(rule.strip, '');
 
-      // Age must contain at most one decimal point.
-      if (rule.id === 'age' && after.split('.').length > 2) {
+      // Age: at most 2 whole digits and 1 decimal digit (no 3-digit ages).
+      if (rule.id === 'age') {
         var parts = after.split('.');
-        after = parts.shift() + '.' + parts.join('');
+        var whole = parts.shift().slice(0, 2);
+        after = parts.length ? whole + '.' + parts.join('').slice(0, 1) : whole;
       }
 
       if (after !== before) {
