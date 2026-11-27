@@ -1643,28 +1643,27 @@ html.fm-open{overflow:hidden}
   --shell-shadow:0 42px 90px -34px rgba(15,52,102,.45);
   --rail-bg:linear-gradient(180deg,#143763 0%,#0A2140 100%);
   --topbar-bg:rgba(255,255,255,.68);
-  --panel:rgba(255,255,255,.86);
-  --panel-line:rgba(255,255,255,.85);
+  --panel:rgba(255,255,255,.80);
+  --panel-line:rgba(255,255,255,.9);
 }
 
 /* soft sky photo behind the window */
-body{
-  background-color:#D8E9F9;
-  background-image:linear-gradient(180deg,rgba(240,248,255,.15),rgba(203,230,252,.32)),url("../img/app-bg.jpg");
-  background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;
+body{display:flow-root;background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
+:root[data-theme="light"] body{
+  background-color:#CFE4F8;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(150,196,238,.10)),url("../img/app-bg.jpg?v=3");
 }
 :root[data-theme="dark"] body{
   background-color:#050B16;
-  background-image:linear-gradient(180deg,rgba(4,10,22,.86),rgba(5,18,40,.9)),url("../img/app-bg.jpg");
+  background-image:linear-gradient(180deg,rgba(5,12,26,.62),rgba(6,20,44,.74)),url("../img/app-bg.jpg?v=3");
 }
 
 /* the window itself */
 .app{
-  position:relative;z-index:1;
+  position:relative;z-index:1;display:block;
   margin:var(--shell-gap);
   height:calc(100vh - var(--shell-gap) * 2);
   min-height:0;
-  grid-template-rows:minmax(0,1fr);
   border-radius:var(--shell-radius);
   background:var(--shell-bg);
   border:1px solid var(--shell-line);
@@ -1720,12 +1719,140 @@ body{
   body,
   :root[data-theme="light"] body{background:#F2F6FC;background-image:none}
   :root[data-theme="dark"] body{background:#0A0A0A;background-image:none}
-  .app,.pos-page .app{margin:0;height:auto;min-height:100vh;grid-template-rows:auto;border:0;border-radius:0;
+  .app,.pos-page .app{margin:0;height:auto;min-height:100vh;border:0;border-radius:0;
     background:var(--surface);box-shadow:none;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none}
   .main,.pos-page .main{margin-left:0;height:auto;overflow:visible}
   .sidebar{top:0;left:0;height:100vh;border-radius:0 18px 18px 0;border-left:0}
   .topbar{top:0;border-radius:0}
 }
+/* ======================================================================
+   FLOATING BUTTONS (every page, both themes)
+   No coloured fills anywhere: primary actions are white floating buttons,
+   secondary actions are frosted glass, danger is glass with red text.
+   The three shared variables below keep all pages visually equal.
+   ====================================================================== */
+:root{
+  --btn-bg:#fff; --btn-fg:#0F2450; --btn-line:rgba(255,255,255,.72);
+  --btn-shadow:0 12px 28px -18px rgba(0,0,0,.9); --btn-hover-bg:#EFF5FF;
+  --btn-soft-bg:rgba(255,255,255,.07); --btn-soft-line:rgba(255,255,255,.28); --btn-soft-fg:#fff;
+  --btn-soft-hover:rgba(255,255,255,.15);
+}
+:root[data-theme="light"]{
+  --btn-bg:#fff; --btn-fg:#0F2450; --btn-line:rgba(15,36,80,.16);
+  --btn-shadow:0 10px 24px -16px rgba(9,30,66,.65); --btn-hover-bg:#F4F8FF;
+  --btn-soft-bg:rgba(255,255,255,.5); --btn-soft-line:rgba(15,36,80,.18); --btn-soft-fg:#0F2450;
+  --btn-soft-hover:rgba(255,255,255,.85);
+}
+
+/* base, secondary and destructive actions */
+:root[data-theme] .btn{background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)}
+:root[data-theme] .btn:hover{background:var(--btn-hover-bg);border-color:var(--btn-line);color:var(--btn-fg);filter:none}
+:root[data-theme] .btn.ghost{background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg);box-shadow:none;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+:root[data-theme] .btn.ghost:hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg)}
+:root[data-theme] .btn.danger{background:var(--btn-soft-bg);border-color:rgba(176,48,48,.45);color:var(--bad);box-shadow:none}
+:root[data-theme] .btn.danger:hover{background:var(--btn-soft-bg);border-color:var(--bad);color:var(--bad)}
+
+/* animal page actions */
+:root[data-theme] body .an-btn{background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg)}
+:root[data-theme] body .an-btn:hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg)}
+:root[data-theme] body .an-btn.primary,:root[data-theme] body .an-btn.primary:hover{background:var(--btn-bg);border-color:var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)}
+
+/* animal full-profile page actions */
+:root[data-theme] body .ap-btn:not(.quiet){background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg)}
+:root[data-theme] body .ap-btn:not(.quiet):hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg)}
+:root[data-theme] body .ap-btn.primary,:root[data-theme] body .ap-btn.primary:hover{background:var(--btn-bg);border-color:var(--btn-line);color:var(--btn-fg);
+  box-shadow:var(--btn-shadow);filter:none}
+
+/* active tabs, filters and segmented controls — white pill, never a colour fill */
+:root[data-theme] body .an-tabs .tab.on,
+:root[data-theme] body .tabs a.active,
+:root[data-theme] body .vm-chip.active,
+:root[data-theme] body .nt-chip.active,
+:root[data-theme] body .auth-tab.active,
+:root[data-theme] body .st-nav a.active,
+:root[data-theme] body .po-cat.on,
+:root[data-theme] body .po-pm.on,
+:root[data-theme] body .po-held.has,
+:root[data-theme] body .chip.on,
+:root[data-theme] body .ma-tabs a.active,
+:root[data-theme] body .mv-tabs a.active,
+:root[data-theme] body .rpt-pillbtn.on,
+:root[data-theme] body .rpt-subtabs a.active,
+:root[data-theme] body .rpt-pager button.active{
+  background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)
+}
+:root[data-theme] body .an-tabs .tab.on *,
+:root[data-theme] body .vm-chip.active *,
+:root[data-theme] body .nt-chip.active *,
+:root[data-theme] body .po-cat.on *,
+:root[data-theme] body .ma-tabs a.active *,
+:root[data-theme] body .mv-tabs a.active *,
+:root[data-theme] body .rpt-pager button.active *{color:inherit}
+:root[data-theme] body .rpt-pillbtn.on span{color:inherit;opacity:1}
+:root[data-theme] body .po-cat.on .po-cat-n,
+:root[data-theme] body .ma-tabs a.active span,
+:root[data-theme] body .mv-tabs a.active span{background:rgba(15,36,80,.1);color:inherit}
+
+/* filled CTAs on the other pages */
+:root[data-theme] body .po-checkout,
+:root[data-theme] body .po-disc.on,
+:root[data-theme] body .iv-btn.primary,
+:root[data-theme] body .mv-add,
+:root[data-theme] body .rpt-alert button{
+  background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)
+}
+:root[data-theme] body .po-checkout:hover:not(:disabled),
+:root[data-theme] body .po-disc.on:hover,
+:root[data-theme] body .iv-btn.primary:hover,
+:root[data-theme] body .mv-add:hover,
+:root[data-theme] body .rpt-alert button:hover{background:var(--btn-hover-bg);color:var(--btn-fg);filter:none}
+:root[data-theme] body .po-checkout:disabled{background:var(--surface-2);border-color:var(--line);color:var(--muted);box-shadow:none}
+
+/* tinted + outlined actions become neutral glass */
+:root[data-theme] body .po-disc,
+:root[data-theme] body .po-qbtn.qa-disc,
+:root[data-theme] body .po-qbtn.qa-cust,
+:root[data-theme] body .rpt-btn,
+:root[data-theme] body .rpt-act,
+:root[data-theme] body .iv-btn.ghost,
+:root[data-theme] body .theme-btn,
+:root[data-theme] body .bell,
+:root[data-theme] body .vm-chip:not(.active),
+:root[data-theme] body .nt-chip:not(.active),
+:root[data-theme] body .pw button,
+:root[data-theme] body .menu-btn{
+  background:var(--btn-soft-bg);border:1px solid var(--btn-soft-line);color:var(--btn-soft-fg);box-shadow:none
+}
+:root[data-theme] body .po-disc:hover,
+:root[data-theme] body .po-qbtn.qa-disc:hover,
+:root[data-theme] body .po-qbtn.qa-cust:hover,
+:root[data-theme] body .rpt-btn:hover,
+:root[data-theme] body .rpt-act:hover,
+:root[data-theme] body .iv-btn.ghost:hover,
+:root[data-theme] body .theme-btn:hover,
+:root[data-theme] body .bell:hover,
+:root[data-theme] body .vm-chip:not(.active):hover,
+:root[data-theme] body .nt-chip:not(.active):hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg);filter:none}
+:root[data-theme] body .po-ghost.clr{background:var(--btn-soft-bg);border:1px solid rgba(176,48,48,.45);color:var(--bad);box-shadow:none}
+:root[data-theme] body .po-ghost.clr:hover{background:var(--btn-soft-hover);color:var(--bad)}
+
+/* a chip's count inherits the neutral text colour */
+:root[data-theme] body .nt-chip:not(.active) .nt-chip-n{color:inherit}
+
+/* phones: same neutral treatment for the mobile action bars */
+@media(max-width:700px){
+  :root[data-theme] body .ma-btn.primary{background:var(--btn-bg);border-color:var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)}
+  /* the mobile Animals card stays light in both themes, so its search field must too */
+  :root[data-theme] body .ma-search{background:#fff;border:0;box-shadow:0 3px 12px rgba(11,36,64,.06)}
+  :root[data-theme] body .ma-search svg{stroke:#8794A8}
+  :root[data-theme] body .ma-search input{background:transparent;border:0;color:#12233B;box-shadow:none;padding:0}
+  :root[data-theme] body .ma-search input::placeholder{color:#9AA6B2}
+  :root[data-theme] body .ma-search input:focus{outline:0;border-color:transparent;box-shadow:none}
+}
+/* dark rail: active item is a neutral highlight, not a colour fill */
+:root[data-theme="dark"] .nav a.active{background:rgba(255,255,255,.12);color:#fff}
+
 @media print{
   body,:root[data-theme="dark"] body,:root[data-theme="light"] body{background:#fff!important;background-image:none!important}
   .app,.pos-page .app{height:auto;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:#fff;backdrop-filter:none;overflow:visible}
