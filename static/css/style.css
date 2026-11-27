@@ -1509,29 +1509,36 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 :root[data-theme="light"] .dz-circle{background:#EDEAE3;color:#16305C}
 :root[data-theme="light"] .dropzone.drag{border-color:#16305C;background:#EDECE8}
 
-/* --- register / edit animal: fields sized to what they hold --- */
+/* --- register / edit animal: balanced, comfortably sized form --- */
+.af-page .page-head,
+.af-page .form-section{max-width:900px;margin-left:auto;margin-right:auto}
+
+.af-page .fi-grid{grid-template-columns:1fr 1fr minmax(210px,.85fr);gap:20px}
+.af-page .fi-pair{gap:20px}
+
+/* Fields fill their column so every edge lines up. */
 .af-page .fi-grid input:not([type=file]),
 .af-page .fi-grid select,
 .af-page .fi-pair input,
 .af-page .form-section > .field > input,
-.af-page .form-section > .field > select{width:auto;max-width:100%}
-.af-page #animal_id_view{width:100%}
-.af-page #species,.af-page #sex,.af-page #ownership_status{width:180px}
-.af-page #color{width:150px}
-.af-page #animal_name{width:200px}
-.af-page #breed{width:210px}
-.af-page #age{width:95px}
-.af-page #registration_date{width:165px}
-.af-page #owner_name{width:215px}
-.af-page #owner_mobile{width:170px}
-.af-page #owner_email{width:250px}
-.af-page #description{width:100%}
+.af-page .form-section > .field > select{width:100%;max-width:100%}
+
+/* Age is the only deliberately short field. */
+.af-page #age{width:90px;max-width:100%}
+
+/* Ownership fields stay compact and centred instead of stretching. */
+.af-page .owner-section > .field,
+.af-page .owner-section .fi-pair{max-width:520px}
+.af-page .owner-section .field-wide{max-width:none}
+.af-page .owner-section .fi-pair{gap:20px}
+
+@media(max-width:1100px){.af-page .fi-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){
-  .af-page .fi-grid input:not([type=file]),
-  .af-page .fi-grid select,
-  .af-page .fi-pair input,
-  .af-page .form-section > .field > input,
-  .af-page .form-section > .field > select{width:100%}
+  .af-page .fi-grid{grid-template-columns:1fr;gap:16px}
+  .af-page .fi-pair{gap:16px}
+  .af-page .owner-section > .field,
+  .af-page .owner-section .fi-pair{max-width:none}
+  .af-page #age{width:100%}
 }
 
 /* ===== Mobile bottom navigation (swipeable) — every page, <=700px only ===== */
