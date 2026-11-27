@@ -47,17 +47,16 @@
       {% if rows %}
       <div class="mv-mobile-list">
       {% for r in rows %}
-      {% set detail = {'animal': r.animal.animal_name, 'id': r.animal_id, 'species': r.animal.species,
-                       'vaccine': r.vaccine_name, 'given': r.date_administered|fmt_date,
-                       'due': r.next_due_date|fmt_date if r.next_due_date else '-', 'status': r.status} %}
-      <div class="mv-item vax-open" tabindex="0" data-detail='{{ detail|tojson }}'>
-        <span class="mv-av">{{ initial(r.animal) }}</span>
-        <div class="mv-item-body">
-          <b>{{ r.animal.animal_name }}</b>
-          <small>{{ r.animal_id }} &middot; {{ r.vaccine_name }}</small>
-          <span class="mv-item-dates">Given {{ r.date_administered|fmt_date }}{% if r.next_due_date %} &middot; Next due <b>{{ r.next_due_date|fmt_date }}</b>{% endif %}</span>
-          <span>{{ badge(r.status) }}</span>
-        </div>
+      <div class="mv-item">
+        <a class="mv-open" href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" data-modal-form data-modal-title="Edit vaccination">
+          <span class="mv-av">{{ initial(r.animal) }}</span>
+          <div class="mv-item-body">
+            <b>{{ r.animal.animal_name }}</b>
+            <small>{{ r.animal_id }} &middot; {{ r.vaccine_name }}</small>
+            <span class="mv-item-dates">Given {{ r.date_administered|fmt_date }}{% if r.next_due_date %} &middot; Next due <b>{{ r.next_due_date|fmt_date }}</b>{% endif %}</span>
+            <span>{{ badge(r.status) }}</span>
+          </div>
+        </a>
         <div class="mv-item-acts">
           {% if user.role == 'admin' %}<form class="inline" method="post" action="{{ url_for('vaccination_delete', vacc_id=r.vaccination_id) }}" data-confirm="Delete vaccination record {{ r.vaccination_id }}?">{{ csrf() }}<button type="submit" title="Delete">{{ icon('trash') }}</button></form>{% endif %}
         </div>
@@ -113,11 +112,8 @@
     <thead><tr><th>Animal</th><th>Vaccine</th><th>Administered</th><th>Next due</th><th>Status</th><th class="right">Actions</th></tr></thead>
     <tbody>
     {% for r in rows %}
-    {% set detail = {'animal': r.animal.animal_name, 'id': r.animal_id, 'species': r.animal.species,
-                     'vaccine': r.vaccine_name, 'given': r.date_administered|fmt_date,
-                     'due': r.next_due_date|fmt_date if r.next_due_date else '-', 'status': r.status} %}
       <tr>
-        <td class="vm-animal vax-open" tabindex="0" data-detail='{{ detail|tojson }}'><span class="vm-av">{{ initial(r.animal) }}</span><span><b>{{ r.animal.animal_name }}</b><br><span class="small muted">{{ r.animal_id }}</span></span></td>
+        <td class="vm-animal"><a href="{{ url_for('vaccination_edit', vacc_id=r.vaccination_id) }}" data-modal-form data-modal-title="Edit vaccination"><span class="vm-av">{{ initial(r.animal) }}</span><span><b>{{ r.animal.animal_name }}</b><br><span class="small muted">{{ r.animal_id }}</span></span></a></td>
         <td>{{ r.vaccine_name }}</td>
         <td class="nowrap">{{ r.date_administered|fmt_date }}</td>
         <td class="nowrap">{{ r.next_due_date|fmt_date if r.next_due_date else '-' }}</td>
@@ -132,15 +128,6 @@
 </section>
 </div>
 
-<!-- Record detail popup (click an animal) -->
-<div class="vax-modal" id="vaxModal" hidden>
-  <div class="vax-modal-backdrop" data-vax-close></div>
-  <button type="button" class="vax-modal-x" data-vax-close aria-label="Close">&times;</button>
-  <div class="vax-modal-box" role="dialog" aria-modal="true" aria-label="Vaccination record">
-    <h2 id="vaxModalTitle"></h2>
-    <dl class="vax-modal-facts" id="vaxModalFacts"></dl>
-  </div>
-</div>
 {% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/vaccination.js') }}"></script>

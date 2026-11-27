@@ -22,6 +22,7 @@
   }
 
   function finish() {
+    if (dlg.open) return;            // a newer popup open already reloaded the body
     clearScripts();
     body.innerHTML = '';
     dlg.className = 'fm-dialog';
