@@ -395,6 +395,23 @@
 .fm-dialog.ef-page .ef-desc {
   margin-top:16px;
 }
+/* Modal action buttons fit their text instead of stretching wide */
+.fm-dialog.ef-page .ef-actions {
+  justify-content:flex-end;
+  gap:10px;
+}
+.fm-dialog.ef-page .ef-actions .ef-btn {
+  width:auto;
+  flex:0 0 auto;
+  height:38px;
+  padding:0 16px;
+  font-size:.84rem;
+  gap:6px;
+}
+.fm-dialog.ef-page .ef-actions .ef-btn .ico {
+  width:15px;
+  height:15px;
+}
 @media(max-width:700px) {
   .fm-dialog.ef-page .ef-top,
   .fm-dialog.ef-page .ef-grid {
