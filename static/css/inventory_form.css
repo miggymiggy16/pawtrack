@@ -377,3 +377,27 @@
     font-size:1rem;
   }
 }
+
+/* ===== Inside the centered form modal: keep a clean two-column layout ===== */
+.fm-dialog.ef-page .ef-top {
+  grid-template-columns:minmax(0,1fr) 240px;
+}
+.fm-dialog.ef-page .ef-grid {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px 20px;
+}
+.fm-dialog.ef-page .ef-shead {
+  margin-bottom:16px;
+}
+.fm-dialog.ef-page .ef-card {
+  padding:20px;
+}
+.fm-dialog.ef-page .ef-desc {
+  margin-top:16px;
+}
+@media(max-width:700px) {
+  .fm-dialog.ef-page .ef-top,
+  .fm-dialog.ef-page .ef-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
