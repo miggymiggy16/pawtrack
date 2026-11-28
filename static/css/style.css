@@ -501,10 +501,10 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 @media(prefers-reduced-motion:reduce){html.theme-anim *{transition:none !important}}
 
 /* toggle button */
-.theme-btn{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+.theme-btn{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
   background:rgba(163,160,149,.1);color:var(--light);cursor:pointer;padding:0;flex:none}
 .theme-btn:hover{background:rgba(163,160,149,.2);color:var(--white)}
-.theme-btn .ico{width:19px;height:19px}
+.theme-btn .ico{width:24px;height:24px}
 .theme-btn .t-sun{display:none}
 :root[data-theme="light"] .theme-btn .t-sun{display:block}
 :root[data-theme="light"] .theme-btn .t-moon{display:none}
@@ -567,9 +567,9 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
    both themes apply automatically.
    ====================================================================== */
 .topbar .who{display:flex;align-items:center;gap:12px}
-.bell{position:relative;display:inline-grid;place-items:center;width:38px;height:38px;padding:0;border-radius:50%;border:1px solid var(--line);background:rgba(163,160,149,.1);color:var(--light)}
+.bell{position:relative;display:inline-grid;place-items:center;width:42px;height:42px;padding:0;border-radius:50%;border:1px solid var(--line);background:rgba(163,160,149,.1);color:var(--light)}
 .bell:hover{background:rgba(163,160,149,.2);color:var(--white)}
-.bell .ico{width:19px;height:19px}
+.bell .ico{width:24px;height:24px}
 .bell-n{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--bad-bg);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center;border:2px solid var(--midnight)}
 :root[data-theme="light"] .bell{background:#FAFBFE}
 :root[data-theme="light"] .bell-n{border-color:var(--panel)}
@@ -584,7 +584,7 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 .pm-pop a:hover,.pm-pop button:hover{background:rgba(163,160,149,.12);color:var(--white)}
 :root[data-theme="light"] .pm-pop{background:var(--panel)}
 :root[data-theme="light"] .pm-pop a:hover,:root[data-theme="light"] .pm-pop button:hover{background:rgba(15,36,80,.08)}
-.who-name{color:var(--muted);font-size:.86rem;font-weight:600;white-space:nowrap}
+.who-name{color:var(--muted);font-size:.95rem;font-weight:600;white-space:nowrap}
 
 /* ---------- topbar notification panel (opens on click, does not navigate) ---------- */
 .notif-wrap{position:relative}
@@ -1028,13 +1028,13 @@ a.kpi:hover{filter:brightness(1.1)}
 :root[data-theme="light"] .topbar{background:var(--surface)}
 .tb-left,.tb-right{display:flex;align-items:center;gap:12px;min-width:0}
 .tb-left{flex:1}
-.tb-title{font-size:1.4rem;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-title{font-size:1.55rem;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tb-search{position:relative;display:block;margin:0;width:min(330px,34vw)}
 .tb-search input{height:42px;padding:0 14px 0 42px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface-2);color:var(--white);font-weight:500}
 .tb-search input::placeholder{color:var(--muted)}
 .tb-search .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted);pointer-events:none}
-.tb-clock{display:flex;align-items:center;gap:8px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;padding:0 4px}
-.tb-clock .ico{width:18px;height:18px;color:var(--muted)}
+.tb-clock{display:flex;align-items:center;gap:8px;font-size:.95rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;padding:0 4px}
+.tb-clock .ico{width:23px;height:23px;color:var(--muted)}
 .po-held{position:relative;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:var(--radius-sm);border:1px solid var(--line);background:var(--surface-2);color:var(--light);font:700 .85rem var(--font);cursor:pointer}
 .po-held .ico{width:17px;height:17px}
 .po-held:hover{border-color:var(--light);color:var(--white)}
