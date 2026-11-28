@@ -212,7 +212,7 @@
               <section class="an-hsec">
                 <h4>Owner Information</h4>
                 {% if a.ownership_status == 'Owned' %}
-                <dl class="an-hkv">
+                <dl class="an-hlist">
                   <div><dt>Owner Name</dt><dd>{{ a.owner_name or '-' }}</dd></div>
                   <div><dt>Mobile Number</dt><dd>{{ a.owner_mobile or '-' }}</dd></div>
                   <div><dt>Email Address</dt><dd>{{ a.owner_email or '-' }}</dd></div>
@@ -221,7 +221,7 @@
               </section>
               <section class="an-hsec">
                 <h4>Vaccination Status</h4>
-                <dl class="an-hkv">
+                <dl class="an-hlist">
                   <div><dt>Current Status</dt><dd><span class="an-vax st-{{ a.vax_status|slug }}">{{ a.vax_status }}</span></dd></div>
                   <div><dt>Latest Vaccination</dt><dd>{{ a.latest.vaccine_name if a.latest else '-' }}{% if a.latest %}<small>{{ a.latest.date_administered|fmt_date }}</small>{% endif %}</dd></div>
                   <div><dt>Next Due Date</dt><dd>{{ a.next_due|fmt_date if a.next_due else '-' }}</dd></div>
