@@ -1955,9 +1955,94 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
   box-shadow:0 0 0 3px rgba(15,36,80,.16), 0 2px 6px rgba(15,36,80,.10);
 }
 
+/* ======================================================================
+   SUBTLE GLASSMORPHISM — shared surface treatment (visual styling only).
+   Cards and stat tiles become lightly translucent with a soft blur, a thin
+   light border and a gentle shadow so they float above the background.
+   No changes to layout, size, spacing, text or arrangement.
+   ====================================================================== */
+:root{
+  --glass-bg:rgba(24,29,38,.66);
+  --glass-line:rgba(255,255,255,.13);
+  --glass-shadow:0 20px 48px -34px rgba(0,0,0,.75);
+}
+:root[data-theme="light"]{
+  --glass-bg:rgba(255,255,255,.66);
+  --glass-line:rgba(255,255,255,.85);
+  --glass-shadow:0 18px 44px -32px rgba(15,52,102,.42);
+}
+
+:root[data-theme] .card,
+:root[data-theme] .stat,
+:root[data-theme] .band,
+:root[data-theme] .dcard,
+:root[data-theme] .kpi,
+:root[data-theme] .report-group,
+:root[data-theme] .nt-card,
+:root[data-theme] .dstat,
+:root[data-theme] .vm-card,
+:root[data-theme] .an-list,
+:root[data-theme] .an-box,
+:root[data-theme] .an-card,
+:root[data-theme] .an-pane,
+:root[data-theme] .rpt-card,
+:root[data-theme] .rpt-stat,
+:root[data-theme] .ef-card,
+:root[data-theme] .sl-panel,
+:root[data-theme] .sl-stat,
+:root[data-theme] .m-card,
+:root[data-theme] .ma-card{
+  background:var(--glass-bg);
+  border-color:var(--glass-line);
+  box-shadow:var(--glass-shadow);
+  backdrop-filter:blur(14px) saturate(130%);
+  -webkit-backdrop-filter:blur(14px) saturate(130%);
+}
+
+/* Faint glass on every remaining control — barely visible, just enough to
+   lift elements off the background. Layout, size and text stay untouched. */
+:root{
+  --glass-soft-line:rgba(255,255,255,.12);
+  --glass-soft-shadow:0 6px 16px -12px rgba(0,0,0,.55);
+}
+:root[data-theme="light"]{
+  --glass-soft-line:rgba(15,36,80,.10);
+  --glass-soft-shadow:0 6px 16px -12px rgba(15,52,102,.30);
+}
+
+:root[data-theme] button,
+:root[data-theme] input,
+:root[data-theme] select,
+:root[data-theme] textarea,
+:root[data-theme] .chip,
+:root[data-theme] .badge,
+:root[data-theme] .pill,
+:root[data-theme] .tabs a,
+:root[data-theme] .nav a,
+:root[data-theme] .nav button,
+:root[data-theme] .flash,
+:root[data-theme] .notif-panel,
+:root[data-theme] .pm-pop,
+:root[data-theme] .dropzone,
+:root[data-theme] .table-wrap,
+:root[data-theme] .kv,
+:root[data-theme] .an-tabs .tab,
+:root[data-theme] .ma-tabs a,
+:root[data-theme] .vm-tabs a,
+:root[data-theme] .rpt-tabs a,
+:root[data-theme] .rpt-subtabs a,
+:root[data-theme] .st-nav a,
+:root[data-theme] .dialog,
+:root[data-theme] .po-dialog{
+  border-color:var(--glass-soft-line);
+  box-shadow:var(--glass-soft-shadow);
+  backdrop-filter:blur(8px) saturate(120%);
+  -webkit-backdrop-filter:blur(8px) saturate(120%);
+}
+
 @media print{
   body,:root[data-theme="dark"] body,:root[data-theme="light"] body{background:#fff!important;background-image:none!important}
-  :root[data-theme="light"] body *{box-shadow:none!important}
+  :root[data-theme] body *{box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .app,.pos-page .app{height:auto;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:#fff;backdrop-filter:none;overflow:visible}
   .main{height:auto;overflow:visible;margin-left:0}
 }
