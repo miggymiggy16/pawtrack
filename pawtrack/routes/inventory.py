@@ -34,7 +34,9 @@ def validate_item(form, editing=False):
     if f["category"] not in CATEGORIES:
         errors.append("Please choose a valid category.")
     if not f["unit"]:
-        errors.append("Unit is required (for example: pcs, vials, boxes).")
+        errors.append("Unit is required.")
+    elif f["unit"] not in ("pcs", "vials", "boxes", "bottles", "tablets", "sacks"):
+        errors.append("Please choose a valid unit.")
     nums = [("min_stock", "Minimum stock level", int)]
     if not editing:
         nums.insert(0, ("quantity", "Quantity", int))
