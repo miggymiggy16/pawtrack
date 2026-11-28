@@ -45,7 +45,6 @@
       <option value="expired" {{ 'selected' if args.view=='expired' }}>Expired</option>
     </select></label>
   <a class="iv-btn ghost iv-clear" href="{{ url_for('inventory') }}">Clear Filters</a>
-  <button class="iv-btn primary" type="submit">{{ icon('search') }}Search</button>
 </form>
 
 {% if rows %}

@@ -137,14 +137,6 @@ body.inv-page .iv-sel select:focus {
 .iv-clear {
   height:46px;
 }
-.iv-filters button[type="submit"] {
-  height:46px;
-  padding:0 20px;
-  font-size:.88rem;
-  white-space:nowrap;
-  font-weight:700;
-  min-width:100px;
-}
 /* summary cards */
 .iv-stats {
   display:grid;
