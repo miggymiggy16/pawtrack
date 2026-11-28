@@ -1,7 +1,10 @@
 /* PawTrack small helpers: mobile menu, delete confirmations, show/hide password, flash close */
 (function () {
   const menu = document.getElementById('menuBtn'), side = document.getElementById('sidebar');
-  if (menu && side) menu.addEventListener('click', () => side.classList.toggle('open'));
+  if (menu && side) menu.addEventListener('click', () => {
+    side.classList.toggle('open');
+    document.body.classList.toggle('menu-open', side.classList.contains('open'));
+  });
 
   // No future dates on record/history fields. Fields whose whole purpose is a
   // future date (next due date, expiry, due-date filters) opt out with data-allow-future.
@@ -390,6 +393,9 @@ document.querySelectorAll('input[data-autosubmit]').forEach(inp => inp.addEventL
   }
   const side = document.getElementById('sidebar'), btn = document.getElementById('menuBtn');
   document.addEventListener('click', e => {
-    if (side && side.classList.contains('open') && !side.contains(e.target) && !(btn && btn.contains(e.target))) side.classList.remove('open');
+    if (side && side.classList.contains('open') && !side.contains(e.target) && !(btn && btn.contains(e.target))) {
+      side.classList.remove('open');
+      document.body.classList.remove('menu-open');
+    }
   });
 })();
