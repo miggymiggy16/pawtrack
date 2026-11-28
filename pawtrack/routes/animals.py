@@ -23,7 +23,7 @@ from ..storage import edit, issue_animal_id, load, lock
 BREED_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")   # letters, spaces, dot, hyphen, apostrophe
 NAME_RE = re.compile(r"^[A-Za-z][A-Za-z .'\-]*$")    # letters + spaces for personal names
 AGE_RE = re.compile(r"^\d{1,2}(?:\.\d)?$")           # number only, at most 2 digits (e.g. 2 or 12.5)
-MOBILE_RE = re.compile(r"^[\d\s\-\+]+$")            # digits, spaces, dash, country code
+MOBILE_RE = re.compile(r"^09\d{9}$")               # 11 digits, starts with 09 (e.g. 09171234567)
 
 
 def validate_animal(form, existing=None):
@@ -53,7 +53,7 @@ def validate_animal(form, existing=None):
         elif not NAME_RE.match(f["owner_name"]):
             errors.append("Owner name must contain letters only.")
         if f["owner_mobile"] and not MOBILE_RE.match(f["owner_mobile"]):
-            errors.append("Owner mobile number must contain numbers only.")
+            errors.append("Owner mobile number must be 11 digits starting with 09 (e.g. 09171234567).")
         if not f["owner_email"]:
             errors.append("Owner email is required for owned animals.")
         elif not valid_email(f["owner_email"]):

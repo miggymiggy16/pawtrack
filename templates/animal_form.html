@@ -68,7 +68,7 @@
       <div class="field"><label class="lbl" for="owner_name">{{ icon('user') }}Owner name</label>
         <input id="owner_name" name="owner_name" value="{{ form.owner_name }}" placeholder="e.g. Juan Dela Cruz" pattern="[A-Za-z .'\-]+" title="Letters only"></div>
       <div class="field"><label class="lbl" for="owner_mobile">{{ icon('phone') }}Owner mobile number</label>
-        <input id="owner_mobile" name="owner_mobile" value="{{ form.owner_mobile }}" placeholder="e.g. 09171234567" inputmode="numeric" pattern="[\d\s\-+]+" title="Numbers only"></div>
+        <input id="owner_mobile" name="owner_mobile" value="{{ form.owner_mobile }}" placeholder="e.g. 09171234567" inputmode="numeric" pattern="09\d{9}" maxlength="11" title="11 digits starting with 09 (e.g. 09171234567)"></div>
     </div>
     <div class="field"><label class="lbl" for="owner_email">{{ icon('mail') }}Owner email <span class="req">*</span></label>
       <input id="owner_email" name="owner_email" type="email" value="{{ form.owner_email }}" placeholder="e.g. juan@email.com" required><small>Required for owned animals &mdash; used to send vaccination reminders.</small></div>
