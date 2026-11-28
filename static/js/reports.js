@@ -16,13 +16,13 @@
   var rows = groups.flatMap(function (g) { return g.rows; });
   var pager = document.getElementById('rptPager'), info = document.getElementById('rptInfo'),
       count = document.getElementById('rptCount'), box = document.getElementById('rptSearch');
-  var page = 1, size = 10, term = '', pill = 'all';
+  var page = 1, size = 10, term = '';
 
   rows.forEach(function (r) {
     r.dataset.all = (r.dataset.search + ' ' + r.textContent).toLowerCase().replace(/\s+/g, ' ');
   });
   function matches(r) {
-    return (pill === 'all' || r.dataset.filter === pill) && (!term || r.dataset.all.indexOf(term) >= 0);
+    return !term || r.dataset.all.indexOf(term) >= 0;
   }
   function pbtn(label, on, opts) {
     opts = opts || {};
@@ -80,13 +80,9 @@
     }
   }
 
-  document.querySelectorAll('[data-pill]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      pill = b.dataset.pill; page = 1;
-      document.querySelectorAll('[data-pill]').forEach(function (x) { x.classList.toggle('on', x === b); });
-      render();
-    });
-  });
+  // Vaccination Status lives in its own GET form: a change reloads the page with ?status=...
+  var statusSel = document.getElementById('rptStatus');
+  if (statusSel && statusSel.form) statusSel.addEventListener('change', function () { statusSel.form.submit(); });
   groups.forEach(function (g) {
     if (g.btn) g.btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
   });

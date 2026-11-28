@@ -308,28 +308,38 @@
   font-size:.8rem;
   color:var(--muted);
 }
-.rpt-pills {
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.rpt-pillbtn {
-  padding:5px 12px;
-  border-radius:999px;
-  border:1px solid var(--line);
-  background:transparent;
+/* vaccination status dropdown, styled like the Inventory stock status select */
+.rpt-vsel {
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  margin-left:auto;
+  font-size:.8rem;
+  font-weight:600;
   color:var(--muted);
-  font-size:.79rem;
+}
+.rpt-vsel select {
+  height:40px;
+  min-width:184px;
+  padding:0 34px 0 14px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background-color:var(--surface-2);
+  color:var(--white);
+  font-family:inherit;
+  font-size:.86rem;
   font-weight:600;
   cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 12px center;
+  background-size:14px;
 }
-.rpt-pillbtn span {
-  opacity:.85;
-}
-.rpt-pillbtn.on {
-  background:rgba(76,123,234,.18);
+.rpt-vsel select:focus {
   border-color:#4C7BEA;
-  color:var(--white);
+  outline:2px solid rgba(76,123,234,.25);
+  outline-offset:0;
 }
 .rpt-search {
   display:flex;
@@ -636,6 +646,15 @@ tbody.closed .rpt-gbtn .ico {
   .rpt-rhead {
     gap:10px;
   }
+  .rpt-vsel {
+    margin-left:0;
+    width:100%;
+    gap:8px;
+  }
+  .rpt-vsel select {
+    flex:1 1 auto;
+    min-width:0;
+  }
   .rpt-alert form {
     margin-left:0;
   }
@@ -645,7 +664,7 @@ tbody.closed .rpt-gbtn .ico {
     size:A4 landscape;
     margin:12mm;
   }
-  .rpt-head,.rpt-tabs,.rpt-subtabs,.rpt-pills,.rpt-search,.rpt-foot,.rpt-alert,.rpt-filters {
+  .rpt-head,.rpt-tabs,.rpt-subtabs,.rpt-vsel,.rpt-search,.rpt-foot,.rpt-alert,.rpt-filters {
     display:none!important;
   }
   .rpt-twrap {

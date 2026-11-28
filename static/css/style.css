@@ -1770,7 +1770,6 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] body .chip.on,
 :root[data-theme] body .ma-tabs a.active,
 :root[data-theme] body .mv-tabs a.active,
-:root[data-theme] body .rpt-pillbtn.on,
 :root[data-theme] body .rpt-subtabs a.active,
 :root[data-theme] body .rpt-pager button.active{
   background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)
@@ -1782,7 +1781,6 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] body .ma-tabs a.active *,
 :root[data-theme] body .mv-tabs a.active *,
 :root[data-theme] body .rpt-pager button.active *{color:inherit}
-:root[data-theme] body .rpt-pillbtn.on span{color:inherit;opacity:1}
 :root[data-theme] body .po-cat.on .po-cat-n,
 :root[data-theme] body .ma-tabs a.active span,
 :root[data-theme] body .mv-tabs a.active span{background:rgba(15,36,80,.1);color:inherit}

@@ -21,7 +21,7 @@
 {% set primary = report.sections|selectattr('primary')|first %}
 {% set ns = namespace(sub=[]) %}
 {% for _t, _i, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
-{% set adv_open = namespace(v=false) %}{% for f in filters %}{% if args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
+{% set adv_open = namespace(v=false) %}{% for f in filters %}{% if f != 'status' and args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
 {% set merge_id = primary.headers[0] == 'Animal ID' %}
 {% set st_idx = primary.headers.index('Status') if 'Status' in primary.headers else 0 %}
 {% set ncols = (primary.headers|length - 1 if merge_id else primary.headers|length) + 1 %}
@@ -88,7 +88,6 @@
     {% if 'species' in filters %}<div class="field"><label for="species">Species</label><select id="species" name="species"><option value="">All</option>{% for s in species %}<option {{ 'selected' if args.species==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
     {% if 'vaccine' in filters %}<div class="field"><label for="vaccine">Vaccine</label><select id="vaccine" name="vaccine"><option value="">All</option>{% for v in vaccines %}<option {{ 'selected' if args.vaccine==v }}>{{ v }}</option>{% endfor %}</select></div>{% endif %}
     {% if 'category' in filters %}<div class="field"><label for="category">Category</label><select id="category" name="category"><option value="">All</option>{% for c in categories %}<option {{ 'selected' if args.category==c }}>{{ c }}</option>{% endfor %}</select></div>{% endif %}
-    {% if 'status' in filters %}<div class="field"><label for="status">Vaccination status</label><select id="status" name="status"><option value="">All</option>{% for s in ['Completed','Upcoming','Due Today','Overdue'] %}<option {{ 'selected' if args.status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
     {% if 'stock_status' in filters %}<div class="field"><label for="stock_status">Stock status</label><select id="stock_status" name="stock_status"><option value="">All</option>{% for s in ['In Stock','Low Stock','Out of Stock'] %}<option {{ 'selected' if args.stock_status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
     {% if 'exp_status' in filters %}<div class="field"><label for="exp_status">Expiration status</label><select id="exp_status" name="exp_status"><option value="">All</option>{% for s in ['Valid','Expiring Soon','Expired'] %}<option {{ 'selected' if args.exp_status==s }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
     {% if 'date_from' in filters %}<div class="field"><label for="date_from">{{ 'Registered from' if kind=='population' else 'Administered from' }}</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
@@ -118,12 +117,18 @@
 <section class="rpt-card">
   <div class="rpt-rhead">
     <h2>{{ primary.title }}</h2><span class="rpt-count" id="rptCount"></span>
-    {% if vax_kind %}<div class="rpt-pills no-print" role="group" aria-label="Filter by status">
-      <button class="rpt-pillbtn on" type="button" data-pill="all">All <span>{{ primary.rows|length }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="attn">Overdue <span>{{ gidx.attn|length }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="up">Upcoming <span>{{ gidx.up|length }}</span></button>
-      <button class="rpt-pillbtn" type="button" data-pill="done">Completed <span>{{ gidx.done|length }}</span></button>
-    </div>{% endif %}
+    {% if 'status' in filters %}<form class="rpt-vsel no-print" method="get">
+      <input type="hidden" name="type" value="{{ kind }}">
+      {% for k, v in args.items() if k != 'status' and v %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+      <label for="rptStatus">Vaccination Status</label>
+      <select id="rptStatus" name="status">
+        <option value="">All Vaccinations</option>
+        <option value="Overdue"{{ ' selected' if args.status == 'Overdue' }}>Overdue</option>
+        <option value="Due Today"{{ ' selected' if args.status == 'Due Today' }}>Due Today</option>
+        <option value="Upcoming"{{ ' selected' if args.status == 'Upcoming' }}>Upcoming</option>
+        <option value="Completed"{{ ' selected' if args.status == 'Completed' }}>Completed</option>
+      </select>
+    </form>{% endif %}
   </div>
 
   {% if primary.rows %}
@@ -133,7 +138,7 @@
     <tbody{% if g.title %} class="rpt-grp"{% endif %}>
       {% if g.title %}<tr class="rpt-ghead"><td colspan="{{ ncols }}"><button class="rpt-gbtn" type="button" data-gtoggle aria-expanded="true">{{ icon('chevron') }}<span>{{ g.title }}</span><span class="rpt-gcount">{{ g.idx|length }} record{{ '' if g.idx|length == 1 else 's' }}</span></button></td></tr>{% endif %}
       {% for i in g.idx %}{% set row = primary.rows[i] %}{% set m = primary.meta[i] %}
-      <tr class="rpt-row{{ ' bad' if row[st_idx] == 'Overdue' }}" data-search="{{ m.search }}" data-filter="{{ g.key }}">
+      <tr class="rpt-row{{ ' bad' if row[st_idx] == 'Overdue' }}" data-search="{{ m.search }}">
         {% for c in row %}{% set h = primary.headers[loop.index0] %}{% set hl = h|lower %}
         {% if merge_id and loop.first %}
         {% elif merge_id and loop.index0 == 1 %}<td class="rpt-animal"><b>{{ c }}</b><small>{{ row[0] }}</small></td>
