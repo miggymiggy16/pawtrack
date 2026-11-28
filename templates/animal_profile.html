@@ -15,7 +15,7 @@
       </div>
     </div>
     <div class="ap-actions">
-      <a class="ap-btn primary" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }}Edit Animal</a>
+      <a class="ap-btn primary" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Edit animal">{{ icon('edit') }}Edit Animal</a>
       {{ photo_upload(a, request.path) }}
       <a class="ap-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Add Vaccination">{{ icon('syringe') }}Add Vaccination</a>
       <a class="ap-btn gold" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}Generate / View QR</a>

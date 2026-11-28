@@ -54,7 +54,7 @@
 
       <div class="ma-actions">
         <a class="ma-btn primary" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('users') }} View Profile</a>
-        <a class="ma-btn ghost" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">{{ icon('edit') }} Edit</a>
+        <a class="ma-btn ghost" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Edit animal">{{ icon('edit') }} Edit</a>
       </div>
       <div class="ma-actions sub">
         {{ photo_upload(a, url_for('animals_list', **dict(request.args.to_dict(), selected=a.animal_id)), sm=True) }}
@@ -182,7 +182,7 @@
             <div class="an-qa">
               <a class="an-btn primary" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">View QR Code</a>
               <a class="an-btn" href="{{ url_for('vaccination_new', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Add vaccination">Add Vaccination</a>
-              <a class="an-btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}">Edit Animal</a>
+              <a class="an-btn" href="{{ url_for('animal_edit', animal_id=a.animal_id) }}" data-modal-form data-modal-title="Edit animal">Edit Animal</a>
               <a class="an-btn" href="{{ url_for('animal_id_tag', animal_id=a.animal_id) }}">Print ID</a>
             </div>
             <div class="an-qfoot">
