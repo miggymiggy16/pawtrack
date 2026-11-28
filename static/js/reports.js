@@ -5,6 +5,19 @@
     adv.setAttribute('aria-expanded', open); panel.hidden = !open;
   });
 
+  // Vaccination Status lives in its own GET form: a change reloads the page with ?status=...
+  // Bound before the table check so an empty report still has a working dropdown.
+  var statusSel = document.getElementById('rptStatus');
+  if (statusSel && statusSel.form) {
+    var statusShown = statusSel.value;   // the value this page was rendered with
+    statusSel.addEventListener('change', function () {
+      if (statusSel.value === statusShown) return;
+      // "All Vaccinations" adds no filter, so drop the blank status= from the URL
+      statusSel.disabled = !statusSel.value;
+      statusSel.form.submit();
+    });
+  }
+
   var table = document.getElementById('rptTable'); if (!table) return;
   var groups = Array.from(table.tBodies, function (tb) {
     var head = tb.querySelector('.rpt-ghead');
@@ -80,13 +93,6 @@
     }
   }
 
-  // Vaccination Status lives in its own GET form: a change reloads the page with ?status=...
-  var statusSel = document.getElementById('rptStatus');
-  if (statusSel && statusSel.form) statusSel.addEventListener('change', function () {
-    // "All Vaccinations" adds no filter, so drop the blank status= from the URL
-    statusSel.disabled = !statusSel.value;
-    statusSel.form.submit();
-  });
   groups.forEach(function (g) {
     if (g.btn) g.btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
   });
