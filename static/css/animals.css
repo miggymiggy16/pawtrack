@@ -548,6 +548,74 @@
 .an-del:hover {
   text-decoration:underline;
 }
+/* history pane: animal, owner and vaccination status in one compact panel */
+.an-hist {
+  display:grid;
+  gap:14px;
+}
+.an-hsec {
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px;
+  background:rgba(22,48,92,.12);
+}
+.an-hist h4 {
+  margin:0 0 10px;
+  font-size:.74rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.an-hrow {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px;
+}
+.an-hkv {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px 18px;
+  margin:0;
+}
+.an-hkv dt {
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:600;
+}
+.an-hkv dd {
+  margin:3px 0 0;
+  font-size:.9rem;
+  font-weight:700;
+  overflow-wrap:anywhere;
+}
+.an-hkv dd small {
+  display:block;
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:600;
+}
+.an-hkv .an-own,
+.an-hkv .an-vax {
+  padding:2px 10px;
+  font-size:.72rem;
+}
+.an-hsec .an-muted {
+  margin:0;
+  font-size:.86rem;
+}
+:root[data-theme="light"] .an-hsec {
+  background:#EAF0FB;
+}
+@media(max-width:900px) {
+  .an-hrow {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .an-hkv {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
 /* vaccination pane: this animal's own record */
 .an-ptitle {
   display:flex;
