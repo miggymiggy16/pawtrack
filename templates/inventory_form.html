@@ -3,7 +3,7 @@
 {% block title %}{{ 'Edit Item' if editing else 'Add Item' }}{% endblock %}
 {% block body_class %}ef-page{% endblock %}
 
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory_form.css') }}">
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory_form.css') }}?v=20261129b">
 {% endblock %}
 
 {% block content %}
@@ -17,34 +17,33 @@
 
   {# ---------- Basic information ---------- #}
   <section class="ef-card">
-    <div class="ef-top">
-      <div class="ef-main">
-        <div class="ef-shead"><span class="ef-sico">{{ icon('box') }}</span><h2>Basic Information</h2><span class="ef-rule"></span></div>
-        <div class="ef-grid">
-          <div class="ef-field"><label class="ef-lbl" for="item_name">{{ icon('tag') }}Item name <span class="ef-req">*</span></label>
-            <input id="item_name" name="item_name" value="{{ form.item_name }}" placeholder="e.g. Anti-Rabies Vaccine" required></div>
-          <div class="ef-field"><label class="ef-lbl" for="unit">{{ icon('pill') }}Unit <span class="ef-req">*</span></label>
-            <select id="unit" name="unit" required>
-              <option value="">Choose unit...</option>
-              <option {{ 'selected' if form.unit=='pcs' }}>pcs</option>
-              <option {{ 'selected' if form.unit=='vials' }}>vials</option>
-              <option {{ 'selected' if form.unit=='boxes' }}>boxes</option>
-              <option {{ 'selected' if form.unit=='bottles' }}>bottles</option>
-              <option {{ 'selected' if form.unit=='tablets' }}>tablets</option>
-              <option {{ 'selected' if form.unit=='sacks' }}>sacks</option>
-            </select></div>
-          <div class="ef-field"><label class="ef-lbl" for="category">{{ icon('grid') }}Category <span class="ef-req">*</span></label>
-            <select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
-          <div class="ef-field"><label class="ef-lbl" for="min_stock">{{ icon('alert') }}Minimum stock level</label>
-            <input id="min_stock" name="min_stock" type="number" min="0" step="1" value="{{ form.min_stock }}"></div>
-          <div class="ef-field"><label class="ef-lbl" for="quantity">{{ icon('plus') }}Quantity</label>
-            <input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
-          <div class="ef-field"><label class="ef-lbl" for="expiration_date">{{ icon('calendar') }}Expiration date</label>
-            <input id="expiration_date" name="expiration_date" type="date" data-allow-future value="{{ form.expiration_date }}">
-            <small class="ef-help">Leave empty for items that do not expire.</small></div>
-        </div>
+    <div class="ef-shead"><span class="ef-sico">{{ icon('box') }}</span><h2>Basic Information</h2><span class="ef-rule"></span></div>
+    <div class="ef-grid">
+      <div class="ef-col">
+        <div class="ef-field"><label class="ef-lbl" for="item_name">{{ icon('tag') }}Item name <span class="ef-req">*</span></label>
+          <input id="item_name" name="item_name" value="{{ form.item_name }}" placeholder="e.g. Anti-Rabies Vaccine" required></div>
+        <div class="ef-field"><label class="ef-lbl" for="category">{{ icon('grid') }}Category <span class="ef-req">*</span></label>
+          <select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
+        <div class="ef-field"><label class="ef-lbl" for="min_stock">{{ icon('alert') }}Minimum stock level</label>
+          <input id="min_stock" name="min_stock" type="number" min="0" step="1" value="{{ form.min_stock }}"></div>
       </div>
-
+      <div class="ef-col">
+        <div class="ef-field"><label class="ef-lbl" for="unit">{{ icon('pill') }}Unit <span class="ef-req">*</span></label>
+          <select id="unit" name="unit" required>
+            <option value="">Choose unit...</option>
+            <option {{ 'selected' if form.unit=='pcs' }}>pcs</option>
+            <option {{ 'selected' if form.unit=='vials' }}>vials</option>
+            <option {{ 'selected' if form.unit=='boxes' }}>boxes</option>
+            <option {{ 'selected' if form.unit=='bottles' }}>bottles</option>
+            <option {{ 'selected' if form.unit=='tablets' }}>tablets</option>
+            <option {{ 'selected' if form.unit=='sacks' }}>sacks</option>
+          </select></div>
+        <div class="ef-field"><label class="ef-lbl" for="quantity">{{ icon('plus') }}Quantity</label>
+          <input id="quantity" name="quantity" type="number" min="0" step="1" value="{{ form.quantity }}" {{ 'readonly' if editing }}></div>
+        <div class="ef-field"><label class="ef-lbl" for="expiration_date">{{ icon('calendar') }}Expiration date</label>
+          <input id="expiration_date" name="expiration_date" type="date" data-allow-future value="{{ form.expiration_date }}">
+          <small class="ef-help">Leave empty for items that do not expire.</small></div>
+      </div>
       <aside class="ef-photo">
         <label class="ef-lbl" for="image">{{ icon('image') }}Product picture</label>
         <label class="dropzone" for="image">
@@ -74,7 +73,7 @@
   {# ---------- Pricing ---------- #}
   <section class="ef-card">
     <div class="ef-shead"><span class="ef-sico">{{ icon('percent') }}</span><h2>Pricing</h2><span class="ef-rule"></span></div>
-    <div class="ef-grid">
+    <div class="ef-grid ef-2col">
       <div class="ef-field"><label class="ef-lbl" for="unit_cost">{{ icon('tag') }}Unit cost (&#8369;)</label>
         <input id="unit_cost" name="unit_cost" type="number" inputmode="decimal" min="0" step="0.01" data-money value="{{ form.unit_cost if form.unit_cost is string else '%.2f'|format(form.unit_cost|float) }}">
         <small class="ef-help">Price of one unit in pesos, e.g. 150.00 (not cents).</small></div>
@@ -89,7 +88,7 @@
   {# ---------- Vaccine details (shown only for the Vaccines category) ---------- #}
   <section class="ef-card" data-vaccine-only {{ 'hidden' if form.category != 'Vaccines' }}>
     <div class="ef-shead"><span class="ef-sico">{{ icon('syringe') }}</span><h2>Vaccine Details</h2><span class="ef-rule"></span></div>
-    <div class="ef-grid">
+    <div class="ef-grid ef-2col">
       <div class="ef-field"><label class="ef-lbl" for="vaccine_type">{{ icon('syringe') }}Vaccine type</label>
         <input id="vaccine_type" name="vaccine_type" list="vtypes" value="{{ form.vaccine_type }}" placeholder="e.g. Rabies"><datalist id="vtypes">{% for v in vaccine_types %}<option value="{{ v }}">{% endfor %}</datalist>
         <small class="ef-help">For vaccines only.</small></div>

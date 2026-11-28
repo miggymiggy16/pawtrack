@@ -10,10 +10,32 @@
   var titleEl = dlg.querySelector('[data-fm-title]');
   var opener = null;
   var scriptNodes = [];
+  var linkNodes = [];
 
   function clearScripts() {
     scriptNodes.forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
     scriptNodes = [];
+    linkNodes.forEach(function (n) { if (n.parentNode) n.parentNode.removeChild(n); });
+    linkNodes = [];
+  }
+
+  // Load any stylesheet the form page declares in <head> so its page-scoped
+  // styles apply inside the popup (e.g. inventory_form.css for Add Item).
+  function loadStyles(doc) {
+    var loaded = {};
+    Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"]'), function (l) {
+      loaded[l.href] = true;
+    });
+    Array.prototype.forEach.call(doc.querySelectorAll('link[rel="stylesheet"]'), function (l) {
+      var href = l.href;
+      if (!href || loaded[href]) return;
+      var node = document.createElement('link');
+      node.rel = 'stylesheet';
+      node.href = href;
+      document.head.appendChild(node);
+      loaded[href] = true;
+      linkNodes.push(node);
+    });
   }
 
   function close() {
@@ -79,6 +101,7 @@
     dlg.className = ('fm-dialog ' + doc.body.className.trim()).trim();   // keep page-scoped form styles (af-page)
     clearScripts();
     body.innerHTML = content.innerHTML;
+    loadStyles(doc);
     runScripts(doc);
     if (window.pawInitAnimalPicker) window.pawInitAnimalPicker(body);   // searchable animal picker in the popup
     bind(pageUrl);                                                    // after the picker, so its checks run first
