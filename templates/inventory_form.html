@@ -24,7 +24,15 @@
           <div class="ef-field"><label class="ef-lbl" for="item_name">{{ icon('tag') }}Item name <span class="ef-req">*</span></label>
             <input id="item_name" name="item_name" value="{{ form.item_name }}" placeholder="e.g. Anti-Rabies Vaccine" required></div>
           <div class="ef-field"><label class="ef-lbl" for="unit">{{ icon('pill') }}Unit <span class="ef-req">*</span></label>
-            <input id="unit" name="unit" value="{{ form.unit }}" placeholder="e.g. vials, pcs, boxes" required></div>
+            <select id="unit" name="unit" required>
+              <option value="">Choose unit...</option>
+              <option {{ 'selected' if form.unit=='pcs' }}>pcs</option>
+              <option {{ 'selected' if form.unit=='vials' }}>vials</option>
+              <option {{ 'selected' if form.unit=='boxes' }}>boxes</option>
+              <option {{ 'selected' if form.unit=='bottles' }}>bottles</option>
+              <option {{ 'selected' if form.unit=='tablets' }}>tablets</option>
+              <option {{ 'selected' if form.unit=='sacks' }}>sacks</option>
+            </select></div>
           <div class="ef-field"><label class="ef-lbl" for="category">{{ icon('grid') }}Category <span class="ef-req">*</span></label>
             <select id="category" name="category">{% for c in categories %}<option {{ 'selected' if form.category==c }}>{{ c }}</option>{% endfor %}</select></div>
           <div class="ef-field"><label class="ef-lbl" for="min_stock">{{ icon('alert') }}Minimum stock level</label>
