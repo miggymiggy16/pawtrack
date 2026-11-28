@@ -20,9 +20,11 @@
   <div class="sl-field"><label for="cashier">Cashier</label><select id="cashier" name="cashier"><option value="">All</option>{% for c in cashiers %}<option {{ 'selected' if args.cashier==c }}>{{ c }}</option>{% endfor %}</select></div>
   <div class="sl-field"><label for="payment">Payment Method</label><select id="payment" name="payment"><option value="">All</option>{% for p in payments %}<option {{ 'selected' if args.payment==p }}>{{ p }}</option>{% endfor %}</select></div>
   <div class="sl-field"><label for="status">Status</label><select id="status" name="status"><option value="">All</option>{% for st in ['Completed','Voided'] %}<option {{ 'selected' if args.status==st }}>{{ st }}</option>{% endfor %}</select></div>
-  <div class="sl-field"><label class="sr" for="q">Search transactions</label>
-    <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Search transaction..."></div></div>
-  <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('sales_list') }}">Reset</a></div>
+  <div class="sl-filters-tail">
+    <div class="sl-field sl-field-search"><label class="sr" for="q">Search transactions</label>
+      <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Search transaction..."></div></div>
+    <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('sales_list') }}">Reset</a></div>
+  </div>
 </form>
 
 <div class="sl-stats">

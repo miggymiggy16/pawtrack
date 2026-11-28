@@ -38,10 +38,22 @@
 /* filters */
 .sl-filters {
   display:grid;
-  grid-template-columns:repeat(5,minmax(0,1fr)) minmax(190px,1.35fr) auto;
-  gap:14px;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:14px 16px;
   align-items:end;
   padding:16px 18px;
+}
+/* search and actions sit on their own slim row under the filters */
+.sl-filters-tail {
+  grid-column:1/-1;
+  display:flex;
+  align-items:flex-end;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.sl-field-search {
+  flex:0 1 320px;
+  max-width:320px;
 }
 .sl-field {
   display:flex;
@@ -77,9 +89,12 @@ body.sales-page .sl-search-box input,body.my-sales-page .sl-search-box input {
   display:flex;
   gap:10px;
   align-items:center;
+  margin-left:auto;
 }
 .sl-filter-btns .btn {
   justify-content:center;
+  padding-left:20px;
+  padding-right:20px;
 }
 /* stat cards */
 .sl-stats {
@@ -422,10 +437,6 @@ body.sales-page .sl-search-box input,body.my-sales-page .sl-search-box input {
   .sl-filters {
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
-  .sl-filter-btns {
-    grid-column:1/-1;
-    justify-content:flex-end;
-  }
 }
 @media(max-width:760px) {
   .sl-head h1 {
@@ -447,6 +458,13 @@ body.sales-page .sl-search-box input,body.my-sales-page .sl-search-box input {
   }
 }
 @media(max-width:560px) {
+  .sl-field-search {
+    flex:1 1 100%;
+    max-width:none;
+  }
+  .sl-filter-btns {
+    width:100%;
+  }
   .sl-filter-btns .btn {
     flex:1;
   }

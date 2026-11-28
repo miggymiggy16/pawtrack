@@ -4,9 +4,7 @@
 {% block body_class %}my-sales-page{% endblock %}
 
 {% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/pos_sales.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/pos_sales.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/_sales_style.css') }}">
-{% endblock %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/_sales_style.css') }}">{% endblock %}
 
 {% block content %}
 <div class="sl-head">
@@ -20,9 +18,11 @@
 <form class="card sl-filters" method="get">
   <div class="sl-field"><label for="date_from">From</label><input id="date_from" type="date" name="date_from" value="{{ args.date_from }}"></div>
   <div class="sl-field"><label for="date_to">To</label><input id="date_to" type="date" name="date_to" value="{{ args.date_to }}"></div>
-  <div class="sl-field"><label class="sr" for="q">Search sales</label>
-    <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer or item"></div></div>
-  <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('pos_my_sales') }}">Today</a></div>
+  <div class="sl-filters-tail">
+    <div class="sl-field sl-field-search"><label class="sr" for="q">Search sales</label>
+      <div class="sl-search-box">{{ icon('search') }}<input id="q" name="q" value="{{ args.q }}" placeholder="Sale no., customer or item"></div></div>
+    <div class="sl-filter-btns"><button class="btn" type="submit">Apply</button><a class="btn ghost" href="{{ url_for('pos_my_sales') }}">Today</a></div>
+  </div>
 </form>
 
 <div class="sl-stats">
