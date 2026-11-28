@@ -212,66 +212,33 @@
   padding:14px 18px;
   margin-bottom:18px;
 }
-.rpt-frow {
+.rpt-fbar {
   display:flex;
-  gap:14px;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
   flex-wrap:wrap;
-  align-items:flex-end;
-}
-.rpt-frow .field {
-  flex:0 1 190px;
-  min-width:150px;
-}
-.rpt-frow .rpt-flabel {
-  font-size:.66rem;
-  letter-spacing:.09em;
-  text-transform:uppercase;
-  color:var(--muted);
-  font-weight:700;
-  padding-bottom:11px;
-}
-.rpt-frow .field>label {
-  display:block;
-  font-size:.76rem;
-  color:var(--muted);
-  margin:0 0 6px;
-  font-weight:600;
-}
-.rpt-frow input,.rpt-frow select {
-  width:100%;
-  background:var(--surface-2);
-  border:1px solid var(--line);
-  border-radius:9px;
-  padding:8px 12px;
-  color:var(--white);
-  font-size:.87rem;
-  margin:0;
-}
-.rpt-frow input[type=date] {
-  min-width:140px;
-}
-.rpt-fbtn {
-  display:flex;
-  gap:8px;
-  margin-left:auto;
-  padding-bottom:1px;
 }
 .rpt-advb {
   display:inline-flex;
   align-items:center;
-  gap:6px;
-  margin-left:10px;
-  border:0;
-  background:none;
-  color:var(--muted);
-  font-size:.78rem;
+  gap:8px;
+  padding:9px 16px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface-2);
+  color:var(--white);
   font-weight:600;
+  font-size:.85rem;
+  line-height:1.2;
   cursor:pointer;
-  padding:0 0 11px;
+}
+.rpt-advb:hover {
+  background:rgba(255,255,255,.07);
 }
 .rpt-advb .ico {
-  width:14px;
-  height:14px;
+  width:15px;
+  height:15px;
   transition:transform .15s;
 }
 .rpt-advb[aria-expanded=true] .ico {
@@ -281,13 +248,43 @@
   display:flex;
   gap:14px;
   flex-wrap:wrap;
+  align-items:flex-end;
   padding-top:14px;
   margin-top:14px;
   border-top:1px solid var(--line);
 }
+.rpt-adv-panel[hidden] {
+  display:none;
+}
 .rpt-adv-panel .field {
-  flex:0 1 220px;
-  min-width:160px;
+  flex:0 1 190px;
+  min-width:150px;
+}
+.rpt-adv-panel .field>label {
+  display:block;
+  font-size:.76rem;
+  color:var(--muted);
+  margin:0 0 6px;
+  font-weight:600;
+}
+.rpt-adv-panel input,.rpt-adv-panel select {
+  width:100%;
+  background:var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:8px 12px;
+  color:var(--white);
+  font-size:.87rem;
+  margin:0;
+}
+.rpt-adv-panel input[type=date] {
+  min-width:140px;
+}
+.rpt-fbtn {
+  display:flex;
+  gap:8px;
+  margin-left:auto;
+  padding-bottom:1px;
 }
 .rpt-card {
   background:var(--panel);
@@ -335,7 +332,6 @@
   color:var(--white);
 }
 .rpt-search {
-  margin-left:auto;
   display:flex;
   align-items:center;
   gap:8px;
@@ -344,6 +340,7 @@
   border-radius:10px;
   padding:7px 12px;
   min-width:240px;
+  cursor:text;
 }
 .rpt-search input {
   border:0;
@@ -360,6 +357,48 @@
   height:16px;
   color:var(--muted);
   flex:0 0 auto;
+}
+/* icon-only search that opens on click/focus */
+.rpt-searchonly {
+  width:46px;
+  min-width:0;
+  height:40px;
+  padding:0;
+  justify-content:center;
+  overflow:hidden;
+  border-color:rgba(76,123,234,.45);
+  background:rgba(76,123,234,.10);
+  transition:width .18s ease,border-color .15s,background .15s;
+}
+.rpt-searchonly .ico {
+  width:19px;
+  height:19px;
+  color:var(--white);
+  opacity:.9;
+}
+.rpt-searchonly:hover {
+  border-color:rgba(76,123,234,.85);
+  background:rgba(76,123,234,.18);
+}
+.rpt-searchonly input {
+  width:0;
+  opacity:0;
+  transition:opacity .12s;
+}
+.rpt-searchonly.open {
+  width:300px;
+  padding:7px 12px;
+  justify-content:flex-start;
+  cursor:text;
+  background:var(--surface-2);
+  border-color:var(--line);
+}
+.rpt-searchonly.open .ico {
+  color:var(--muted);
+}
+.rpt-searchonly.open input {
+  width:100%;
+  opacity:1;
 }
 .rpt-twrap {
   overflow-x:auto;
@@ -580,11 +619,14 @@ tbody.closed .rpt-gbtn .ico {
   .rpt-stats {
     grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
   }
-  .rpt-search {
-    margin-left:0;
-    width:100%;
+  .rpt-fbar {
+    align-items:stretch;
   }
-  .rpt-frow .field {
+  .rpt-searchonly.open {
+    flex:1 1 100%;
+    width:auto;
+  }
+  .rpt-adv-panel .field {
     flex:1 1 100%;
   }
   .rpt-fbtn {
