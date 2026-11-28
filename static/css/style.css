@@ -1673,7 +1673,7 @@ html.fm-open{overflow:hidden}
   --shell-shadow:0 30px 64px -34px rgba(16,32,60,.28);
   --rail-bg:linear-gradient(180deg,rgba(20,55,99,.82) 0%,rgba(10,33,64,.82) 100%);
   --topbar-bg:rgba(210,220,236,.62);
-  --panel:rgba(224,232,244,.62);
+  --panel:rgba(198,210,230,.68);
   --panel-line:rgba(255,255,255,.85);
 }
 
@@ -2050,7 +2050,7 @@ body{
   --control-shadow:0 6px 16px -12px rgba(0,0,0,.45);
 }
 :root[data-theme="light"]{
-  --surface-glass:rgba(212,222,238,.62);
+  --surface-glass:rgba(196,209,230,.68);
   --surface-line:rgba(255,255,255,.90);
   --surface-shadow:0 10px 24px -18px rgba(16,32,60,.20);
   --control-line:rgba(255,255,255,.80);
@@ -2248,7 +2248,7 @@ body{
 :root[data-theme] .ap-card,
 :root[data-theme] .auth-box,
 :root[data-theme] .auth-card form{
-  background:rgba(210,220,236,.58) !important;
+  background:rgba(192,205,226,.66) !important;
   border-color:rgba(255,255,255,.90) !important;
   box-shadow:0 10px 24px -16px rgba(16,32,60,.28) !important;
   backdrop-filter:blur(10px) saturate(130%) !important;
