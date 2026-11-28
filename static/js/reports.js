@@ -84,16 +84,8 @@
     if (g.btn) g.btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
   });
   box.addEventListener('input', function () { term = box.value.trim().toLowerCase(); page = 1; render(); });
-  var searchBox = document.getElementById('rptSearchBox');
-  if (searchBox) {
-    var openSearch = function (on) { searchBox.classList.toggle('open', on); };
-    searchBox.addEventListener('click', function () { openSearch(true); box.focus(); });
-    box.addEventListener('focus', function () { openSearch(true); });
-    box.addEventListener('blur', function () { if (!box.value) openSearch(false); });
-    // the search lives inside the filter form: never submit it on Enter
-    box.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
-    if (box.value) openSearch(true);
-  }
+  // the search lives inside the filter form: never submit it on Enter
+  box.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
   window.addEventListener('beforeprint', function () {
     rows.forEach(function (r) { r.hidden = !matches(r); });
     groups.forEach(function (g) {

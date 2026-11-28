@@ -13,7 +13,7 @@
 
 
 
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}">
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/reports.css') }}?v=20261128">
 {% endblock %}
 
 {% block content %}
@@ -62,7 +62,7 @@
 <form class="rpt-filters no-print" method="get">
   <input type="hidden" name="type" value="{{ kind }}">
   <div class="rpt-fbar">
-    <label class="rpt-search rpt-searchonly" id="rptSearchBox">{{ icon('search') }}<input id="rptSearch" type="search" placeholder="Search records..." autocomplete="off" aria-label="Search records"></label>
+    <label class="rpt-search" id="rptSearchBox">{{ icon('search') }}<input id="rptSearch" type="search" placeholder="Search records..." autocomplete="off" aria-label="Search records"></label>
     <button type="button" class="rpt-advb" data-adv aria-expanded="{{ 'true' if adv_open.v else 'false' }}" aria-controls="rpAdv">Advanced Filters{{ icon('chevron') }}</button>
   </div>
   <div class="rpt-adv-panel" id="rpAdv" {{ '' if adv_open.v else 'hidden' }}>
