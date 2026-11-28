@@ -1588,8 +1588,16 @@ html.fm-open{overflow:hidden}
 .fm-dialog[open]{display:flex;flex-direction:column}
 .fm-dialog::backdrop{background:rgba(8,20,40,.55)}
 .fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
-.fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white)}
+.fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white);flex:1}
+.fm-x{width:30px;height:30px;display:grid;place-items:center;flex:none;border:1px solid var(--line);
+  border-radius:50%;background:transparent;color:var(--white);font-size:1.3rem;line-height:1;cursor:pointer;padding:0}
+.fm-x:hover{background:rgba(128,128,128,.18)}
 .fm-body{padding:20px 22px 24px;overflow:auto;flex:1 1 auto}
+/* Detailed analytics reports shown inside the popup */
+.fm-body .summary-row{margin-top:0}
+.fm-body .chart-box{height:300px}
+.fm-body .chart-box.tall{height:360px}
+.fm-body .rpt-section h3{margin-top:0}
 .fm-body .page-head,
 .fm-body .ef-head{display:none}
 .fm-body .form-section{margin-bottom:18px}

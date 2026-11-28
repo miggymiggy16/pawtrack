@@ -14,7 +14,7 @@
   {% for row in t.rows %}<tr>{% for c in row %}<td>{% if c is mapping %}<a href="{{ c.href }}">{{ c.text }}</a>{% else %}{{ c }}{% endif %}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div>
   {% else %}<p class="empty">Nothing to show here yet.</p>{% endif %}</section>{% endfor %}
 
-<div class="actions"><a class="btn ghost" href="{{ url_for('analytics') }}">Back to Analytics</a></div>
+<div class="actions"><a class="btn ghost" href="{{ url_for('analytics') }}" data-fm-close>Back to Analytics</a></div>
 {% endblock %}
 {% block scripts %}
 {% if r.chart %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from '_macros.html' import icon %}
 {% block title %}Analytics{% endblock %}
 {% block content %}
 <div class="page-head"><div><h1>Business analytics</h1><p>All charts are calculated live from your PawTrack records.</p></div></div>
@@ -12,24 +13,24 @@
 
 <h2>Animal population</h2>
 <div class="grid g2">
-  <section class="card"><h3>Animals by species</h3><div class="chart-box"><canvas id="c1"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='species') }}">View Report</a></div></section>
-  <section class="card"><h3>Owned vs. stray</h3><div class="chart-box"><canvas id="c2"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='ownership') }}">View Report</a></div></section>
-  <section class="card"><h3>Animals by sex</h3><div class="chart-box"><canvas id="c3"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='sex') }}">View Report</a></div></section>
-  <section class="card"><h3>Animals by breed (top 10)</h3><div class="chart-box"><canvas id="c4"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='breed') }}">View Report</a></div></section>
+  <section class="card"><h3>Animals by species</h3><div class="chart-box"><canvas id="c1"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='species') }}" data-modal-form data-modal-title="Animals by Species">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Owned vs. stray</h3><div class="chart-box"><canvas id="c2"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='ownership') }}" data-modal-form data-modal-title="Animals by Ownership">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Animals by sex</h3><div class="chart-box"><canvas id="c3"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='sex') }}" data-modal-form data-modal-title="Animals by Sex">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Animals by breed (top 10)</h3><div class="chart-box"><canvas id="c4"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='breed') }}" data-modal-form data-modal-title="Animals by Breed">{{ icon('chart') }}View Report</a></div></section>
 </div>
 <h2>Vaccination</h2>
 <div class="grid g2">
-  <section class="card"><h3>Vaccination status of animals</h3><div class="chart-box"><canvas id="c5"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='status') }}">View Report</a></div></section>
-  <section class="card"><h3>Monitoring: upcoming, due today, overdue</h3><div class="chart-box"><canvas id="c6"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='monitoring') }}">View Report</a></div></section>
-  <section class="card"><h3>Vaccinations administered per month</h3><div class="chart-box"><canvas id="c7"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='trends') }}">View Report</a></div></section>
-  <section class="card"><h3>Most frequently administered vaccines</h3><div class="chart-box"><canvas id="c8"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='vaccines') }}">View Report</a></div></section>
-  <section class="card"><h3>Coverage by species (%)</h3><div class="chart-box"><canvas id="c9"></canvas></div></section>
-  <section class="card"><h3>Coverage by ownership (%)</h3><div class="chart-box"><canvas id="c10"></canvas></div></section>
+  <section class="card"><h3>Vaccination status of animals</h3><div class="chart-box"><canvas id="c5"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='status') }}" data-modal-form data-modal-title="Vaccination Status">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Monitoring: upcoming, due today, overdue</h3><div class="chart-box"><canvas id="c6"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='monitoring') }}" data-modal-form data-modal-title="Vaccination Monitoring">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Vaccinations administered per month</h3><div class="chart-box"><canvas id="c7"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='trends') }}" data-modal-form data-modal-title="Vaccination Trends">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Most frequently administered vaccines</h3><div class="chart-box"><canvas id="c8"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='vaccines') }}" data-modal-form data-modal-title="Most Administered Vaccines">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Coverage by species (%)</h3><div class="chart-box"><canvas id="c9"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='coverage-species') }}" data-modal-form data-modal-title="Vaccination Coverage by Species">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Coverage by ownership (%)</h3><div class="chart-box"><canvas id="c10"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='coverage-ownership') }}" data-modal-form data-modal-title="Vaccination Coverage by Ownership">{{ icon('chart') }}View Report</a></div></section>
 </div>
 <h2>Inventory</h2>
 <div class="grid g2">
-  <section class="card"><h3>Inventory value by category (&#8369;)</h3><div class="chart-box"><canvas id="c11"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-value') }}">View Report</a></div></section>
-  <section class="card"><h3>Inventory alerts</h3><div class="chart-box"><canvas id="c12"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-alerts') }}">View Report</a><a class="btn sm ghost" href="{{ url_for('analytics_report', key='vaccine-stock') }}">Vaccine stock report</a></div></section>
+  <section class="card"><h3>Inventory value by category (&#8369;)</h3><div class="chart-box"><canvas id="c11"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-value') }}" data-modal-form data-modal-title="Inventory Value by Category">{{ icon('chart') }}View Report</a></div></section>
+  <section class="card"><h3>Inventory alerts</h3><div class="chart-box"><canvas id="c12"></canvas></div><div class="actions" style="margin-top:14px"><a class="btn sm" href="{{ url_for('analytics_report', key='inventory-alerts') }}" data-modal-form data-modal-title="Inventory Alerts">{{ icon('chart') }}View Report</a><a class="btn sm ghost" href="{{ url_for('analytics_report', key='vaccine-stock') }}" data-modal-form data-modal-title="Vaccine Stock">Vaccine stock report</a></div></section>
 </div>
 {% endblock %}
 {% block scripts %}
