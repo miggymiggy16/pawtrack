@@ -1760,10 +1760,7 @@ body{
 :root[data-theme="light"] .an-name h2{color:var(--white)}
 :root[data-theme="light"] .an-meta{color:var(--muted)}
 :root[data-theme="light"] .an-photo{background:#EAF1FB;border-color:#fff}
-:root[data-theme="light"] .an-hero .an-vax{background:rgba(15,36,80,.06);border-color:rgba(15,36,80,.16);color:#5A6B84}
-:root[data-theme="light"] .an-hero .an-vax.st-vaccinated,:root[data-theme="light"] .an-hero .an-vax.st-up-to-date{background:#E3F6EC;border-color:#BFE6D2;color:#14693F}
-:root[data-theme="light"] .an-hero .an-vax.st-overdue{background:#FDEBEB;border-color:#F3C6C6;color:#B03030}
-:root[data-theme="light"] .an-hero .an-vax.st-upcoming,:root[data-theme="light"] .an-hero .an-vax.st-due-today{background:#FDF1E3;border-color:#F2D6B4;color:#8F5406}
+/* hero pills are frosted glass in both themes (styled in animals.css) */
 
 /* phones: keep the flat, full-width layouts */
 @media(max-width:900px){

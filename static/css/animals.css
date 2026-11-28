@@ -387,34 +387,21 @@
   border-color:rgba(245,160,74,.45);
   background:rgba(245,160,74,.1);
 }
-/* inside the navy hero the pills are solid, like the reference */
-.an-hero .an-own {
-  background:#1F9D61;
+/* inside the navy hero the pills are frosted glass — no solid colour fill */
+.an-hero .an-own,
+.an-hero .an-own.stray,
+.an-hero .an-vax,
+.an-hero .an-vax.st-vaccinated,
+.an-hero .an-vax.st-up-to-date,
+.an-hero .an-vax.st-overdue,
+.an-hero .an-vax.st-upcoming,
+.an-hero .an-vax.st-due-today {
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.35);
   color:#fff;
-}
-.an-hero .an-own.stray {
-  background:#C97A1E;
-  color:#fff;
-}
-.an-hero .an-vax {
-  background:rgba(255,255,255,.14);
-  border-color:rgba(255,255,255,.28);
-  color:#fff;
-}
-.an-hero .an-vax.st-vaccinated,.an-hero .an-vax.st-up-to-date {
-  background:#1F9D61;
-  border-color:#1F9D61;
-  color:#fff;
-}
-.an-hero .an-vax.st-overdue {
-  background:#E2564C;
-  border-color:#E2564C;
-  color:#fff;
-}
-.an-hero .an-vax.st-upcoming,.an-hero .an-vax.st-due-today {
-  background:#C97A1E;
-  border-color:#C97A1E;
-  color:#fff;
+  box-shadow:0 4px 12px -6px rgba(0,0,0,.35);
+  backdrop-filter:blur(8px) saturate(125%);
+  -webkit-backdrop-filter:blur(8px) saturate(125%);
 }
 .an-meta {
   margin:10px 0 0;
@@ -763,13 +750,20 @@
   background:rgba(46,92,230,.12);
   color:#21459A;
 }
-:root[data-theme="light"] .an-hero .an-own {
-  background:#1F9D61;
-  color:#fff;
-}
-:root[data-theme="light"] .an-hero .an-own.stray {
-  background:#C97A1E;
-  color:#fff;
+:root[data-theme="light"] .an-hero .an-own,
+:root[data-theme="light"] .an-hero .an-own.stray,
+:root[data-theme="light"] .an-hero .an-vax,
+:root[data-theme="light"] .an-hero .an-vax.st-vaccinated,
+:root[data-theme="light"] .an-hero .an-vax.st-up-to-date,
+:root[data-theme="light"] .an-hero .an-vax.st-overdue,
+:root[data-theme="light"] .an-hero .an-vax.st-upcoming,
+:root[data-theme="light"] .an-hero .an-vax.st-due-today {
+  background:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.55);
+  color:#12203A;
+  box-shadow:0 4px 12px -6px rgba(16,32,60,.25);
+  backdrop-filter:blur(8px) saturate(125%);
+  -webkit-backdrop-filter:blur(8px) saturate(125%);
 }
 :root[data-theme="light"] .an-box {
   background:rgba(186,201,225,.78);
