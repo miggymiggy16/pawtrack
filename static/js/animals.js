@@ -23,8 +23,6 @@
       if (detail) detail.hidden = false;
       if (detail && window.matchMedia('(max-width:1100px)').matches) detail.scrollIntoView({behavior: 'smooth', block: 'start'});
     }
-    const close = detail && detail.querySelector('[data-close]');
-    if (close) close.addEventListener('click', () => { detail.hidden = true; });
     if (detail) detail.querySelectorAll('[data-tab]').forEach(t => {
       // Vaccination switches to this animal's own records
       t.addEventListener('click', () => activateTab(t.closest('.an-panel'), t.dataset.tab));

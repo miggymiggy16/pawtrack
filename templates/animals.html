@@ -137,7 +137,6 @@
         <button class="tab" type="button" data-tab="vaccination" aria-pressed="false">{{ icon('syringe') }}Vaccination{% if a.records %}<span class="cnt">{{ a.records|length }}</span>{% endif %}</button>
         <a class="tab" href="{{ url_for('animal_view', animal_id=a.animal_id) }}">{{ icon('clock') }}History</a>
         <a class="tab" href="{{ url_for('qr_view', animal_id=a.animal_id) }}">{{ icon('qr') }}QR Code</a>
-        <button class="an-close" type="button" data-close aria-label="Close details" title="Close details">{{ icon('x') }}</button>
       </nav>
 
       <div class="an-card">

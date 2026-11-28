@@ -261,26 +261,6 @@
   border-radius:18px;
   padding:20px 22px;
 }
-.an-close {
-  margin-left:auto;
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  border:1px solid var(--line);
-  background:var(--surface-2);
-  color:var(--muted);
-  display:grid;
-  place-items:center;
-  cursor:pointer;
-  padding:0;
-}
-.an-close:hover {
-  color:var(--white);
-}
-.an-close .ico {
-  width:16px;
-  height:16px;
-}
 .an-hero {
   position:relative;
   display:flex;
