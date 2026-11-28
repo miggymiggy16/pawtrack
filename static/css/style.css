@@ -151,7 +151,7 @@ td .btn{margin:2px 2px 2px 0}
 .qr-card img{width:100%;max-width:300px;image-rendering:pixelated}
 .qr-card h3{color:var(--navy);margin-top:10px}
 dialog{border:1px solid var(--light);border-radius:var(--radius);background:var(--deep);color:#fff;padding:24px;max-width:420px;width:92%}
-dialog::backdrop{background:rgba(5,10,28,.7)}
+dialog::backdrop{background:rgba(5,10,28,.48)}
 dialog .actions{justify-content:flex-end;margin-top:18px}
 .footer{padding:0 30px 24px;color:var(--muted);font-size:.8rem}
 
@@ -565,7 +565,7 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 :root[data-theme="light"] .nt-detail pre{background:rgba(15,36,80,.08)}
 /* dialog, auth, public QR page */
 :root[data-theme="light"] dialog{background:var(--panel);color:var(--white)}
-:root[data-theme="light"] dialog::backdrop{background:rgba(15,27,61,.5)}
+:root[data-theme="light"] dialog::backdrop{background:rgba(15,27,61,.30)}
 :root[data-theme="light"] .auth-card form{background:var(--panel)}
 :root[data-theme="light"] .public .hero{background:#16305C;color:#fff}
 :root[data-theme="light"] .public .hero h1,:root[data-theme="light"] .public .hero p{color:#fff}
@@ -1597,7 +1597,7 @@ html.fm-open{overflow:hidden}
   box-shadow:0 30px 80px rgba(6,14,30,.45);overflow:hidden}
 .fm-dialog:not([open]){display:none}
 .fm-dialog[open]{display:flex;flex-direction:column}
-.fm-dialog::backdrop{background:rgba(8,20,40,.55)}
+.fm-dialog::backdrop{background:rgba(8,20,40,.38)}
 .fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
 .fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white);flex:1}
 .fm-x{width:30px;height:30px;display:grid;place-items:center;flex:none;border:1px solid var(--line);
@@ -1645,33 +1645,42 @@ html.fm-open{overflow:hidden}
 :root{
   --shell-gap:18px;
   --shell-radius:26px;
-  --shell-bg:rgba(10,16,27,.66);
-  --shell-line:rgba(255,255,255,.10);
-  --shell-shadow:0 40px 90px -36px rgba(0,0,0,.9);
-  --rail-bg:linear-gradient(180deg,#142A47 0%,#07121F 100%);
-  --topbar-bg:rgba(12,17,27,.72);
-  --panel:rgba(24,29,38,.78);
+  --shell-bg:rgba(10,16,27,.10);
+  --shell-line:rgba(255,255,255,.22);
+  --shell-shadow:0 40px 90px -36px rgba(0,0,0,.4);
+  --rail-bg:linear-gradient(180deg,rgba(20,42,71,.45) 0%,rgba(7,18,31,.45) 100%);
+  --topbar-bg:rgba(12,17,27,.14);
+  --panel:rgba(24,29,38,.18);
 }
 :root[data-theme="light"]{
-  /* solid, soft off-white — no glass in light mode */
-  --shell-bg:#E9EDF5;
-  --shell-line:rgba(16,32,60,.14);
-  --shell-shadow:0 26px 56px -32px rgba(16,32,60,.30);
-  --rail-bg:linear-gradient(180deg,#143763 0%,#0A2140 100%);
-  --topbar-bg:#F4F6FA;
-  --panel:#FBFBFD;
-  --panel-line:rgba(16,32,60,.14);
+  /* frosted glass over the pale branded background */
+  --shell-bg:rgba(247,250,255,.10);
+  --shell-line:rgba(255,255,255,.90);
+  --shell-shadow:0 30px 64px -34px rgba(16,32,60,.14);
+  --rail-bg:linear-gradient(180deg,rgba(20,55,99,.42) 0%,rgba(10,33,64,.42) 100%);
+  --topbar-bg:rgba(250,252,255,.12);
+  --panel:rgba(255,255,255,.16);
+  --panel-line:rgba(255,255,255,.85);
 }
 
-/* soft sky photo behind the window */
-body{display:flow-root;background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
+/* Exact PawTrack branded backgrounds supplied for each theme.
+   The images already contain the pet photo, paw prints and curved shapes. */
+body{
+  display:flow-root;
+  background-color:#E9EFF8;
+  background-image:url("../img/theme-light-bg.jpg?v=1");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+}
 :root[data-theme="light"] body{
-  background-color:#E4EAF4;
-  background-image:linear-gradient(180deg,rgba(232,238,248,.85),rgba(214,226,242,.75));
+  background-color:#E9EFF8;
+  background-image:url("../img/theme-light-bg.jpg?v=1");
 }
 :root[data-theme="dark"] body{
-  background-color:#050B16;
-  background-image:linear-gradient(180deg,rgba(5,12,26,.62),rgba(6,20,44,.74)),url("../img/app-bg.jpg?v=3");
+  background-color:#16233B;
+  background-image:url("../img/theme-dark-bg.jpg?v=1");
 }
 
 /* the window itself */
@@ -1685,10 +1694,9 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
   border:1px solid var(--shell-line);
   box-shadow:var(--shell-shadow);
   overflow:hidden;
-  backdrop-filter:blur(30px) saturate(150%);
-  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  backdrop-filter:blur(5px) saturate(115%);
+  -webkit-backdrop-filter:blur(5px) saturate(115%);
 }
-:root[data-theme="light"] .app{backdrop-filter:none;-webkit-backdrop-filter:none}
 .main{margin-left:calc(var(--rail-w) + 28px);height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
 .main::-webkit-scrollbar{width:10px}
 .main::-webkit-scrollbar-thumb{background:rgba(15,36,80,.18);border-radius:99px;border:3px solid transparent;background-clip:content-box}
@@ -1703,8 +1711,8 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 
 /* top bar: frosted strip that stops at the window edge */
 .topbar{top:0;background:var(--topbar-bg);border-bottom:1px solid var(--shell-line);border-radius:0 var(--shell-radius) 0 0;
-  backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
-:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:var(--shell-line);backdrop-filter:none;-webkit-backdrop-filter:none}
+  backdrop-filter:blur(4px) saturate(115%);-webkit-backdrop-filter:blur(4px) saturate(115%)}
+:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:var(--shell-line)}
 
 /* glass panels */
 :root[data-theme="light"] .card,:root[data-theme="light"] .stat,:root[data-theme="light"] .band,
@@ -1766,10 +1774,53 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] .btn:hover{background:var(--btn-hover-bg);border-color:var(--btn-line);color:var(--btn-fg);filter:none}
 :root[data-theme] .btn.ghost{background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg);box-shadow:none;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-:root[data-theme="light"] .btn.ghost{backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-theme="light"] .btn.ghost{backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%)}
 :root[data-theme] .btn.ghost:hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg)}
 :root[data-theme] .btn.danger{background:var(--btn-soft-bg);border-color:rgba(176,48,48,.45);color:var(--bad);box-shadow:none}
 :root[data-theme] .btn.danger:hover{background:var(--btn-soft-bg);border-color:var(--bad);color:var(--bad)}
+/* Every button: frosted glass with a soft lift on hover and a pressed state */
+:root[data-theme] button,
+:root[data-theme] .btn,
+:root[data-theme] .an-btn,
+:root[data-theme] .ap-btn,
+:root[data-theme] .iv-btn,
+:root[data-theme] .ef-btn,
+:root[data-theme] .ma-btn,
+:root[data-theme] .rpt-btn,
+:root[data-theme] .rpt-act,
+:root[data-theme] .vm-filter-btn,
+:root[data-theme] .vm-act{
+  backdrop-filter:blur(10px) saturate(130%);
+  -webkit-backdrop-filter:blur(10px) saturate(130%);
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,filter .16s ease;
+}
+:root[data-theme] button:hover,
+:root[data-theme] .btn:hover,
+:root[data-theme] .an-btn:hover,
+:root[data-theme] .ap-btn:hover,
+:root[data-theme] .iv-btn:hover,
+:root[data-theme] .ef-btn:hover,
+:root[data-theme] .ma-btn:hover,
+:root[data-theme] .rpt-btn:hover,
+:root[data-theme] .rpt-act:hover,
+:root[data-theme] .vm-filter-btn:hover,
+:root[data-theme] .vm-act:hover{
+  box-shadow:0 14px 30px -18px rgba(6,14,30,.55);
+  filter:brightness(1.04);
+}
+:root[data-theme] button:active,
+:root[data-theme] .btn:active,
+:root[data-theme] .an-btn:active,
+:root[data-theme] .ap-btn:active,
+:root[data-theme] .iv-btn:active,
+:root[data-theme] .ef-btn:active,
+:root[data-theme] .ma-btn:active,
+:root[data-theme] .rpt-btn:active,
+:root[data-theme] .rpt-act:active{
+  box-shadow:0 4px 10px -6px rgba(6,14,30,.45);
+  transform:translateY(1px);
+  filter:brightness(.97);
+}
 
 /* animal page actions */
 :root[data-theme] body .an-btn{background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg)}
@@ -1978,18 +2029,18 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
    floating shadows — no blur, no glass.
    ====================================================================== */
 :root[data-theme="dark"]{
-  --surface-glass:rgba(24,29,38,.66);
-  --surface-line:rgba(255,255,255,.13);
-  --surface-shadow:0 20px 48px -34px rgba(0,0,0,.75);
-  --control-line:rgba(255,255,255,.12);
-  --control-shadow:0 6px 16px -12px rgba(0,0,0,.55);
+  --surface-glass:rgba(24,29,38,.42);
+  --surface-line:rgba(255,255,255,.16);
+  --surface-shadow:0 18px 42px -32px rgba(0,0,0,.6);
+  --control-line:rgba(255,255,255,.16);
+  --control-shadow:0 6px 16px -12px rgba(0,0,0,.45);
 }
 :root[data-theme="light"]{
-  --surface-glass:#FBFBFD;
-  --surface-line:rgba(16,32,60,.18);
-  --surface-shadow:0 10px 24px -18px rgba(16,32,60,.28);
-  --control-line:rgba(16,32,60,.18);
-  --control-shadow:0 4px 12px -10px rgba(16,32,60,.22);
+  --surface-glass:rgba(255,255,255,.42);
+  --surface-line:rgba(255,255,255,.85);
+  --surface-shadow:0 10px 24px -18px rgba(16,32,60,.20);
+  --control-line:rgba(255,255,255,.80);
+  --control-shadow:0 4px 12px -10px rgba(16,32,60,.16);
 }
 
 :root[data-theme] .card,
@@ -2016,29 +2067,29 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
   border-color:var(--surface-line);
   box-shadow:var(--surface-shadow);
 }
-/* Glass blur only in Dark Mode */
-:root[data-theme="dark"] .card,
-:root[data-theme="dark"] .stat,
-:root[data-theme="dark"] .band,
-:root[data-theme="dark"] .dcard,
-:root[data-theme="dark"] .kpi,
-:root[data-theme="dark"] .report-group,
-:root[data-theme="dark"] .nt-card,
-:root[data-theme="dark"] .dstat,
-:root[data-theme="dark"] .vm-card,
-:root[data-theme="dark"] .an-list,
-:root[data-theme="dark"] .an-box,
-:root[data-theme="dark"] .an-card,
-:root[data-theme="dark"] .an-pane,
-:root[data-theme="dark"] .rpt-card,
-:root[data-theme="dark"] .rpt-stat,
-:root[data-theme="dark"] .ef-card,
-:root[data-theme="dark"] .sl-panel,
-:root[data-theme="dark"] .sl-stat,
-:root[data-theme="dark"] .m-card,
-:root[data-theme="dark"] .ma-card{
-  backdrop-filter:blur(14px) saturate(130%);
-  -webkit-backdrop-filter:blur(14px) saturate(130%);
+/* Frosted glass blur on all surfaces in both themes */
+:root[data-theme] .card,
+:root[data-theme] .stat,
+:root[data-theme] .band,
+:root[data-theme] .dcard,
+:root[data-theme] .kpi,
+:root[data-theme] .report-group,
+:root[data-theme] .nt-card,
+:root[data-theme] .dstat,
+:root[data-theme] .vm-card,
+:root[data-theme] .an-list,
+:root[data-theme] .an-box,
+:root[data-theme] .an-card,
+:root[data-theme] .an-pane,
+:root[data-theme] .rpt-card,
+:root[data-theme] .rpt-stat,
+:root[data-theme] .ef-card,
+:root[data-theme] .sl-panel,
+:root[data-theme] .sl-stat,
+:root[data-theme] .m-card,
+:root[data-theme] .ma-card{
+  backdrop-filter:blur(9px) saturate(125%);
+  -webkit-backdrop-filter:blur(9px) saturate(125%);
 }
 
 :root[data-theme] button,
@@ -2067,36 +2118,33 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
   border-color:var(--control-line);
   box-shadow:var(--control-shadow);
 }
-/* faint blur on controls only in Dark Mode */
-:root[data-theme="dark"] button,
-/* Form controls keep a solid surface so overlaid icons (e.g. search) stay visible */
-:root[data-theme="dark"] input,
-:root[data-theme="dark"] select,
-:root[data-theme="dark"] textarea{
-  backdrop-filter:none;
-  -webkit-backdrop-filter:none;
-}
-:root[data-theme="dark"] .chip,
-:root[data-theme="dark"] .badge,
-:root[data-theme="dark"] .pill,
-:root[data-theme="dark"] .tabs a,
-:root[data-theme="dark"] .nav a,
-:root[data-theme="dark"] .nav button,
-:root[data-theme="dark"] .flash,
-:root[data-theme="dark"] .notif-panel,
-:root[data-theme="dark"] .pm-pop,
-:root[data-theme="dark"] .dropzone,
-:root[data-theme="dark"] .table-wrap,
-:root[data-theme="dark"] .kv,
-:root[data-theme="dark"] .an-tabs .tab,
-:root[data-theme="dark"] .ma-tabs a,
-:root[data-theme="dark"] .vm-tabs a,
-:root[data-theme="dark"] .rpt-subtabs a,
-:root[data-theme="dark"] .st-nav a,
-:root[data-theme="dark"] .dialog,
-:root[data-theme="dark"] .po-dialog{
-  backdrop-filter:blur(8px) saturate(120%);
-  -webkit-backdrop-filter:blur(8px) saturate(120%);
+/* faint frosted blur on all controls in both themes.
+   Search icons carry z-index:2, so they stay visible above these controls. */
+:root[data-theme] button,
+:root[data-theme] input,
+:root[data-theme] select,
+:root[data-theme] textarea,
+:root[data-theme] .chip,
+:root[data-theme] .badge,
+:root[data-theme] .pill,
+:root[data-theme] .tabs a,
+:root[data-theme] .nav a,
+:root[data-theme] .nav button,
+:root[data-theme] .flash,
+:root[data-theme] .notif-panel,
+:root[data-theme] .pm-pop,
+:root[data-theme] .dropzone,
+:root[data-theme] .table-wrap,
+:root[data-theme] .kv,
+:root[data-theme] .an-tabs .tab,
+:root[data-theme] .ma-tabs a,
+:root[data-theme] .vm-tabs a,
+:root[data-theme] .rpt-subtabs a,
+:root[data-theme] .st-nav a,
+:root[data-theme] .dialog,
+:root[data-theme] .po-dialog{
+  backdrop-filter:blur(6px) saturate(115%);
+  -webkit-backdrop-filter:blur(6px) saturate(115%);
 }
 
 /* ======================================================================
@@ -2130,19 +2178,8 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 }
 :root[data-theme="light"] th{background:#E4E9F3;color:#16305C}
 :root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:rgba(16,32,60,.14)}
-/* hard off: no glass blur anywhere in light mode */
-:root[data-theme="light"] .card,
-:root[data-theme="light"] .stat,
-:root[data-theme="light"] .band,
-:root[data-theme="light"] .topbar,
-:root[data-theme="light"] .app,
-:root[data-theme="light"] .btn.ghost{
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
-}
-
-/* Final system-wide guard: any leftover pure-white surface in Light Mode
-   becomes a soft off-white; borders stay visible; no glass in Light Mode. */
+/* Final system-wide guard: every surface becomes lightly translucent frosted
+   glass in Light Mode; borders stay visible and elements gently float. */
 :root[data-theme="light"] .sl-stat,
 :root[data-theme="light"] .sl-panel,
 :root[data-theme="light"] .st-sec,
@@ -2161,15 +2198,89 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme="light"] .vm-card,
 :root[data-theme="light"] .dstat,
 :root[data-theme="light"] .kpi{
-  background:#FBFBFD !important;
-  border-color:rgba(16,32,60,.18) !important;
-  box-shadow:0 8px 20px -16px rgba(16,32,60,.26) !important;
+  background:rgba(255,255,255,.40) !important;
+  border-color:rgba(255,255,255,.85) !important;
+  box-shadow:0 10px 26px -18px rgba(16,32,60,.20) !important;
+  backdrop-filter:blur(9px) saturate(125%) !important;
+  -webkit-backdrop-filter:blur(9px) saturate(125%) !important;
 }
-:root[data-theme="light"] .sl-panel,
-:root[data-theme="light"] .st-sec,
-:root[data-theme="light"] .card{
-  backdrop-filter:none !important;
-  -webkit-backdrop-filter:none !important;
+
+/* ======================================================================
+   FINAL GLASS PASS — make the pet background clearly visible through every
+   surface while keeping frosted glass on cards, panels and buttons.
+   ====================================================================== */
+:root[data-theme] .card,
+:root[data-theme] .stat,
+:root[data-theme] .band,
+:root[data-theme] .kpi,
+:root[data-theme] .report-group,
+:root[data-theme] .nt-card,
+:root[data-theme] .dstat,
+:root[data-theme] .vm-card,
+:root[data-theme] .an-list,
+:root[data-theme] .an-box,
+:root[data-theme] .an-card,
+:root[data-theme] .an-pane,
+:root[data-theme] .rpt-card,
+:root[data-theme] .rpt-stat,
+:root[data-theme] .ef-card,
+:root[data-theme] .sl-panel,
+:root[data-theme] .sl-stat,
+:root[data-theme] .m-card,
+:root[data-theme] .ma-card,
+:root[data-theme] .iv-card,
+:root[data-theme] .st-sec,
+:root[data-theme] .st-sum,
+:root[data-theme] .ap-card,
+:root[data-theme] .auth-box,
+:root[data-theme] .auth-card form{
+  background:rgba(255,255,255,.12) !important;
+  border-color:rgba(255,255,255,.70) !important;
+  box-shadow:0 8px 20px -16px rgba(6,14,30,.18) !important;
+  backdrop-filter:blur(5px) saturate(115%) !important;
+  -webkit-backdrop-filter:blur(5px) saturate(115%) !important;
+}
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .stat,
+:root[data-theme="dark"] .band,
+:root[data-theme="dark"] .kpi,
+:root[data-theme="dark"] .report-group,
+:root[data-theme="dark"] .nt-card,
+:root[data-theme="dark"] .dstat,
+:root[data-theme="dark"] .vm-card,
+:root[data-theme="dark"] .an-list,
+:root[data-theme="dark"] .an-box,
+:root[data-theme="dark"] .an-card,
+:root[data-theme="dark"] .an-pane,
+:root[data-theme="dark"] .rpt-card,
+:root[data-theme="dark"] .rpt-stat,
+:root[data-theme="dark"] .ef-card,
+:root[data-theme="dark"] .sl-panel,
+:root[data-theme="dark"] .sl-stat,
+:root[data-theme="dark"] .m-card,
+:root[data-theme="dark"] .ma-card,
+:root[data-theme="dark"] .iv-card,
+:root[data-theme="dark"] .st-sec,
+:root[data-theme="dark"] .st-sum,
+:root[data-theme="dark"] .ap-card,
+:root[data-theme="dark"] .auth-box,
+:root[data-theme="dark"] .auth-card form{
+  background:rgba(20,27,42,.12) !important;
+  border-color:rgba(175,205,245,.32) !important;
+  box-shadow:0 10px 24px -18px rgba(0,0,0,.35) !important;
+}
+/* frosted glass buttons that keep text readable */
+:root[data-theme] button,
+:root[data-theme] .btn,
+:root[data-theme] .an-btn,
+:root[data-theme] .ap-btn,
+:root[data-theme] .iv-btn,
+:root[data-theme] .ef-btn,
+:root[data-theme] .ma-btn,
+:root[data-theme] .rpt-btn,
+:root[data-theme] .rpt-act{
+  backdrop-filter:blur(10px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(10px) saturate(130%) !important;
 }
 
 @media print{
