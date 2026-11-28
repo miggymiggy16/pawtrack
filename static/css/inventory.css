@@ -592,6 +592,33 @@ body.inv-page .iv-sel select:focus {
   font-size: .82rem;
   margin-left: auto;
 }
+/* Keep the columns compact and aligned instead of stretching full width. */
+body.inv-page .iv-list-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+body.inv-page .iv-list-table th,
+body.inv-page .iv-list-table td {
+  padding: 9px 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Column widths: Item takes the remaining space, the rest are tight. */
+body.inv-page .iv-list-table th:nth-child(1),
+body.inv-page .iv-list-table td:nth-child(1) { width: 30%; }
+body.inv-page .iv-list-table th:nth-child(2),
+body.inv-page .iv-list-table td:nth-child(2) { width: 14%; }
+body.inv-page .iv-list-table th:nth-child(3),
+body.inv-page .iv-list-table td:nth-child(3) { width: 12%; }  /* Quantity */
+body.inv-page .iv-list-table th:nth-child(4),
+body.inv-page .iv-list-table td:nth-child(4) { width: 12%; }  /* Sell price */
+body.inv-page .iv-list-table th:nth-child(5),
+body.inv-page .iv-list-table td:nth-child(5) { width: 12%; }  /* Expiration */
+body.inv-page .iv-list-table th:nth-child(6),
+body.inv-page .iv-list-table td:nth-child(6) { width: 10%; }  /* Stock */
+body.inv-page .iv-list-table th:nth-child(7),
+body.inv-page .iv-list-table td:nth-child(7) { width: 10%; }  /* Expiry */
 .iv-list-table tbody tr.iv-open-detail {
   cursor: pointer;
   transition: background .12s;
