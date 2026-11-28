@@ -19,5 +19,5 @@
 {% block scripts %}
 {% if r.chart %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>window.PAW_REPORT = {{ r.chart|tojson }};</script>
-<script src="{{ url_for('static', filename='js/analytics_report.js') }}"></script>{% endif %}
+<script src="{{ url_for('static', filename='js/analytics_report.js') }}?v=20261129b"></script>{% endif %}
 {% endblock %}
