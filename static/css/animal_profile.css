@@ -2,10 +2,11 @@
 .ap-page{display:grid;gap:22px;max-width:1180px}
 .ap-hero{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
 .ap-who{display:flex;align-items:center;gap:22px;min-width:0}
-.ap-photo{width:128px;height:128px;border-radius:50%;overflow:hidden;flex:none;background:var(--royal);
-  border:3px solid #fff;box-shadow:0 0 0 1px var(--line);display:grid;place-items:center}
-.ap-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.ap-photo>span{font-size:2.7rem;font-weight:800;color:#fff}
+.ap-photo{width:128px;height:128px;border-radius:50%;overflow:hidden;flex:none;background:transparent;
+  display:block;padding:0}
+.ap-photo a{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}
+.ap-photo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border:0;padding:0}
+.ap-photo>span{display:grid;place-items:center;width:100%;height:100%;background:var(--royal);border-radius:50%;font-size:2.7rem;font-weight:800;color:#fff}
 .ap-titles{min-width:0}
 .ap-titles h1{font-size:2.6rem;font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0 0 8px}
 .ap-titles p{margin:0;color:var(--muted);font-size:1rem}
