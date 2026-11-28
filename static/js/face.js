@@ -84,7 +84,12 @@
       canvas.width = Math.round(width * scale);
       canvas.height = Math.round(height * scale);
       var context = canvas.getContext("2d");
+      // Mirror the captured frame to match the selfie-style preview.
+      context.save();
+      context.translate(canvas.width, 0);
+      context.scale(-1, 1);
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      context.restore();
       canvas.toBlob(function (blob) {
         if (blob) resolve(blob);
         else reject(new Error("Could not capture the camera image."));

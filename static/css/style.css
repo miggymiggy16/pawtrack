@@ -1392,7 +1392,7 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 .face-camera{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--radius-sm);
   overflow:hidden;background:rgba(8,20,45,.55);border:1px solid var(--line);margin:10px 0 14px}
 .face-camera video{width:100%;height:100%;object-fit:cover;display:none}
-.face-camera video.live{display:block}
+.face-camera video.live{display:block;transform:scaleX(-1)}
 .face-placeholder{position:absolute;inset:0;display:grid;place-items:center;text-align:center;
   color:var(--muted);font-size:.9rem;padding:18px}
 .face-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -1694,10 +1694,18 @@ body{
 :root[data-theme="light"] body{
   background-color:#E9EFF8;
   background-image:url("../img/theme-light-bg.jpg?v=1");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
 }
 :root[data-theme="dark"] body{
   background-color:#16233B;
   background-image:url("../img/theme-dark-bg.jpg?v=1");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
 }
 
 /* the window itself */
