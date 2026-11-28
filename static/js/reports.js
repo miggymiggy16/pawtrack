@@ -82,7 +82,11 @@
 
   // Vaccination Status lives in its own GET form: a change reloads the page with ?status=...
   var statusSel = document.getElementById('rptStatus');
-  if (statusSel && statusSel.form) statusSel.addEventListener('change', function () { statusSel.form.submit(); });
+  if (statusSel && statusSel.form) statusSel.addEventListener('change', function () {
+    // "All Vaccinations" adds no filter, so drop the blank status= from the URL
+    statusSel.disabled = !statusSel.value;
+    statusSel.form.submit();
+  });
   groups.forEach(function (g) {
     if (g.btn) g.btn.addEventListener('click', function () { g.closed = !g.closed; render(); });
   });
