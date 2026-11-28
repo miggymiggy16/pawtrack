@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from '_macros.html' import icon %}
+{% from '_macros.html' import icon, csrf %}
 {% block title %}Reports{% endblock %}
 
 {% macro tone(t) -%}
@@ -19,6 +19,8 @@
 {% block content %}
 {% set vax_kind = kind in ('vaccination', 'overdue', 'upcoming') %}
 {% set primary = report.sections|selectattr('primary')|first %}
+{% set ns = namespace(sub=[]) %}
+{% for _t, _i, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
 {% set adv_open = namespace(v=false) %}{% for f in filters %}{% if f != 'status' and args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
 {% set merge_id = primary.headers[0] == 'Animal ID' %}
 {% set st_idx = primary.headers.index('Status') if 'Status' in primary.headers else 0 %}
@@ -46,6 +48,8 @@
 <section class="no-print" aria-label="Report type">
   <nav class="rpt-tabs" aria-label="Report group">{% for gtitle, _i, kinds in groups %}
     <a href="{{ url_for('reports', type=kinds[0]) }}" class="{{ 'active' if kind in kinds }}"{% if kind in kinds %} aria-current="page"{% endif %}>{{ gtab.get(gtitle, gtitle) }}</a>{% endfor %}</nav>
+  {% if ns.sub|length > 1 %}<nav class="rpt-subtabs" aria-label="Report">{% for k in ns.sub %}
+    <a href="{{ url_for('reports', type=k) }}" class="{{ 'active' if kind == k }}"{% if kind == k %} aria-current="page"{% endif %}>{{ tab_labels[k] }}</a>{% endfor %}</nav>{% endif %}
 </section>
 
 {# 2. Summary cards #}
@@ -53,6 +57,25 @@
   <div class="rpt-stat {{ s.tone }}"><span class="l">{{ s.label }}</span><span class="n">{{ s.value }}</span>
     <span class="h">{{ 'Due now' if s.label == 'Due Today' and s.value else hints.get(s.label, '') }}</span></div>{% endfor %}
 </div>
+
+{# 3. Overdue call-out #}
+{% set sv = namespace(overdue=0) %}
+{% for s in report.summary %}
+  {% if s.label == 'Overdue' %}{% set sv.overdue = s.value|int %}{% endif %}
+{% endfor %}
+{% if sv.overdue %}
+<div class="rpt-alert no-print">{{ icon('alert') }}
+  <div><span class="t">{{ sv.overdue }} vaccination{{ ' is' if sv.overdue == 1 else 's are' }} overdue</span>
+    <span class="s">Notify owners so these animals can be vaccinated.</span></div>
+  {% if can('settings.manage') %}
+  <form method="post" action="{{ url_for('notification_check') }}">{{ csrf() }}
+    <input type="hidden" name="back" value="{{ url_for('reports', type=kind) }}">
+    <button type="submit">Send all reminders</button></form>
+  {% else %}
+  <a class="rpt-btn" href="{{ url_for('reports', type='overdue') }}">View overdue</a>
+  {% endif %}
+</div>
+{% endif %}
 
 {# 5. Filters #}
 <form class="rpt-filters no-print" method="get">

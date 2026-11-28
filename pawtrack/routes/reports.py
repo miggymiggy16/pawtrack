@@ -13,7 +13,8 @@ from ..helpers import _safe_cell, now_str
 from ..security import permission_required
 from ..services.reports import (FILTER_LABELS,
                                 REPORT_FILTERS, REPORT_GROUPS,
-                                REPORTS, build_report, pdf_report)
+                                REPORT_TAB_LABELS, REPORTS, build_report,
+                                pdf_report)
 from ..storage import get_settings, load
 
 
@@ -33,6 +34,7 @@ def reports():
     chips = [(FILTER_LABELS[k], v) for k, v in args.items() if v]
     animals = load("animals")
     return render_template("reports.html", kind=kind, reports=REPORTS, groups=REPORT_GROUPS, args=args, chips=chips,
+                           tab_labels=REPORT_TAB_LABELS,
                            generated=now_str(), report=build_report(kind, args),
                            filters=REPORT_FILTERS[kind], categories=CATEGORIES,
                            species=sorted({a["species"] for a in animals} | set(SPECIES_CHOICES)),
