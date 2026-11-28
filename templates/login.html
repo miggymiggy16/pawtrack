@@ -31,8 +31,10 @@
         <div class="field"><label for="username">Username</label><input id="username" name="username" autocomplete="username" required autofocus></div>
         <div class="field"><label for="password">Password</label>
           <div class="pw"><input id="password" name="password" type="password" autocomplete="current-password" required><button type="button" class="pw-eye" data-hold-pw="password" aria-label="Hold to show password" title="Hold to show password">{{ icon('eye') }}</button></div></div>
-        <button class="btn" type="submit">Log in</button>
-        <p style="margin-top:14px;text-align:right"><a href="{{ url_for('forgot_password') }}">Forgot password?</a></p>
+        <div class="auth-actions">
+          <button class="btn" type="submit">Log in</button>
+          <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+        </div>
       </form>
     </div>
     </div>
