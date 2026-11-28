@@ -119,7 +119,7 @@
           {% if vax_kind and m.notify and can('animals.edit') and row[st_idx] in ('Overdue','Due Today','Upcoming') %}
             <a class="rpt-btn" href="{{ m.notify }}">Remind</a>
           {% else %}
-            <a class="rpt-btn ghost" href="{{ m.href }}">View</a>
+            <a class="rpt-btn ghost" href="{{ m.href }}" data-modal-form data-modal-title="Record Details">View</a>
           {% endif %}
         </td>
       </tr>{% endfor %}
