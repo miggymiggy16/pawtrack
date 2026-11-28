@@ -55,16 +55,18 @@
   font-weight:600;
   font-size:.95rem;
   color:var(--muted);
-  border-bottom:2px solid transparent;
-  margin-bottom:-1px;
+  border-bottom:0;
+  margin-bottom:0;
   white-space:nowrap;
+  /* active indicator drawn inside the tab so the group rule line stays clean */
+  box-shadow:inset 0 -2px 0 transparent;
 }
 .rpt-tabs a:hover {
   color:var(--white);
 }
 .rpt-tabs a.active {
   color:var(--white);
-  border-bottom-color:#4C7BEA;
+  box-shadow:inset 0 -2px 0 var(--light);
 }
 .rpt-subtabs {
   display:flex;
@@ -83,9 +85,10 @@
 }
 .rpt-subtabs a.active {
   background:rgba(76,123,234,.16);
-  border-color:#4C7BEA;
+  border-color:var(--light);
   color:var(--white);
 }
+:root[data-theme="light"] .rpt-subtabs a.active{background:rgba(22,48,92,.1);color:var(--royal)}
 .rpt-stats {
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
