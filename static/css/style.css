@@ -487,13 +487,14 @@ dialog .actions{justify-content:flex-end;margin-top:18px}
    ====================================================================== */
 :root[data-theme="light"]{
   color-scheme:light;
-  --midnight:#FFFFFF; --navy:#0B0B0B; --deep:#FFFFFF; --panel:#FFFFFF;
-  --surface:#FFFFFF; --surface-2:#F2F4F8; --rail:#FFFFFF;
-  --white:#101010; --muted:#5A564D; --line:rgba(0,0,0,.13); --light:#16305C; --soft:#16305C;
+  /* soft off-white palette — no pure white across large areas */
+  --midnight:#F7F8FB; --navy:#0D1A2E; --deep:#F1F3F8; --panel:#FBFBFD;
+  --surface:#F4F6FA; --surface-2:#ECEFF5; --rail:#F7F8FB;
+  --white:#12203A; --muted:#5B6577; --line:rgba(16,32,60,.16); --light:#16305C; --soft:#16305C;
   --ok:#177A4E; --warn:#9A5406; --bad:#C0392B; --info:#16305C; --bad-bg:#C0392B;
-  --bs-body-color:#101010; --bs-body-color-rgb:16,16,16; --bs-heading-color:inherit;
-  --bs-emphasis-color:#101010; --bs-secondary-color:#5A564D; --bs-border-color:rgba(0,0,0,.13);
-  --shadow:none}
+  --bs-body-color:#12203A; --bs-body-color-rgb:18,32,58; --bs-heading-color:inherit;
+  --bs-emphasis-color:#12203A; --bs-secondary-color:#5B6577; --bs-border-color:rgba(16,32,60,.18);
+  --shadow:0 6px 16px -12px rgba(16,32,60,.18)}
 /* smooth, subtle transition only while toggling (never on first paint) */
 html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
   transition:background-color .25s ease,color .25s ease,border-color .25s ease,fill .25s ease,stroke .25s ease !important}
@@ -510,13 +511,13 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 .theme-btn.floating{position:fixed;top:16px;right:16px;z-index:40}
 .topbar .who{gap:12px}
 
-:root[data-theme="light"] body{background:#F5F7FA;background-attachment:fixed}
+:root[data-theme="light"] body{background:#EEF1F7;background-attachment:fixed}
 :root[data-theme="light"] a:hover{color:var(--royal)}
-:root[data-theme="light"] .band{background:#FFFFFF;color:#101010}
-:root[data-theme="light"] .topbar{background:#FFFFFF}
-:root[data-theme="light"] .card,:root[data-theme="light"] .report-group,:root[data-theme="light"] .nt-card{background:#FFFFFF}
-:root[data-theme="light"] .nt-card.read{background:#EFF4FB}
-:root[data-theme="light"] .stat{background:#FFFFFF}
+:root[data-theme="light"] .band{background:var(--panel);color:var(--white)}
+:root[data-theme="light"] .topbar{background:var(--panel)}
+:root[data-theme="light"] .card,:root[data-theme="light"] .report-group,:root[data-theme="light"] .nt-card{background:var(--panel)}
+:root[data-theme="light"] .nt-card.read{background:#E9EEF7}
+:root[data-theme="light"] .stat{background:var(--panel)}
 :root[data-theme="light"] .dstat.hero,:root[data-theme="light"] .dstat.hero .n{color:#fff}
 :root[data-theme="light"] .dstat.hero .l,:root[data-theme="light"] .dstat.hero .sub{color:#ECE9E2}
 :root[data-theme="light"] .dstat.hero{border-color:var(--royal)}
@@ -524,12 +525,12 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 :root[data-theme="light"] .dstat.hero .dico{background:rgba(255,255,255,.18)}
 :root[data-theme="light"] .dpets .pet:hover{color:var(--royal)}
 /* forms */
-:root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff;border-color:#E0DED7;color:var(--navy)}
-:root[data-theme="light"] input:focus,:root[data-theme="light"] select:focus,:root[data-theme="light"] textarea:focus{outline:3px solid rgba(15,36,80,.25);outline-offset:0}
-:root[data-theme="light"] .combo-list{background:#fff;color:var(--navy)}
-:root[data-theme="light"] input::placeholder,:root[data-theme="light"] textarea::placeholder{color:#5E5A50}
-:root[data-theme="light"] .thumb,:root[data-theme="light"] .pic-box{background:#EAF1FC}
-:root[data-theme="light"] .pic-box img{background:#fff}
+:root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#FAFBFE;border-color:rgba(16,32,60,.20);color:var(--navy)}
+:root[data-theme="light"] input:focus,:root[data-theme="light"] select:focus,:root[data-theme="light"] textarea:focus{outline:3px solid rgba(22,48,92,.22);outline-offset:0;border-color:var(--royal)}
+:root[data-theme="light"] .combo-list{background:#FAFBFE;color:var(--navy);border-color:rgba(16,32,60,.18)}
+:root[data-theme="light"] input::placeholder,:root[data-theme="light"] textarea::placeholder{color:#6B7688}
+:root[data-theme="light"] .thumb,:root[data-theme="light"] .pic-box{background:#E6ECF6}
+:root[data-theme="light"] .pic-box img{background:#FAFBFE}
 /* buttons */
 :root[data-theme="light"] .btn.ghost:hover{background:rgba(15,36,80,.1);color:var(--royal-2)}
 :root[data-theme="light"] .vm-filter-btn:hover,:root[data-theme="light"] .vm-act:hover{background:rgba(15,36,80,.1);color:var(--white)}
@@ -538,10 +539,10 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 :root[data-theme="light"] .vm-chip:hover,:root[data-theme="light"] .nt-chip:hover{background:rgba(15,36,80,.16);color:var(--white)}
 :root[data-theme="light"] .vm-chip.active,:root[data-theme="light"] .nt-chip.active{background:var(--royal);color:#fff}
 :root[data-theme="light"] .nt-chip-n{color:var(--royal)}
-:root[data-theme="light"] .theme-btn{background:#fff}
+:root[data-theme="light"] .theme-btn{background:#FAFBFE}
 /* tables */
-:root[data-theme="light"] th{background:rgba(15,36,80,.12);color:#16305C}
-:root[data-theme="light"] tbody tr:hover{background:rgba(15,36,80,.06)}
+:root[data-theme="light"] th{background:#E4E9F3;color:#16305C}
+:root[data-theme="light"] tbody tr:hover{background:rgba(22,48,92,.05)}
 :root[data-theme="light"] .vm-av{color:#fff}
 /* badges, tags, alerts: darker text for contrast on light surfaces */
 :root[data-theme="light"] .b-overdue,:root[data-theme="light"] .b-out-of-stock,:root[data-theme="light"] .b-expired,:root[data-theme="light"] .b-failed,:root[data-theme="light"] .b-stock-out{color:#A62B2B;background:rgba(242,107,107,.14)}
@@ -553,9 +554,9 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 :root[data-theme="light"] .combo-error,:root[data-theme="light"] .imgnote{color:#A62B2B!important}
 :root[data-theme="light"] .nt-detail pre{background:rgba(15,36,80,.08)}
 /* dialog, auth, public QR page */
-:root[data-theme="light"] dialog{background:#fff;color:var(--white)}
+:root[data-theme="light"] dialog{background:var(--panel);color:var(--white)}
 :root[data-theme="light"] dialog::backdrop{background:rgba(15,27,61,.5)}
-:root[data-theme="light"] .auth-card form{background:#fff}
+:root[data-theme="light"] .auth-card form{background:var(--panel)}
 :root[data-theme="light"] .public .hero{background:#16305C;color:#fff}
 :root[data-theme="light"] .public .hero h1,:root[data-theme="light"] .public .hero p{color:#fff}
 :root[data-theme="light"] .public .hero .muted{color:#ECE9E2}
@@ -570,8 +571,8 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 .bell:hover{background:rgba(163,160,149,.2);color:var(--white)}
 .bell .ico{width:19px;height:19px}
 .bell-n{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:999px;background:var(--bad-bg);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center;border:2px solid var(--midnight)}
-:root[data-theme="light"] .bell{background:#fff}
-:root[data-theme="light"] .bell-n{border-color:#fff}
+:root[data-theme="light"] .bell{background:#FAFBFE}
+:root[data-theme="light"] .bell-n{border-color:var(--panel)}
 .profile-menu{position:relative}
 .profile-menu summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--muted);font-size:.9rem;border-radius:var(--radius-sm);padding:0;background:transparent;border:0}
 .profile-menu summary::-webkit-details-marker{display:none}
@@ -581,7 +582,7 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 .pm-head{display:flex;flex-direction:column;padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px;color:var(--white)}
 .pm-pop a,.pm-pop button{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:var(--radius-sm);color:var(--white);background:none;border:0;font:inherit;font-weight:600;cursor:pointer}
 .pm-pop a:hover,.pm-pop button:hover{background:rgba(163,160,149,.12);color:var(--white)}
-:root[data-theme="light"] .pm-pop{background:#fff}
+:root[data-theme="light"] .pm-pop{background:var(--panel)}
 :root[data-theme="light"] .pm-pop a:hover,:root[data-theme="light"] .pm-pop button:hover{background:rgba(15,36,80,.08)}
 .who-name{color:var(--muted);font-size:.86rem;font-weight:600;white-space:nowrap}
 
@@ -589,7 +590,7 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 .notif-wrap{position:relative}
 .notif-panel{position:absolute;right:0;top:calc(100% + 10px);width:min(430px,94vw);max-height:460px;overflow-y:auto;z-index:45;background:var(--deep);border:1px solid var(--line);border-radius:var(--radius);padding:6px 0}
 .notif-panel[hidden]{display:none}
-:root[data-theme="light"] .notif-panel{background:#fff}
+:root[data-theme="light"] .notif-panel{background:var(--panel)}
 .notif-empty{padding:12px 14px;color:var(--muted);font-size:.88rem;text-align:center}
 .notif-item{display:flex;align-items:start;gap:10px;width:100%;padding:8px 12px;border:0;background:transparent;text-align:left;cursor:pointer;font:inherit;font-size:.9rem;border-radius:var(--radius-sm)}
 .notif-item:hover{background:rgba(163,160,149,.12);color:var(--white)}
@@ -702,7 +703,7 @@ tr[hidden]{display:none}
 .kpis.k5{grid-template-columns:repeat(5,minmax(0,1fr))}
 .kpi{display:flex;flex-direction:column;gap:8px;min-width:0;padding:16px 18px 14px;color:var(--white);border:0;
   border-radius:var(--radius);background:var(--panel);transition:transform .15s,filter .15s}
-:root[data-theme="light"] .kpi{background:#fff}
+:root[data-theme="light"] .kpi{background:var(--panel)}
 a.kpi:hover{color:var(--white);filter:brightness(1.1)}
 .kpi-top{display:flex;justify-content:space-between;align-items:center}
 .kpi-mid{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
@@ -801,7 +802,7 @@ a.kpi:hover{color:var(--white);filter:brightness(1.1)}
 .kpi{display:grid;grid-template-columns:48px minmax(0,1fr);column-gap:14px;row-gap:5px;align-content:center;align-items:center;padding:16px 18px;
   border:0;border-radius:var(--radius);
   background:var(--panel)}
-:root[data-theme="light"] .kpi{background:#FFFFFF;border:1px solid var(--line)}
+:root[data-theme="light"] .kpi{background:var(--panel);border:1px solid var(--line)}
 .kpi > :not(.kico){grid-column:2;min-width:0}
 .kico{grid-column:1;grid-row:1/span 4;align-self:center;display:grid;place-items:center;width:48px;height:48px;border-radius:var(--radius-sm);
   background:rgba(163,160,149,.14);border:1px solid var(--line);color:var(--light)}
@@ -848,7 +849,7 @@ a.kpi:hover{filter:brightness(1.1)}
    ====================================================================== */
 .card.sec{border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
   background:var(--panel)}
-:root[data-theme="light"] .card.sec{background:#FFFFFF}
+:root[data-theme="light"] .card.sec{background:var(--panel)}
 .card.sec.bad{border-color:rgba(242,107,107,.55)} .card.sec.warn{border-color:rgba(245,160,74,.55)}
 .card.sec.info{border-color:rgba(227,181,98,.5)} .card.sec.ok{border-color:rgba(76,195,138,.5)}
 .sec.bad .kico{color:var(--bad);border-color:rgba(242,107,107,.55);background:rgba(242,107,107,.12)}
@@ -913,7 +914,7 @@ a.kpi:hover{filter:brightness(1.1)}
 .pos-item{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;min-height:104px;padding:12px 14px;border-radius:var(--radius);
   border:1px solid var(--line);border-left:4px solid var(--royal);background:var(--panel);
   color:var(--white);font:inherit;cursor:pointer;transition:transform .12s,border-color .12s}
-:root[data-theme="light"] .pos-item{background:#fff}
+:root[data-theme="light"] .pos-item{background:var(--panel)}
 .pos-item:hover:not(:disabled){border-color:var(--light)}
 .pos-item:active:not(:disabled){transform:translateY(0)}
 .pos-item.off{opacity:.5;cursor:not-allowed;border-left-color:var(--bad)}
@@ -1107,11 +1108,11 @@ th{text-transform:none}
 .inv-search .ico{position:absolute;right:16px;width:18px;height:18px;color:var(--muted);pointer-events:none}
 .inv-search input{width:100%;height:48px;padding:0 46px 0 18px;border-radius:999px;background:var(--surface-2);
   border:1px solid var(--line);color:var(--white);font:inherit}
-:root[data-theme="light"] .inv-search input{background:#fff;color:var(--navy)}
+:root[data-theme="light"] .inv-search input{background:#FAFBFE;color:var(--navy)}
 .inv-select{display:inline-flex}
 .inv-select select{height:48px;padding:0 18px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);
   color:var(--white);font:inherit;cursor:pointer}
-:root[data-theme="light"] .inv-select select{background:#fff;color:var(--navy)}
+:root[data-theme="light"] .inv-select select{background:#FAFBFE;color:var(--navy)}
 
 .inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
 .inv-card{position:relative;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);
@@ -1378,7 +1379,7 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 .face-status{min-height:1.4em;font-size:.88rem;color:var(--muted);margin-top:6px}
 .face-status.ok{color:var(--ok)}
 .face-status.error{color:var(--bad)}
-:root[data-theme="light"] .auth-box{background:#fff}
+:root[data-theme="light"] .auth-box{background:var(--panel)}
 :root[data-theme="light"] .face-camera{background:#E8EEF8}
 
 /* =============================================================
@@ -1429,7 +1430,7 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 /* --- primary buttons = navy (Register Animal), ghost = outlined --- */
 :root[data-theme="light"] .btn{background:#0F2450;border-color:#0F2450;color:#fff}
 :root[data-theme="light"] .btn:hover{background:#1B3260;color:#fff;filter:none}
-:root[data-theme="light"] .btn.ghost{background:#fff;color:#0F2450;border-color:#D5D3CC}
+:root[data-theme="light"] .btn.ghost{background:#FAFBFE;color:#0F2450;border-color:rgba(16,32,60,.20)}
 :root[data-theme="light"] .btn.ghost:hover{background:#F0EFEC;color:#0F2450}
 :root[data-theme="light"] .btn.danger{background:#B03030;border-color:#B03030;color:#fff}
 
@@ -1640,20 +1641,21 @@ html.fm-open{overflow:hidden}
   --panel:rgba(24,29,38,.78);
 }
 :root[data-theme="light"]{
-  --shell-bg:rgba(246,251,255,.55);
-  --shell-line:rgba(255,255,255,.70);
-  --shell-shadow:0 42px 90px -34px rgba(15,52,102,.45);
+  /* solid, soft off-white — no glass in light mode */
+  --shell-bg:#E9EDF5;
+  --shell-line:rgba(16,32,60,.14);
+  --shell-shadow:0 26px 56px -32px rgba(16,32,60,.30);
   --rail-bg:linear-gradient(180deg,#143763 0%,#0A2140 100%);
-  --topbar-bg:rgba(255,255,255,.68);
-  --panel:rgba(255,255,255,.80);
-  --panel-line:rgba(255,255,255,.9);
+  --topbar-bg:#F4F6FA;
+  --panel:#FBFBFD;
+  --panel-line:rgba(16,32,60,.14);
 }
 
 /* soft sky photo behind the window */
 body{display:flow-root;background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
 :root[data-theme="light"] body{
-  background-color:#CFE4F8;
-  background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(150,196,238,.10)),url("../img/app-bg.jpg?v=3");
+  background-color:#E4EAF4;
+  background-image:linear-gradient(180deg,rgba(232,238,248,.85),rgba(214,226,242,.75));
 }
 :root[data-theme="dark"] body{
   background-color:#050B16;
@@ -1674,6 +1676,7 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
   backdrop-filter:blur(30px) saturate(150%);
   -webkit-backdrop-filter:blur(30px) saturate(150%);
 }
+:root[data-theme="light"] .app{backdrop-filter:none;-webkit-backdrop-filter:none}
 .main{margin-left:calc(var(--rail-w) + 28px);height:100%;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin}
 .main::-webkit-scrollbar{width:10px}
 .main::-webkit-scrollbar-thumb{background:rgba(15,36,80,.18);border-radius:99px;border:3px solid transparent;background-clip:content-box}
@@ -1689,7 +1692,7 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 /* top bar: frosted strip that stops at the window edge */
 .topbar{top:0;background:var(--topbar-bg);border-bottom:1px solid var(--shell-line);border-radius:0 var(--shell-radius) 0 0;
   backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
-:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:var(--shell-line)}
+:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:var(--shell-line);backdrop-filter:none;-webkit-backdrop-filter:none}
 
 /* glass panels */
 :root[data-theme="light"] .card,:root[data-theme="light"] .stat,:root[data-theme="light"] .band,
@@ -1751,6 +1754,7 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] .btn:hover{background:var(--btn-hover-bg);border-color:var(--btn-line);color:var(--btn-fg);filter:none}
 :root[data-theme] .btn.ghost{background:var(--btn-soft-bg);border-color:var(--btn-soft-line);color:var(--btn-soft-fg);box-shadow:none;
   backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+:root[data-theme="light"] .btn.ghost{backdrop-filter:none;-webkit-backdrop-filter:none}
 :root[data-theme] .btn.ghost:hover{background:var(--btn-soft-hover);color:var(--btn-soft-fg)}
 :root[data-theme] .btn.danger{background:var(--btn-soft-bg);border-color:rgba(176,48,48,.45);color:var(--bad);box-shadow:none}
 :root[data-theme] .btn.danger:hover{background:var(--btn-soft-bg);border-color:var(--bad);color:var(--bad)}
@@ -1956,20 +1960,24 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 }
 
 /* ======================================================================
-   SUBTLE GLASSMORPHISM — shared surface treatment (visual styling only).
-   Cards and stat tiles become lightly translucent with a soft blur, a thin
-   light border and a gentle shadow so they float above the background.
-   No changes to layout, size, spacing, text or arrangement.
+   SURFACE TREATMENT (visual styling only, no layout changes)
+   DARK MODE: subtle glassmorphism — translucent surfaces, soft blur.
+   LIGHT MODE: solid soft off-white surfaces, visible borders, gentle
+   floating shadows — no blur, no glass.
    ====================================================================== */
-:root{
-  --glass-bg:rgba(24,29,38,.66);
-  --glass-line:rgba(255,255,255,.13);
-  --glass-shadow:0 20px 48px -34px rgba(0,0,0,.75);
+:root[data-theme="dark"]{
+  --surface-glass:rgba(24,29,38,.66);
+  --surface-line:rgba(255,255,255,.13);
+  --surface-shadow:0 20px 48px -34px rgba(0,0,0,.75);
+  --control-line:rgba(255,255,255,.12);
+  --control-shadow:0 6px 16px -12px rgba(0,0,0,.55);
 }
 :root[data-theme="light"]{
-  --glass-bg:rgba(255,255,255,.66);
-  --glass-line:rgba(255,255,255,.85);
-  --glass-shadow:0 18px 44px -32px rgba(15,52,102,.42);
+  --surface-glass:#FBFBFD;
+  --surface-line:rgba(16,32,60,.18);
+  --surface-shadow:0 10px 24px -18px rgba(16,32,60,.28);
+  --control-line:rgba(16,32,60,.18);
+  --control-shadow:0 4px 12px -10px rgba(16,32,60,.22);
 }
 
 :root[data-theme] .card,
@@ -1992,22 +2000,33 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] .sl-stat,
 :root[data-theme] .m-card,
 :root[data-theme] .ma-card{
-  background:var(--glass-bg);
-  border-color:var(--glass-line);
-  box-shadow:var(--glass-shadow);
+  background:var(--surface-glass);
+  border-color:var(--surface-line);
+  box-shadow:var(--surface-shadow);
+}
+/* Glass blur only in Dark Mode */
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .stat,
+:root[data-theme="dark"] .band,
+:root[data-theme="dark"] .dcard,
+:root[data-theme="dark"] .kpi,
+:root[data-theme="dark"] .report-group,
+:root[data-theme="dark"] .nt-card,
+:root[data-theme="dark"] .dstat,
+:root[data-theme="dark"] .vm-card,
+:root[data-theme="dark"] .an-list,
+:root[data-theme="dark"] .an-box,
+:root[data-theme="dark"] .an-card,
+:root[data-theme="dark"] .an-pane,
+:root[data-theme="dark"] .rpt-card,
+:root[data-theme="dark"] .rpt-stat,
+:root[data-theme="dark"] .ef-card,
+:root[data-theme="dark"] .sl-panel,
+:root[data-theme="dark"] .sl-stat,
+:root[data-theme="dark"] .m-card,
+:root[data-theme="dark"] .ma-card{
   backdrop-filter:blur(14px) saturate(130%);
   -webkit-backdrop-filter:blur(14px) saturate(130%);
-}
-
-/* Faint glass on every remaining control — barely visible, just enough to
-   lift elements off the background. Layout, size and text stay untouched. */
-:root{
-  --glass-soft-line:rgba(255,255,255,.12);
-  --glass-soft-shadow:0 6px 16px -12px rgba(0,0,0,.55);
-}
-:root[data-theme="light"]{
-  --glass-soft-line:rgba(15,36,80,.10);
-  --glass-soft-shadow:0 6px 16px -12px rgba(15,52,102,.30);
 }
 
 :root[data-theme] button,
@@ -2034,10 +2053,109 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] .st-nav a,
 :root[data-theme] .dialog,
 :root[data-theme] .po-dialog{
-  border-color:var(--glass-soft-line);
-  box-shadow:var(--glass-soft-shadow);
+  border-color:var(--control-line);
+  box-shadow:var(--control-shadow);
+}
+/* faint blur on controls only in Dark Mode */
+:root[data-theme="dark"] button,
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .chip,
+:root[data-theme="dark"] .badge,
+:root[data-theme="dark"] .pill,
+:root[data-theme="dark"] .tabs a,
+:root[data-theme="dark"] .nav a,
+:root[data-theme="dark"] .nav button,
+:root[data-theme="dark"] .flash,
+:root[data-theme="dark"] .notif-panel,
+:root[data-theme="dark"] .pm-pop,
+:root[data-theme="dark"] .dropzone,
+:root[data-theme="dark"] .table-wrap,
+:root[data-theme="dark"] .kv,
+:root[data-theme="dark"] .an-tabs .tab,
+:root[data-theme="dark"] .ma-tabs a,
+:root[data-theme="dark"] .vm-tabs a,
+:root[data-theme="dark"] .rpt-tabs a,
+:root[data-theme="dark"] .rpt-subtabs a,
+:root[data-theme="dark"] .st-nav a,
+:root[data-theme="dark"] .dialog,
+:root[data-theme="dark"] .po-dialog{
   backdrop-filter:blur(8px) saturate(120%);
   -webkit-backdrop-filter:blur(8px) saturate(120%);
+}
+
+/* ======================================================================
+   LIGHT MODE — final pass: enforce soft off-white surfaces, visible borders
+   and gentle shadows everywhere. Solid design only (no glass/blur).
+   ====================================================================== */
+:root[data-theme="light"] .topbar,
+:root[data-theme="light"] .nav a.active,
+:root[data-theme="light"] .kpi,
+:root[data-theme="light"] .card.sec,
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .stat,
+:root[data-theme="light"] .report-group,
+:root[data-theme="light"] .nt-card,
+:root[data-theme="light"] .dstat,
+:root[data-theme="light"] .vm-card{
+  background:var(--panel);
+  border-color:rgba(16,32,60,.18);
+  box-shadow:var(--surface-shadow);
+}
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea,
+:root[data-theme="light"] .pic-box,
+:root[data-theme="light"] .dropzone,
+:root[data-theme="light"] .theme-btn,
+:root[data-theme="light"] .bell{
+  background:#FAFBFE;
+  border-color:rgba(16,32,60,.20);
+  color:var(--navy);
+}
+:root[data-theme="light"] th{background:#E4E9F3;color:#16305C}
+:root[data-theme="light"] .topbar{background:var(--topbar-bg);border-bottom-color:rgba(16,32,60,.14)}
+/* hard off: no glass blur anywhere in light mode */
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .stat,
+:root[data-theme="light"] .band,
+:root[data-theme="light"] .topbar,
+:root[data-theme="light"] .app,
+:root[data-theme="light"] .btn.ghost{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+}
+
+/* Final system-wide guard: any leftover pure-white surface in Light Mode
+   becomes a soft off-white; borders stay visible; no glass in Light Mode. */
+:root[data-theme="light"] .sl-stat,
+:root[data-theme="light"] .sl-panel,
+:root[data-theme="light"] .st-sec,
+:root[data-theme="light"] .st-sum,
+:root[data-theme="light"] .an-box,
+:root[data-theme="light"] .an-pane[data-pane="history"],
+:root[data-theme="light"] .ma-card,
+:root[data-theme="light"] .m-card,
+:root[data-theme="light"] .po-item,
+:root[data-theme="light"] .auth-box,
+:root[data-theme="light"] .auth-card form,
+:root[data-theme="light"] .qr-card,
+:root[data-theme="light"] .card,
+:root[data-theme="light"] .ef-card,
+:root[data-theme="light"] .rpt-card,
+:root[data-theme="light"] .vm-card,
+:root[data-theme="light"] .dstat,
+:root[data-theme="light"] .kpi{
+  background:#FBFBFD !important;
+  border-color:rgba(16,32,60,.18) !important;
+  box-shadow:0 8px 20px -16px rgba(16,32,60,.26) !important;
+}
+:root[data-theme="light"] .sl-panel,
+:root[data-theme="light"] .st-sec,
+:root[data-theme="light"] .card{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
 }
 
 @media print{
