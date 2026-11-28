@@ -280,7 +280,8 @@
   height:40px;
   cursor:text;
 }
-.rpt-search input {
+.rpt-search input,
+:root[data-theme] .rpt-search input {
   border:0;
   background:transparent;
   color:var(--white);
@@ -289,6 +290,15 @@
   font-size:.85rem;
   margin:0;
   padding:0;
+  box-shadow:none;                 /* override the global control shadow */
+  appearance:none;
+  -webkit-appearance:none;
+}
+.rpt-search input::-webkit-search-cancel-button,
+.rpt-search input::-webkit-search-decoration,
+.rpt-search input::-webkit-search-results-button,
+.rpt-search input::-webkit-search-results-decoration {
+  display:none;                    /* remove native search decorations */
 }
 .rpt-search input::placeholder {
   color:var(--muted);
