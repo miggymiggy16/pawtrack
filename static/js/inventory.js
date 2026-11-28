@@ -4,6 +4,15 @@
     form.querySelectorAll('select').forEach(function (sel) {
       sel.addEventListener('change', function () { form.submit(); });
     });
+    var q = form.querySelector('input[name="q"]');
+    if (q) {
+      q.addEventListener('input', function () {
+        if (this.value.length === 0 || this.value.length >= 2) {
+          clearTimeout(form._qTimer);
+          form._qTimer = setTimeout(function () { form.submit(); }, 400);
+        }
+      });
+    }
   }
 
   // Item detail popup: click a card to view, X or outside click to close.

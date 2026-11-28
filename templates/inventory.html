@@ -3,7 +3,7 @@
 {% block title %}{{ 'Stock' if readonly else 'Inventory' }}{% endblock %}
 {% block body_class %}inv-page{% endblock %}
 
-{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}">
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}?v=20261128">
 {% endblock %}
 
 {% block content %}
@@ -45,6 +45,7 @@
       <option value="expired" {{ 'selected' if args.view=='expired' }}>Expired</option>
     </select></label>
   <a class="iv-btn ghost iv-clear" href="{{ url_for('inventory') }}">Clear Filters</a>
+  <button class="iv-btn primary" type="submit">{{ icon('search') }}Search</button>
 </form>
 
 {% if rows %}
