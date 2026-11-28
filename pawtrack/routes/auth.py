@@ -1,16 +1,24 @@
 """
 PawTrack - login and logout
 """
+import secrets
+
 from flask import (current_app, flash, jsonify, redirect, render_template,
                    request, session, url_for)
-from werkzeug.security import check_password_hash
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..extensions import app
-from ..security import ROLE_LABELS, current_user, role_home, safe_next
+from ..security import ROLE_LABELS, current_user, password_errors, role_home, safe_next
 from ..services.face import FaceError, embedding, identify
-from ..storage import load
+from ..storage import edit, load
 
 FACE_MAX_FAILURES = 5
+RESET_MAX_AGE = 15 * 60          # reset links expire after 15 minutes
+
+
+def _reset_serializer():
+    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="pawtrack-password-reset")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -109,6 +117,87 @@ def login_face_cancel():
     session.pop("pending_next", None)
     session.pop("face_failures", None)
     return redirect(url_for("login"))
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Step 1 of password recovery: verify identity and issue a single-use reset link."""
+    if current_user():
+        return redirect(role_home())
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        full_name = request.form.get("full_name", "").strip()
+        match = next((u for u in load("users")
+                      if u["username"].lower() == username.lower()
+                      and (u.get("full_name") or "").strip().lower() == full_name.lower()), None)
+        if not match:
+            # Generic message: never reveal whether a username exists.
+            flash("If the username and full name match an active account, a reset link has been issued.", "info")
+        elif not match.get("active", True):
+            flash("This account is deactivated. Please contact an administrator.", "error")
+        else:
+            nonce = secrets.token_hex(8)
+            with edit("users") as users:
+                for u in users:
+                    if u["user_id"] == match["user_id"]:
+                        u["reset_nonce"] = nonce
+            token = _reset_serializer().dumps({"uid": match["user_id"], "nonce": nonce})
+            link = url_for("reset_password", token=token, _external=True)
+            # Email it when mail is configured; otherwise show it locally so
+            # recovery still works on an offline clinic machine.
+            from ..services.email import mail_config, send_email
+            cfg = mail_config()
+            recipient = (match.get("email") or "").strip()
+            if cfg["configured"] and recipient and "@" in recipient:
+                ok, err = send_email(
+                    recipient, "PawTrack password reset",
+                    f"Hello {match.get('full_name') or match['username']},\n\n"
+                    f"Use this link to reset your PawTrack password within 15 minutes:\n{link}\n\n"
+                    f"If you did not request this, ignore this email.\n\nPawTrack")
+                if ok:
+                    flash("A password reset link has been sent to your registered email.", "success")
+                else:
+                    flash(f"Could not send the email ({err}). Ask an administrator for help.", "error")
+            else:
+                flash("Password reset link (valid 15 minutes): " + link, "info")
+        return render_template("forgot_password.html", username=username)
+    return render_template("forgot_password.html")
+
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Step 2: consume the signed, single-use token and set a new password."""
+    if current_user():
+        return redirect(role_home())
+    try:
+        data = _reset_serializer().loads(token, max_age=RESET_MAX_AGE)
+        uid, nonce = data["uid"], data["nonce"]
+    except (BadSignature, SignatureExpired, KeyError, TypeError):
+        flash("This reset link is invalid or has expired. Please request a new one.", "error")
+        return redirect(url_for("forgot_password"))
+
+    user = next((u for u in load("users") if u["user_id"] == uid), None)
+    if not user or not user.get("active", True) or user.get("reset_nonce") != nonce:
+        flash("This reset link has already been used or is no longer valid.", "error")
+        return redirect(url_for("forgot_password"))
+
+    if request.method == "POST":
+        new, confirm = request.form.get("new_password", ""), request.form.get("confirm_password", "")
+        problems = password_errors(new)
+        if problems:
+            for problem in problems:
+                flash(problem, "error")
+        elif new != confirm:
+            flash("New password and confirmation do not match.", "error")
+        else:
+            with edit("users") as users:
+                for u in users:
+                    if u["user_id"] == uid and u.get("reset_nonce") == nonce:
+                        u["password_hash"] = generate_password_hash(new)
+                        u.pop("reset_nonce", None)      # single use
+            flash("Your password has been reset. Please log in with the new password.", "success")
+            return redirect(url_for("login"))
+    return render_template("reset_password.html", token=token)
 
 
 @app.route("/logout", methods=["POST"])
