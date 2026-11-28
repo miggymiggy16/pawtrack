@@ -1836,8 +1836,119 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 /* dark rail: active item is a neutral highlight, not a colour fill */
 :root[data-theme="dark"] .nav a.active{background:rgba(255,255,255,.12);color:#fff}
 
+/* ======================================================================
+   LIGHT MODE: subtle depth for buttons and inputs (visual styling only).
+   No changes to layout, size, spacing, text or arrangement.
+   ====================================================================== */
+:root[data-theme="light"]{
+  --lt-shadow:0 2px 6px rgba(15,36,80,.10), 0 1px 2px rgba(15,36,80,.06);
+  --lt-shadow-hover:0 6px 14px rgba(15,36,80,.16), 0 2px 4px rgba(15,36,80,.08);
+  --lt-line:#C6D2E3;
+}
+
+/* White / primary buttons — lifted from the white background */
+:root[data-theme="light"] body .btn,
+:root[data-theme="light"] body .an-btn.primary,
+:root[data-theme="light"] body .ap-btn.primary,
+:root[data-theme="light"] body .iv-btn.primary,
+:root[data-theme="light"] body .ef-btn.primary,
+:root[data-theme="light"] body .ma-btn.primary,
+:root[data-theme="light"] body .po-checkout,
+:root[data-theme="light"] body .mv-add,
+:root[data-theme="light"] body .auth-tab.active,
+:root[data-theme="light"] body .st-nav a.active,
+:root[data-theme="light"] body .an-tabs .tab.on,
+:root[data-theme="light"] body .tabs a.active,
+:root[data-theme="light"] body .ma-tabs a.active,
+:root[data-theme="light"] body .mv-tabs a.active,
+:root[data-theme="light"] body .rpt-subtabs a.active,
+:root[data-theme="light"] body .rpt-pager button.active,
+:root[data-theme="light"] body .po-cat.on,
+:root[data-theme="light"] body .po-pm.on,
+:root[data-theme="light"] body .vm-chip.active,
+:root[data-theme="light"] body .nt-chip.active,
+:root[data-theme="light"] body .chip.on{
+  box-shadow:var(--lt-shadow);
+  transition:box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+}
+
+/* Secondary / ghost / glass controls — softer lift */
+:root[data-theme="light"] body .btn.ghost,
+:root[data-theme="light"] body .an-btn:not(.primary),
+:root[data-theme="light"] body .ap-btn:not(.primary),
+:root[data-theme="light"] body .iv-btn.ghost,
+:root[data-theme="light"] body .ef-btn.ghost,
+:root[data-theme="light"] body .ma-btn.ghost,
+:root[data-theme="light"] body .rpt-btn,
+:root[data-theme="light"] body .rpt-act,
+:root[data-theme="light"] body .rpt-advb,
+:root[data-theme="light"] body .rpt-gbtn,
+:root[data-theme="light"] body .vm-filter-btn,
+:root[data-theme="light"] body .vm-act,
+:root[data-theme="light"] body .theme-btn,
+:root[data-theme="light"] body .bell,
+:root[data-theme="light"] body .menu-btn,
+:root[data-theme="light"] body .pw button,
+:root[data-theme="light"] body .po-disc,
+:root[data-theme="light"] body .po-qbtn,
+:root[data-theme="light"] body .po-ghost,
+:root[data-theme="light"] body .vm-chip:not(.active),
+:root[data-theme="light"] body .nt-chip:not(.active){
+  box-shadow:var(--lt-shadow);
+  transition:box-shadow .16s ease, background-color .16s ease, border-color .16s ease;
+}
+
+/* Hover — slightly stronger lift for every clickable control above */
+:root[data-theme="light"] body .btn:hover,
+:root[data-theme="light"] body .an-btn:hover,
+:root[data-theme="light"] body .ap-btn:hover,
+:root[data-theme="light"] body .iv-btn:hover,
+:root[data-theme="light"] body .ef-btn:hover,
+:root[data-theme="light"] body .ma-btn:hover,
+:root[data-theme="light"] body .rpt-btn:hover,
+:root[data-theme="light"] body .rpt-act:hover,
+:root[data-theme="light"] body .rpt-advb:hover,
+:root[data-theme="light"] body .rpt-gbtn:hover,
+:root[data-theme="light"] body .vm-filter-btn:hover,
+:root[data-theme="light"] body .vm-act:hover,
+:root[data-theme="light"] body .theme-btn:hover,
+:root[data-theme="light"] body .bell:hover,
+:root[data-theme="light"] body .menu-btn:hover,
+:root[data-theme="light"] body .pw button:hover,
+:root[data-theme="light"] body .po-qbtn:hover,
+:root[data-theme="light"] body .po-disc:hover,
+:root[data-theme="light"] body .vm-chip:hover,
+:root[data-theme="light"] body .nt-chip:hover,
+:root[data-theme="light"] body .an-tabs .tab:hover,
+:root[data-theme="light"] body .tabs a:hover,
+:root[data-theme="light"] body .ma-tabs a:hover,
+:root[data-theme="light"] body .mv-tabs a:hover{
+  box-shadow:var(--lt-shadow-hover);
+}
+
+/* Inputs, selects and textareas — slightly darker border + soft inset shadow */
+:root[data-theme="light"] input,
+:root[data-theme="light"] select,
+:root[data-theme="light"] textarea{
+  border-color:var(--lt-line);
+  box-shadow:0 1px 2px rgba(15,36,80,.05);
+  transition:border-color .16s ease, box-shadow .16s ease;
+}
+:root[data-theme="light"] input:hover,
+:root[data-theme="light"] select:hover,
+:root[data-theme="light"] textarea:hover{
+  border-color:#AEBDD3;
+  box-shadow:0 2px 5px rgba(15,36,80,.08);
+}
+:root[data-theme="light"] input:focus,
+:root[data-theme="light"] select:focus,
+:root[data-theme="light"] textarea:focus{
+  box-shadow:0 0 0 3px rgba(15,36,80,.16), 0 2px 6px rgba(15,36,80,.10);
+}
+
 @media print{
   body,:root[data-theme="dark"] body,:root[data-theme="light"] body{background:#fff!important;background-image:none!important}
+  :root[data-theme="light"] body *{box-shadow:none!important}
   .app,.pos-page .app{height:auto;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:#fff;backdrop-filter:none;overflow:visible}
   .main{height:auto;overflow:visible;margin-left:0}
 }
