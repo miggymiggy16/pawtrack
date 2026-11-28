@@ -151,7 +151,11 @@ td .btn{margin:2px 2px 2px 0}
 .qr-card img{width:100%;max-width:300px;image-rendering:pixelated}
 .qr-card h3{color:var(--navy);margin-top:10px}
 dialog{border:1px solid var(--light);border-radius:var(--radius);background:var(--deep);color:#fff;padding:24px;max-width:420px;width:92%}
-dialog::backdrop{background:rgba(5,10,28,.48)}
+dialog::backdrop{
+  background:rgba(5,10,28,.48);
+  backdrop-filter:blur(6px) saturate(115%);
+  -webkit-backdrop-filter:blur(6px) saturate(115%);
+}
 dialog .actions{justify-content:flex-end;margin-top:18px}
 .footer{padding:0 30px 24px;color:var(--muted);font-size:.8rem}
 
@@ -565,7 +569,11 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{
 :root[data-theme="light"] .nt-detail pre{background:rgba(15,36,80,.08)}
 /* dialog, auth, public QR page */
 :root[data-theme="light"] dialog{background:var(--panel);color:var(--white)}
-:root[data-theme="light"] dialog::backdrop{background:rgba(15,27,61,.30)}
+:root[data-theme="light"] dialog::backdrop{
+  background:rgba(15,27,61,.30);
+  backdrop-filter:blur(6px) saturate(115%);
+  -webkit-backdrop-filter:blur(6px) saturate(115%);
+}
 :root[data-theme="light"] .auth-card form{background:var(--panel)}
 :root[data-theme="light"] .public .hero{background:#16305C;color:#fff}
 :root[data-theme="light"] .public .hero h1,:root[data-theme="light"] .public .hero p{color:#fff}
@@ -1597,7 +1605,13 @@ html.fm-open{overflow:hidden}
   box-shadow:0 30px 80px rgba(6,14,30,.45);overflow:hidden}
 .fm-dialog:not([open]){display:none}
 .fm-dialog[open]{display:flex;flex-direction:column}
-.fm-dialog::backdrop{background:rgba(8,20,40,.38)}
+.fm-dialog::backdrop{
+  background:rgba(8,20,40,.38);
+  backdrop-filter:blur(6px) saturate(115%);
+  -webkit-backdrop-filter:blur(6px) saturate(115%);
+}
+/* light mode popup: slightly stronger wash so the blur reads clearly */
+:root[data-theme="light"] .fm-dialog::backdrop{background:rgba(15,27,61,.32)}
 .fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
 .fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white);flex:1}
 .fm-x{width:30px;height:30px;display:grid;place-items:center;flex:none;border:1px solid var(--line);
