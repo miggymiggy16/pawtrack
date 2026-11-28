@@ -86,10 +86,13 @@
 .iv-search .ico {
   position:absolute;
   left:14px;
+  top:50%;
+  transform:translateY(-50%);
   width:18px;
   height:18px;
   color:var(--muted);
   pointer-events:none;
+  z-index:2;
 }
 body.inv-page .iv-search input {
   width:100%;
@@ -100,7 +103,13 @@ body.inv-page .iv-search input {
   background:var(--surface);
   color:var(--white);
   font:inherit;
+  box-shadow:none;
 }
+/* keep the search icon visible in both themes */
+:root[data-theme="light"] .iv-search .ico{color:#16305C}
+:root[data-theme="dark"] .iv-search .ico{color:#B4BCC8}
+:root[data-theme="light"] body.inv-page .iv-search input{background:#FAFBFE;border-color:rgba(16,32,60,.20);color:#12203A}
+:root[data-theme="light"] body.inv-page .iv-search input::placeholder{color:#6B7688}
 body.inv-page .iv-search input::placeholder {
   color:var(--muted);
 }

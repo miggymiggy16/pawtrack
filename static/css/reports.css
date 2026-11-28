@@ -308,6 +308,7 @@
   height:17px;
   color:var(--muted);
   flex:0 0 auto;
+  z-index:2;
 }
 .rpt-twrap {
   overflow-x:auto;
