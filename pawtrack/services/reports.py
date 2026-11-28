@@ -30,9 +30,6 @@ REPORT_GROUPS = [          # (tab title, icon, report kinds) - shown as the big 
     ("Animal Reports", "paw", ["population"]),
     ("Inventory Reports", "box", ["inventory", "vaccine_stock"]),
 ]
-REPORT_TAB_LABELS = {"vaccination": "All Vaccinations", "overdue": "Overdue Vaccination",
-                     "upcoming": "Upcoming Vaccination", "population": "Animal Population",
-                     "inventory": "Inventory", "vaccine_stock": "Vaccine Stock"}
 FILTER_LABELS = {"date_from": "From", "date_to": "To", "species": "Species", "breed": "Breed", "sex": "Sex",
                  "ownership": "Ownership", "status": "Vaccination status", "vaccine": "Vaccine",
                  "category": "Category", "stock_status": "Stock status", "exp_status": "Expiration status"}

@@ -1770,7 +1770,6 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] body .chip.on,
 :root[data-theme] body .ma-tabs a.active,
 :root[data-theme] body .mv-tabs a.active,
-:root[data-theme] body .rpt-subtabs a.active,
 :root[data-theme] body .rpt-pager button.active{
   background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)
 }
@@ -1789,15 +1788,13 @@ body{display:flow-root;background-size:cover;background-position:center;backgrou
 :root[data-theme] body .po-checkout,
 :root[data-theme] body .po-disc.on,
 :root[data-theme] body .iv-btn.primary,
-:root[data-theme] body .mv-add,
-:root[data-theme] body .rpt-alert button{
+:root[data-theme] body .mv-add{
   background:var(--btn-bg);border:1px solid var(--btn-line);color:var(--btn-fg);box-shadow:var(--btn-shadow)
 }
 :root[data-theme] body .po-checkout:hover:not(:disabled),
 :root[data-theme] body .po-disc.on:hover,
 :root[data-theme] body .iv-btn.primary:hover,
-:root[data-theme] body .mv-add:hover,
-:root[data-theme] body .rpt-alert button:hover{background:var(--btn-hover-bg);color:var(--btn-fg);filter:none}
+:root[data-theme] body .mv-add:hover{background:var(--btn-hover-bg);color:var(--btn-fg);filter:none}
 :root[data-theme] body .po-checkout:disabled{background:var(--surface-2);border-color:var(--line);color:var(--muted);box-shadow:none}
 
 /* tinted + outlined actions become neutral glass */
