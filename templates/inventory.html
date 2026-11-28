@@ -91,6 +91,7 @@
       <div class="iv-modal-cat" id="ivModalCat"></div>
       <div class="iv-modal-pills" id="ivModalPills"></div>
       <dl class="iv-modal-facts" id="ivModalFacts"></dl>
+      {% if not readonly %}<div class="iv-modal-actions"><button type="button" class="btn danger" id="ivModalDelete">{{ icon('trash') }}Delete Item</button></div>{% endif %}
     </div>
   </div>
 </div>

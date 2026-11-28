@@ -577,6 +577,13 @@ body.inv-page .iv-sel select:focus {
   font-size: .85rem;
   text-align: right;
 }
+.iv-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
 
 /* ===== Main stock list: improved compact rows ===== */
 .inv-hint {

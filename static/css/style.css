@@ -1593,6 +1593,8 @@ html.fm-open{overflow:hidden}
 .fm-x{width:30px;height:30px;display:grid;place-items:center;flex:none;border:1px solid var(--line);
   border-radius:50%;background:transparent;color:var(--white);font-size:1.3rem;line-height:1;cursor:pointer;padding:0}
 .fm-x:hover{background:rgba(128,128,128,.18)}
+#confirmDialog{position:relative}
+#confirmDialog>.fm-x{position:absolute;top:12px;right:12px}
 .fm-body{padding:20px 22px 24px;overflow:auto;flex:1 1 auto}
 /* Detailed analytics reports shown inside the popup */
 .fm-body .summary-row{margin-top:0}

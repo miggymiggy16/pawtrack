@@ -23,8 +23,11 @@
   var catEl = document.getElementById('ivModalCat');
   var pillsEl = document.getElementById('ivModalPills');
   var factsEl = document.getElementById('ivModalFacts');
+  var deleteBtn = document.getElementById('ivModalDelete');
+  var currentItem = null;
 
   function open(data) {
+    currentItem = data;
     photo.innerHTML = data.image
       ? '<img src="' + data.image + '" alt="' + data.name + '">'
       : '<span class="iv-ph-none">&#128230;</span>';
@@ -47,7 +50,55 @@
   }
   function close() {
     modal.hidden = true;
+    currentItem = null;
     document.body.style.overflow = '';
+  }
+
+  // Delete only after an explicit confirmation naming the selected item.
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', function () {
+      if (!currentItem || !currentItem.id) return;
+      var name = currentItem.name || currentItem.id;
+      var confirmDlg = document.getElementById('confirmDialog');
+      if (!confirmDlg || !confirmDlg.showModal) {
+        if (!window.confirm('Delete ' + name + ' from inventory? This cannot be undone.')) return;
+      } else {
+        confirmDlg.querySelector('[data-msg]').textContent =
+          'Delete ' + name + ' (' + currentItem.id + ') from inventory? This cannot be undone.';
+        confirmDlg.showModal();
+      }
+      var proceed = function () {
+        if (confirmDlg && confirmDlg.open) confirmDlg.close();
+        var url = '/inventory/' + encodeURIComponent(currentItem.id) + '/delete';
+        var tok = document.getElementById('pawCsrf');
+        var body = new URLSearchParams();
+        if (tok) body.append('csrf_token', tok.value);
+        fetch(url, {
+          method: 'POST', body: body, credentials: 'same-origin',
+          headers: { 'X-Requested-With': 'fetch' }
+        }).then(function (r) {
+          if (!r.ok) throw new Error(String(r.status));
+          return r.text().then(function (html) {
+            var doc = new DOMParser().parseFromString(html, 'text/html');
+            var fl = doc.querySelector('.flashes');
+            close();                                     // close only the detail popup
+            if (window.pawRefreshPage) window.pawRefreshPage(fl ? fl.innerHTML : '');
+            else window.location.reload();
+          });
+        }).catch(function () {
+          var w = document.createElement('div');
+          w.className = 'flash error';
+          w.textContent = 'Could not delete the item. Please try again.';
+          var box = document.querySelector('main.content');
+          if (box) box.insertBefore(w, box.firstChild);
+        });
+      };
+      if (!confirmDlg || !confirmDlg.showModal) { proceed(); return; }
+      var yes = confirmDlg.querySelector('[data-yes]');
+      var no = confirmDlg.querySelector('[data-no]');
+      yes.onclick = proceed;
+      no.onclick = function () { confirmDlg.close(); };   // cancel: close only, delete nothing
+    });
   }
 
   document.querySelectorAll('.iv-open-detail').forEach(function (card) {
