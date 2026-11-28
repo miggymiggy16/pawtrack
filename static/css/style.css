@@ -1590,7 +1590,8 @@ html.fm-open{overflow:hidden}
 .fm-head{display:flex;align-items:center;gap:14px;padding:16px 22px;border-bottom:1px solid var(--line);flex:none}
 .fm-head h2{margin:0;font-size:1.15rem;font-weight:700;color:var(--white)}
 .fm-body{padding:20px 22px 24px;overflow:auto;flex:1 1 auto}
-.fm-body .page-head{display:none}
+.fm-body .page-head,
+.fm-body .ef-head{display:none}
 .fm-body .form-section{margin-bottom:18px}
 .fm-body .form-section:last-of-type{margin-bottom:22px}
 .fm-body .form-actions,.fm-body .actions{margin:0;padding-top:2px}

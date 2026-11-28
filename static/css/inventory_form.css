@@ -1,5 +1,5 @@
 /* ===== Inventory item form (reference layout) â€” scoped to .ef-page ===== */
-body.ef-page {
+.ef-page {
   --ef-accent:#22467E;
   --ef-field-bg:var(--surface);
   --ef-field-border:var(--line);
@@ -7,7 +7,7 @@ body.ef-page {
   --ef-focus:#E3B562;
   --ef-ring:rgba(227,181,98,.22);
 }
-:root[data-theme="light"] body.ef-page {
+:root[data-theme="light"] .ef-page {
   background-color:#F4F7FC;
   --ef-accent:#16305C;
   --ef-field-bg:#fff;
@@ -132,9 +132,9 @@ body.ef-page {
   color:var(--muted);
   line-height:1.45;
 }
-body.ef-page .ef-field input,
-body.ef-page .ef-field select,
-body.ef-page .ef-field textarea {
+.ef-page .ef-field input,
+.ef-page .ef-field select,
+.ef-page .ef-field textarea {
   width:100%;
   height:46px;
   padding:0 14px;
@@ -145,7 +145,7 @@ body.ef-page .ef-field textarea {
   font:400 .92rem var(--font);
   box-shadow:none;
 }
-body.ef-page .ef-field select {
+.ef-page .ef-field select {
   appearance:none;
   cursor:pointer;
   padding-right:38px;
@@ -154,16 +154,16 @@ body.ef-page .ef-field select {
   background-position:right 14px center;
   background-size:14px;
 }
-body.ef-page .ef-field textarea {
+.ef-page .ef-field textarea {
   height:auto;
   min-height:58px;
   padding:12px 14px;
   line-height:1.5;
   resize:vertical;
 }
-body.ef-page .ef-field input:focus,
-body.ef-page .ef-field select:focus,
-body.ef-page .ef-field textarea:focus {
+.ef-page .ef-field input:focus,
+.ef-page .ef-field select:focus,
+.ef-page .ef-field textarea:focus {
   border-color:var(--ef-focus);
   outline:3px solid var(--ef-ring);
   outline-offset:0;
@@ -181,7 +181,7 @@ body.ef-page .ef-field textarea:focus {
 :root[data-theme="light"] .ef-photo {
   background:#EFF5FE;
 }
-body.ef-page .ef-photo .dropzone {
+.ef-page .ef-photo .dropzone {
   display:grid;
   justify-items:center;
   gap:6px;
@@ -194,15 +194,15 @@ body.ef-page .ef-photo .dropzone {
   cursor:pointer;
   transition:border-color .15s,background .15s;
 }
-:root[data-theme="light"] body.ef-page .ef-photo .dropzone {
+:root[data-theme="light"] .ef-page .ef-photo .dropzone {
   background:#F7FAFF;
   border-color:#C6D6EC;
 }
-body.ef-page .ef-photo .dropzone:hover {
+.ef-page .ef-photo .dropzone:hover {
   border-color:var(--ef-focus);
   background:var(--surface);
 }
-:root[data-theme="light"] body.ef-page .ef-photo .dropzone:hover {
+:root[data-theme="light"] .ef-page .ef-photo .dropzone:hover {
   background:#EDF3FD;
 }
 .ef-dz-circle {
@@ -373,7 +373,7 @@ body.ef-page .ef-photo .dropzone:hover {
     flex:1 1 100%;
   }
   /* 16px stops iOS Safari from zooming the page when a field is focused */
-  body.ef-page .ef-field input,body.ef-page .ef-field select,body.ef-page .ef-field textarea {
+  .ef-page .ef-field input,.ef-page .ef-field select,.ef-page .ef-field textarea {
     font-size:1rem;
   }
 }

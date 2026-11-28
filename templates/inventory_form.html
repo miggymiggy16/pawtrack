@@ -102,7 +102,7 @@
   </section>
 
   <div class="ef-actions">
-    <a class="ef-btn ghost" href="{{ url_for('inventory') }}">Cancel</a>
+    <a class="ef-btn ghost" href="{{ url_for('inventory') }}" data-fm-close>Cancel</a>
     <button class="ef-btn primary" type="submit">{{ icon('save') }}{{ 'Update Item' if editing else 'Add Item' }}</button>
   </div>
 </form>

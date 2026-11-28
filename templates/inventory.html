@@ -22,7 +22,7 @@
     <a class="iv-btn primary" href="{{ url_for('vaccination_new') }}">{{ icon('syringe') }}Record vaccination</a>
     {% else %}
     <a class="iv-btn ghost" href="{{ url_for('inventory_transactions') }}">{{ icon('clock') }}Transaction History</a>
-    <a class="iv-btn primary" href="{{ url_for('inventory_new') }}">{{ icon('plus') }}Add Item</a>
+    <a class="iv-btn primary" href="{{ url_for('inventory_new') }}" data-modal-form data-modal-title="Add Item">{{ icon('plus') }}Add Item</a>
     {% endif %}
   </div>
 </div>
