@@ -21,7 +21,7 @@
 {% set primary = report.sections|selectattr('primary')|first %}
 {% set ns = namespace(sub=[]) %}
 {% for _t, _i, kinds in groups %}{% if kind in kinds %}{% set ns.sub = kinds %}{% endif %}{% endfor %}
-{% set adv_open = namespace(v=false) %}{% for f in filters %}{% if f != 'status' and args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
+{% set adv_open = namespace(v=false) %}{% for f in filters %}{% if args[f] %}{% set adv_open.v = true %}{% endif %}{% endfor %}
 {% set merge_id = primary.headers[0] == 'Animal ID' %}
 {% set st_idx = primary.headers.index('Status') if 'Status' in primary.headers else 0 %}
 {% set ncols = (primary.headers|length - 1 if merge_id else primary.headers|length) + 1 %}
@@ -117,18 +117,6 @@
 <section class="rpt-card">
   <div class="rpt-rhead">
     <h2>{{ primary.title }}</h2><span class="rpt-count" id="rptCount"></span>
-    {% if 'status' in filters %}<form class="rpt-vsel no-print" method="get">
-      <input type="hidden" name="type" value="{{ kind }}">
-      {% for k, v in args.items() if k != 'status' and v %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
-      <label for="rptStatus">Vaccination Status</label>
-      <select id="rptStatus" name="status">
-        <option value="">All Vaccinations</option>
-        <option value="Overdue"{{ ' selected' if args.status == 'Overdue' }}>Overdue</option>
-        <option value="Due Today"{{ ' selected' if args.status == 'Due Today' }}>Due Today</option>
-        <option value="Upcoming"{{ ' selected' if args.status == 'Upcoming' }}>Upcoming</option>
-        <option value="Completed"{{ ' selected' if args.status == 'Completed' }}>Completed</option>
-      </select>
-    </form>{% endif %}
   </div>
 
   {% if primary.rows %}

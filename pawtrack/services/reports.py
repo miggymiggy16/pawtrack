@@ -34,11 +34,11 @@ REPORT_TAB_LABELS = {"vaccination": "All Vaccinations", "overdue": "Overdue Vacc
                      "upcoming": "Upcoming Vaccination", "population": "Animal Population",
                      "inventory": "Inventory", "vaccine_stock": "Vaccine Stock"}
 FILTER_LABELS = {"date_from": "From", "date_to": "To", "species": "Species", "breed": "Breed", "sex": "Sex",
-                 "ownership": "Ownership", "status": "Vaccination status", "vaccine": "Vaccine",
+                 "ownership": "Ownership", "vaccine": "Vaccine",
                  "category": "Category", "stock_status": "Stock status", "exp_status": "Expiration status"}
 REPORT_FILTERS = {
     "population": ["date_from", "date_to", "species", "breed", "sex", "ownership"],
-    "vaccination": ["date_from", "date_to", "species", "breed", "sex", "ownership", "status", "vaccine"],
+    "vaccination": ["date_from", "date_to", "species", "breed", "sex", "ownership", "vaccine"],
     "overdue": ["date_from", "date_to", "species", "breed", "sex", "ownership", "vaccine"],
     "upcoming": ["date_from", "date_to", "species", "breed", "sex", "ownership", "vaccine"],
     "inventory": ["category", "stock_status", "exp_status"],
