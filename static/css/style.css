@@ -1294,11 +1294,12 @@ body.po-resizing,body.po-resizing *{cursor:col-resize!important}
 @media(max-width:900px){
   .app{grid-template-columns:1fr}
   .main{margin-left:0}
-  .sidebar{width:270px;transform:translateX(-102%);transition:transform .2s;z-index:1200;box-shadow:8px 0 40px rgba(0,0,0,.5)}
+  .sidebar{width:270px;transform:translateX(-102%);transition:transform .25s ease;z-index:1200;box-shadow:8px 0 40px rgba(0,0,0,.5)}
   .sidebar.open{transform:none}
   .sidebar:hover{width:270px}
-  /* dim the page behind the open mobile menu so only the menu stands out */
-  body.menu-open .main,body.menu-open .mobile-head,body.menu-open .mobile-nav{filter:brightness(.45);pointer-events:none}
+  /* push the page along with the sidebar so they never overlap */
+  .main,.mobile-head,.mobile-nav{transition:transform .25s ease}
+  body.menu-open .main,body.menu-open .mobile-head,body.menu-open .mobile-nav{transform:translateX(270px)}
   .sidebar .brand{justify-content:flex-start}
   .sidebar .brand span:not(.logo-img){display:block}
   .sidebar .nav a,.sidebar .nav button{flex-direction:row;justify-content:flex-start;gap:14px;padding:11px 14px;text-align:left;font-size:.85rem}
