@@ -1654,12 +1654,12 @@ html.fm-open{overflow:hidden}
 }
 :root[data-theme="light"]{
   /* frosted glass over the pale branded background */
-  --shell-bg:rgba(247,250,255,.10);
-  --shell-line:rgba(255,255,255,.90);
-  --shell-shadow:0 30px 64px -34px rgba(16,32,60,.14);
-  --rail-bg:linear-gradient(180deg,rgba(20,55,99,.42) 0%,rgba(10,33,64,.42) 100%);
-  --topbar-bg:rgba(250,252,255,.12);
-  --panel:rgba(255,255,255,.16);
+  --shell-bg:rgba(196,207,225,.45);
+  --shell-line:rgba(255,255,255,.95);
+  --shell-shadow:0 30px 64px -34px rgba(16,32,60,.28);
+  --rail-bg:linear-gradient(180deg,rgba(20,55,99,.82) 0%,rgba(10,33,64,.82) 100%);
+  --topbar-bg:rgba(210,220,236,.62);
+  --panel:rgba(224,232,244,.62);
   --panel-line:rgba(255,255,255,.85);
 }
 
@@ -2036,8 +2036,8 @@ body{
   --control-shadow:0 6px 16px -12px rgba(0,0,0,.45);
 }
 :root[data-theme="light"]{
-  --surface-glass:rgba(255,255,255,.42);
-  --surface-line:rgba(255,255,255,.85);
+  --surface-glass:rgba(212,222,238,.62);
+  --surface-line:rgba(255,255,255,.90);
   --surface-shadow:0 10px 24px -18px rgba(16,32,60,.20);
   --control-line:rgba(255,255,255,.80);
   --control-shadow:0 4px 12px -10px rgba(16,32,60,.16);
@@ -2234,11 +2234,11 @@ body{
 :root[data-theme] .ap-card,
 :root[data-theme] .auth-box,
 :root[data-theme] .auth-card form{
-  background:rgba(255,255,255,.12) !important;
-  border-color:rgba(255,255,255,.70) !important;
-  box-shadow:0 8px 20px -16px rgba(6,14,30,.18) !important;
-  backdrop-filter:blur(5px) saturate(115%) !important;
-  -webkit-backdrop-filter:blur(5px) saturate(115%) !important;
+  background:rgba(210,220,236,.58) !important;
+  border-color:rgba(255,255,255,.90) !important;
+  box-shadow:0 10px 24px -16px rgba(16,32,60,.28) !important;
+  backdrop-filter:blur(10px) saturate(130%) !important;
+  -webkit-backdrop-filter:blur(10px) saturate(130%) !important;
 }
 :root[data-theme="dark"] .card,
 :root[data-theme="dark"] .stat,
